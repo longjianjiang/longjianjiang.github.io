@@ -1,7 +1,113 @@
-#引子：#
+---
+layout: post
+title:  "Markdown Syntax"
+date:   2016-03-15
+excerpt: "Just about everything you'll need to style in the theme: headings, paragraphs, blockquotes, tables, code blocks, and more."
+tag:
+- markdown 
+- syntax
+- sample
+- test
+- jekyll
+comments: true
+---
 
-今天看了论坛上的一篇帖子，说说怎么学习。其中说到一点就是，作为技术人员为什么要写博客，***就算没有读者也要写博客*** ，看了大家的讨论深受感触，所以坚定了持久写博客的打算。
+## HTML Elements
 
-现在正在学习iOS开发，所以从现在开始，把学习过程中遇到的问题、一些自己的发现和总结都利用博客记录下来，一来可以记录自己的学习过程，今后回过头看也是一笔大大的回忆；二是如果我遇到过的问题，别人遇到可以参考，从而更快的解决。
+Below is just about everything you'll need to style in the theme. Check the source code to see the many embedded elements within paragraphs.
 
-最后，开始的开始。
+# Heading 1
+
+## Heading 2
+
+### Heading 3
+
+#### Heading 4
+
+##### Heading 5
+
+###### Heading 6
+
+### Body text
+
+Lorem ipsum dolor sit amet, test link adipiscing elit. **This is strong**. Nullam dignissim convallis est. Quisque aliquam.
+
+![Smithsonian Image](https://mmistakes.github.io/minimal-mistakes/images/3953273590_704e3899d5_m.jpg)
+{: .image-right}
+
+*This is emphasized*. Donec faucibus. Nunc iaculis suscipit dui. 53 = 125. Water is H2O. Nam sit amet sem. Aliquam libero nisi, imperdiet at, tincidunt nec, gravida vehicula, nisl. The New York Times (That’s a citation). Underline.Maecenas ornare tortor. Donec sed tellus eget sapien fringilla nonummy. Mauris a ante. Suspendisse quam sem, consequat at, commodo vitae, feugiat in, nunc. Morbi imperdiet augue quis tellus.
+
+HTML and CSS are our tools. Mauris a ante. Suspendisse quam sem, consequat at, commodo vitae, feugiat in, nunc. Morbi imperdiet augue quis tellus. Praesent mattis, massa quis luctus fermentum, turpis mi volutpat justo, eu volutpat enim diam eget metus.
+
+### Blockquotes
+
+> Lorem ipsum dolor sit amet, test link adipiscing elit. Nullam dignissim convallis est. Quisque aliquam.
+
+## List Types
+
+### Ordered Lists
+
+1. Item one
+   1. sub item one
+   2. sub item two
+   3. sub item three
+2. Item two
+
+### Unordered Lists
+
+* Item one
+* Item two
+* Item three
+
+## Tables
+
+| Header1 | Header2 | Header3 |
+|:--------|:-------:|--------:|
+| cell1   | cell2   | cell3   |
+| cell4   | cell5   | cell6   |
+|----
+| cell1   | cell2   | cell3   |
+| cell4   | cell5   | cell6   |
+|=====
+| Foot1   | Foot2   | Foot3
+{: rules="groups"}
+
+## Code Snippets
+
+{% highlight css %}
+#container {
+  float: left;
+  margin: 0 -240px 0 0;
+  width: 100%;
+}
+{% endhighlight %}
+
+## Buttons
+
+Make any link standout more when applying the `.btn` class.
+
+{% highlight html %}
+<a href="#" class="btn btn-success">Success Button</a>
+{% endhighlight %}
+
+<div markdown="0"><a href="#" class="btn">Primary Button</a></div>
+<div markdown="0"><a href="#" class="btn btn-success">Success Button</a></div>
+<div markdown="0"><a href="#" class="btn btn-warning">Warning Button</a></div>
+<div markdown="0"><a href="#" class="btn btn-danger">Danger Button</a></div>
+<div markdown="0"><a href="#" class="btn btn-info">Info Button</a></div>
+
+## KBD
+
+You can also use `<kbd>` tag for keyboard buttons.
+
+{% highlight html %}
+<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
+{% endhighlight %}
+
+Press <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> to move your car. **Midtown Maddness!!**
+
+## Notices
+testtttttttttttttttttt
+**Watch out!** You can also add notices by appending `{: .notice}` to a paragraph.
+{: .notice}
+
