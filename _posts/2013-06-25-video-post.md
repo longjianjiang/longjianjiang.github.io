@@ -1,20 +1,7 @@
----
-layout: post
-title:  "A Post with a Video"
-date:   2016-03-15
-excerpt: "Custom written post descriptions are the way to go... if you're not lazy."
-tag:
-- sample
-- post
-- video
-comments: true
----
-<iframe width="560" height="315" src="//www.youtube.com/embed/SU3kYxJmWuQ" frameborder="0"> </iframe>
+#引子：#
 
-Video embeds are responsive and scale with the width of the main content block with the help of [FitVids](http://fitvidsjs.com/).
+今天看了论坛上的一篇帖子，说说怎么学习。其中说到一点就是，作为技术人员为什么要写博客，***就算没有读者也要写博客*** ，看了大家的讨论深受感触，所以坚定了持久写博客的打算。
 
-Not sure if this only effects Kramdown or if it's an issue with Markdown in general. But adding YouTube video embeds causes errors when building your Jekyll site. To fix add a space between the `<iframe>` tags and remove `allowfullscreen`. Example below:
+现在正在学习iOS开发，所以从现在开始，把学习过程中遇到的问题、一些自己的发现和总结都利用博客记录下来，一来可以记录自己的学习过程，今后回过头看也是一笔大大的回忆；二是如果我遇到过的问题，别人遇到可以参考，从而更快的解决。
 
-{% highlight html %}
-<iframe width="560" height="315" src="//www.youtube.com/embed/SU3kYxJmWuQ" frameborder="0"> </iframe>
-{% endhighlight %}
+最后，开始的开始。
