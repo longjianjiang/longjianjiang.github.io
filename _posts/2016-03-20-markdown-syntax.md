@@ -1,18 +1,12 @@
 ---
 layout: post
-title:  "Markdown Syntax"
-date:   2016-03-15
-excerpt: "Just about everything you'll need to style in the theme: headings, paragraphs, blockquotes, tables, code blocks, and more."
-tag:
-- markdown 
-- syntax
-- sample
-- test
-- jekyll
+title:  "引子"
+date:   2016-06-25
+excerpt: "我的第一篇博客."
 comments: true
 ---
 
-#引子：#
+##引子：
 
 今天看了论坛上的一篇帖子，说说怎么学习。其中说到一点就是，作为技术人员为什么要写博客，***就算没有读者也要写博客*** ，看了大家的讨论深受感触，所以坚定了持久写博客的打算。
 
