@@ -14,10 +14,6 @@ comments: true
 
 ## HTML Elements
 
-
-![Snip20160715_1.png](http://upload-images.jianshu.io/upload_images/2050942-b998b949e0decf7e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
-
-
 Below is just about everything you'll need to style in the theme. Check the source code to see the many embedded elements within paragraphs.
 
 # Heading 1
@@ -42,6 +38,9 @@ Lorem ipsum dolor sit amet, test link adipiscing elit. **This is strong**. Nulla
 *This is emphasized*. Donec faucibus. Nunc iaculis suscipit dui. 53 = 125. Water is H2O. Nam sit amet sem. Aliquam libero nisi, imperdiet at, tincidunt nec, gravida vehicula, nisl. The New York Times (That’s a citation). Underline.Maecenas ornare tortor. Donec sed tellus eget sapien fringilla nonummy. Mauris a ante. Suspendisse quam sem, consequat at, commodo vitae, feugiat in, nunc. Morbi imperdiet augue quis tellus.
 
 HTML and CSS are our tools. Mauris a ante. Suspendisse quam sem, consequat at, commodo vitae, feugiat in, nunc. Morbi imperdiet augue quis tellus. Praesent mattis, massa quis luctus fermentum, turpis mi volutpat justo, eu volutpat enim diam eget metus.
+
+![Snip20160715_1.png](http://upload-images.jianshu.io/upload_images/2050942-b998b949e0decf7e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
 
 ### Blockquotes
 
