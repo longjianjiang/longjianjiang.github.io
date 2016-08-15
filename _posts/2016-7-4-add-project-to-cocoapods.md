@@ -26,13 +26,13 @@ comments: true
 ## 如何编写？
 - 官方提供了一个模板并附有非常详细的注释说明。` pod spec create LJIn-AppBrowser` 该命令将在本目录产生一个名为`LJIn-AppBrowser.podspec`文件。但是打开创建完的文件你就会发现里面的东西太多了，很多都是我们不需要的。
 - 所以通常我们可以拿别人的.podspec文件进行修改，文件内容如下图：
-![Snip20160704_3.png](http://upload-images.jianshu.io/upload_images/2050942-66d885f0ace313b6.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![Snip20160704_3.png](http://ww4.sinaimg.cn/mw690/6b7cdce2gw1f6utm1i1u3j20m107wwi3.jpg)
 
 ## 通过trunk推送pod spec文件
 - 1、 注册trunk
  * 在注册trunk之前，我们需要确认当前的CocoaPods版本是否足够新。trunk需要pod在0.33及以上版本，如果你不满足要求，打开Terminal使用ruby的gem命令更新pod。
  * 更新结束后，我们开始注册trunk：`pod trunk register 616393956@qq.com 'longjianjiang'  --verbose` --verbose参数是为了便于输出注册过程中的调试信息。执行上面的语句后，点击邮件的链接就完成了trunk注册流程。使用下面的命令可以向trunk服务器查询自己的注册信息：`pod trunk me` 输出如下信息就表示你注册成功.
-![Snip20160704_4.png](http://upload-images.jianshu.io/upload_images/2050942-d2055d9c9af1096d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![Snip20160704_4.png](http://ww4.sinaimg.cn/mw690/6b7cdce2gw1f6utm3atwtj20fl03yaaz.jpg)
 
 - 2、Push项目到Github
  * 终端中用git指令提交代码
@@ -48,20 +48,21 @@ git push origin 0.0.1
 ```
 ######只有确保了以上两点，CocoaPods才能更准确地找到你的仓库，这个时候我们的目录结构通常如下######
 
-![Snip20160704_6.png](http://upload-images.jianshu.io/upload_images/2050942-df868d824e104850.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![Snip20160704_6.png](http://ww1.sinaimg.cn/mw690/6b7cdce2gw1f6utm3zukdj20bg07sq4j.jpg)
 
 - 3、上传
  * 执行指令如下 PS：库中用到了第三方框架
 `pod trunk push LJIn-AppBrowser.podspec`
 然后你会得到下面的错误！
 
-![Snip20160704_7.png](http://upload-images.jianshu.io/upload_images/2050942-54130c32e274d349.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![Snip20160704_7.png](http://ww4.sinaimg.cn/mw690/6b7cdce2gw1f6utm2ce08j20fm02z753.jpg)
+
  所以当你的库中用到了第三方的框架，上传的时候得加上`--use-libraries`,这个时候上传的podspec文件转成json格式文件，如下图：
 
-![Snip20160704_8.png](http://upload-images.jianshu.io/upload_images/2050942-ea5c4839be4f3323.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![Snip20160704_8.png](http://ww2.sinaimg.cn/mw690/6b7cdce2gw1f6utm4cotij20fl03pwfq.jpg)
 此时可以试着搜索你的库，如果有结果则库已审核通过。
 
-![Snip20160704_9.png](http://upload-images.jianshu.io/upload_images/2050942-b652a22e0d77a92e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![Snip20160704_9.png](http://ww4.sinaimg.cn/mw690/6b7cdce2gw1f6utm2c6w4j20fx03kdgs.jpg)
 
 ## 尾巴
 第一次写Markdown，感觉棒极了！
