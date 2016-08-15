@@ -36,14 +36,14 @@ UIViewController *vc = [UIViewController new];
 
 ## 创建UIViewController的View
 我们知道每个控制器都有一个页面也就是常写的`self.view`。先看一张草图：
-![Snip20160709_1.png](http://upload-images.jianshu.io/upload_images/2050942-df43eba4d2df0d82.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![Snip20160709_1.png](http://ww4.sinaimg.cn/mw1024/6b7cdce2gw1f6uttnmvexj20mj0ih40i.jpg)
 上图描述了控制器View加载的过程，下面给出几点建议
 - 1.`loadView`方法用来自定义View，此时不论控制器从Storyboard中创建还是从Xib中加载View，统统失效，以`loadView`方法为准。
 - 2.因为默认系统会去寻找特定名称的两个Xib，所以开发中我们如果要用到控制器View的Xib，起名字和控制器同名,避免使用图例中LJOneView，因为项目中很有可能存在LJOneView，这样会产生混淆。
 
 ## UIViewController生命周期方法
 看图说话：
-![生命周期方法.png](http://upload-images.jianshu.io/upload_images/2050942-94431bede48b6a3b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![生命周期方法.png](http://ww3.sinaimg.cn/mw1024/6b7cdce2gw1f6uttm5nyij20yg0dhtbp.jpg)
 由图可以清楚的看到控制器View的由生到死，两点注意：
 - 控制器的View是懒加载，所以只有当销毁View后才会重新创建View。
 - `viewWillUnload`、`viewDidUnload`现在已被系统弃用。
@@ -63,11 +63,11 @@ self.window.rootViewController = oneVC;
 ## UIViewController中View的理解及作用
 - UIView通常用来显示内容，控制器的View也不例外，我们可以从Storyboard中拖一些控件进行布局。***控制器View换句话说也可以被看做一个容器，用来存放其他要显示内容的容器。***
 
-![Snip20160709_2.png](http://upload-images.jianshu.io/upload_images/2050942-da8059ff7cc4e3e4.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![Snip20160709_2.png](http://ww4.sinaimg.cn/mw1024/6b7cdce2gw1f6uttmvuwdj20fd09emxl.jpg)
 图中每个控制器强引用Root View，然后Root View对通过`[self.view addSubview:xxx];`的进行强引用，这也就是我们通过Storyboard拖线的控件默认是`weak`弱引用。
 - 控制器的View也可以管理其他控制器的View，例如`UISplitViewController`
 
-![Snip20160709_3.png](http://upload-images.jianshu.io/upload_images/2050942-6ac7a57d3793f19a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![Snip20160709_3.png](http://ww2.sinaimg.cn/mw1024/6b7cdce2gw1f6uttl3fzqj20jf0f53zd.jpg)
 此时`UISplitViewController`的View管理着两个子控制器的View，而两个子控制器的View则管理对应的Root View的子View,最终两个子控制器View上的内容仍然放在`UISplitViewController`的View这个容器中显示。
 
 ## 尾巴
