@@ -14,21 +14,21 @@ comments: true
 下面就示范下如何一步一步的将自己的框架上传到Cocoapods。
 如果你还没用过Cocoapods，可以看看唐巧这一篇文章[用CocoaPods做程序的依赖](http://blog.devtang.com/2014/05/25/use-cocoapod-to-manage-ios-lib-dependency/)
 
-####去Github上为你自己的框架新建一个仓库
+## 去Github上为你自己的框架新建一个仓库
 
 - CocoaPods[项目的源码](https://github.com/CocoaPods/CocoaPods)在Github上管理,所以第一步我们需要创建一个属于自己的仓库。
 - 克隆仓库到本地 ，使用命令行：`git clone 仓库地址`
 - 在仓库所在目录新建项目
 
-####配置.podspec文件
+## 配置.podspec文件
 该文件为Cocoapods依赖库的描述文件，每个Cocoapods依赖库必须有且仅有那么一个描述文件，简单地讲就是让CocoaPods搜索引擎知道你的代码的作者、版本号、源代码地址、依赖库等信息的文件。文件名称要和我们想创建的依赖库名称保持一致，我的LJIn-AppBrowser依赖库对应的文件名为LJIn-AppBrowser.podspec。
 
-#####如何编写？
+## 如何编写？
 - 官方提供了一个模板并附有非常详细的注释说明。` pod spec create LJIn-AppBrowser` 该命令将在本目录产生一个名为`LJIn-AppBrowser.podspec`文件。但是打开创建完的文件你就会发现里面的东西太多了，很多都是我们不需要的。
 - 所以通常我们可以拿别人的.podspec文件进行修改，文件内容如下图：
 ![Snip20160704_3.png](http://upload-images.jianshu.io/upload_images/2050942-66d885f0ace313b6.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-####通过trunk推送pod spec文件
+## 通过trunk推送pod spec文件
 - 1、 注册trunk
  * 在注册trunk之前，我们需要确认当前的CocoaPods版本是否足够新。trunk需要pod在0.33及以上版本，如果你不满足要求，打开Terminal使用ruby的gem命令更新pod。
  * 更新结束后，我们开始注册trunk：`pod trunk register 616393956@qq.com 'longjianjiang'  --verbose` --verbose参数是为了便于输出注册过程中的调试信息。执行上面的语句后，点击邮件的链接就完成了trunk注册流程。使用下面的命令可以向trunk服务器查询自己的注册信息：`pod trunk me` 输出如下信息就表示你注册成功.
@@ -63,5 +63,5 @@ git push origin 0.0.1
 
 ![Snip20160704_9.png](http://upload-images.jianshu.io/upload_images/2050942-b652a22e0d77a92e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-####尾巴
+## 尾巴
 第一次写Markdown，感觉棒极了！
