@@ -15,9 +15,10 @@ comments: true
 
 >首先先引用阳神Sunny[博客](http://blog.sunnyxx.com/2015/07/04/ios-interview/)中的一道面试题：
 用@property声明的`NSString`（或`NSArray`，`NSDictionary`）经常使用`copy`关键字，为什么？如果改用`strong`关键字，可能造成什么问题？
+
 >这说明对于我们来讲，弄懂`copy`还是十分有必要的，下面就让我们来一起看看`copy`的黑魔法。
 
-* * *
+***
 
 
 # copy是什么，有什么用？
