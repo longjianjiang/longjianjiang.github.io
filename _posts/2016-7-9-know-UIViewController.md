@@ -15,6 +15,7 @@ UIViewController在开发中每天都要打交道的，通常我们用它来管�
 
 ## 创建UIViewController
 三种方式：
+
 - new
 ```
 UIViewController *vc = [UIViewController new];
