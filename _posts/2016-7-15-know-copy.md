@@ -19,7 +19,8 @@ comments: true
 
 * * *
 
-## copy是什么，有什么用？
+
+# copy是什么，有什么用？
 
 ## 1.是什么？
 首先`copy`和`mutableCopy`是方法，是`NSObject`内定义的方法。还有对应的类方法`copyWithZone:(struct _NSZone *)zone`以及两个协议`NSCopying`和`NSMutableCopying`
@@ -86,6 +87,7 @@ copy顾名思义就是拷贝或者说克隆，所以copy的目的就是复制一
 - (2)对于容器而言，其元素对象始终是指针复制。这样我们就可以修改一个容器的值从而影响到其他拷贝的容器。
 
 ![Snip20160717_13.png](http://upload-images.jianshu.io/upload_images/2050942-95a3fd612c2447ac.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
 ***
 
 如何实现元素对象也是对象复制？可以用归档的方法实现了真正的元素对象拷贝。
