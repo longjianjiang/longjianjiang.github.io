@@ -10,7 +10,7 @@ tiled_bg:           false   # Set this true if you want to tile your background 
 locale:             en_US
 url:                http://www.longjianjiang.com
 
-# Jekyll
+#Jekyll
 permalink:          /:title/
 markdown:           kramdown
 highlighter:        rouge
@@ -25,7 +25,7 @@ sass:
   sass_dir:         _sass
   style:            compressed
 
-Comments
+#Comments
 disqus_shortname:   longjianjiang
 
 # Social
@@ -68,7 +68,7 @@ gems:
   - jekyll-gist
 
 jekyll-mentions:
-    base_url: https://www.longjianjiang.com
+    base_url: https://github.com
 
 # Exclude list
 exclude: [README.md, Gemfile, Gemfile.lock, node_modules, gulpfile.js, package.json, _site, src, vendor, CNAME, LICENSE, Rakefile]
