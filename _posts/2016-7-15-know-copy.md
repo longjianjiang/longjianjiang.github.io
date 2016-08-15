@@ -25,7 +25,8 @@ comments: true
 
 ## 1.是什么？
 首先`copy`和`mutableCopy`是方法，是`NSObject`内定义的方法。还有对应的类方法`copyWithZone:(struct _NSZone *)zone`以及两个协议`NSCopying`和`NSMutableCopying`
-![Snip20160715_1.png](https://github.com/longjianjiang/longjianjiang.github.io/blob/master/Snip20160715_1.png)
+
+![Snip20160715_1.png](http://upload-images.jianshu.io/upload_images/2050942-b998b949e0decf7e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 ![Snip20160715_2.png](http://upload-images.jianshu.io/upload_images/2050942-124f0ffc28569a8b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
