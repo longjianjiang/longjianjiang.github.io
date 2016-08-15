@@ -43,6 +43,8 @@ copy顾名思义就是拷贝或者说克隆，所以copy的目的就是复制一
 - 第一种情况：
 ![Snip20160715_4.png](http://upload-images.jianshu.io/upload_images/2050942-5d021b4fb6d2bb13.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
+***
+
 >我们注意到str和通过`[str mutableCopy]`的copyStr两者内容一致，但内容地址不同，也就是重新创建了一个对象。为什么要新建一个对象？
 >1>：拷贝的目的是互不干扰，所以需要生成一个新的对象。
 >2>：str是一个不可变的对象, 而通过`mutableCopy`拷贝出来的对象必须是一个可变的对象, 所以生成一个新的对象
@@ -51,22 +53,26 @@ copy顾名思义就是拷贝或者说克隆，所以copy的目的就是复制一
 
 ![Snip20160715_5.png](http://upload-images.jianshu.io/upload_images/2050942-98c004ad7a5a4f09.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
+***
+
 >我们发现copyStr在通过`[str mutableCopy]`之后，并没有因为str的改变而改变，符合拷贝的目的；同时这种情况拷贝也生成了一个新的对象，原因同上。
 
 - 第三种情况：
 
 ![Snip20160715_6.png](http://upload-images.jianshu.io/upload_images/2050942-bbd09d94f1051153.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
+***
+
 > 此时copyStr在通过`[str copy]`之后，也没有因为str的改变而改变，同样也生成了一个新的对象，为什么？
->1>：拷贝的目的是互不干扰，所以需要生成一个新的对象。因为str是可变的，为了防止str改变后影响copyStr的值，所以必须新建对象。
+1>：拷贝的目的是互不干扰，所以需要生成一个新的对象。因为str是可变的，为了防止str改变后影响copyStr的值，所以必须新建对象。
 
 - 第四种情况：
 
 ![Snip20160715_7.png](http://upload-images.jianshu.io/upload_images/2050942-f52e95869a388bbe.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 >此时我们发现并没有新建对象，这又是为什么呢？
->1>通过不可变对象调用了copy方法, 那么不会生成一个新的对象
->2> 因为原来的对象是不能修改的, 拷贝出来的对象也是不能修改的,既然两个都不能修改, 所以永远不能影响到另外一个对象,已经符合拷贝的目的 。所以，OC为了对内存进行优化, 就不会生成一个新的对象
+1>通过不可变对象调用了copy方法, 那么不会生成一个新的对象
+2> 因为原来的对象是不能修改的, 拷贝出来的对象也是不能修改的,既然两个都不能修改, 所以永远不能影响到另外一个对象,已经符合拷贝的目的 。所以，OC为了对内存进行优化, 就不会生成一个新的对象
 
 ## 2.`NSArray`、`NSMutableArray`容器对象分析
 首先容器对象和非容器对象一样同样遵从下面的总结：
