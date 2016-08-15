@@ -38,14 +38,19 @@ UIViewController *vc = [UIViewController new];
 我们知道每个控制器都有一个页面也就是常写的`self.view`。先看一张草图：
 ![Snip20160709_1.png](http://ww4.sinaimg.cn/mw1024/6b7cdce2gw1f6uttnmvexj20mj0ih40i.jpg)
 上图描述了控制器View加载的过程，下面给出几点建议
+
 - 1.`loadView`方法用来自定义View，此时不论控制器从Storyboard中创建还是从Xib中加载View，统统失效，以`loadView`方法为准。
+
 - 2.因为默认系统会去寻找特定名称的两个Xib，所以开发中我们如果要用到控制器View的Xib，起名字和控制器同名,避免使用图例中LJOneView，因为项目中很有可能存在LJOneView，这样会产生混淆。
+
 
 ## UIViewController生命周期方法
 看图说话：
 ![生命周期方法.png](http://ww3.sinaimg.cn/mw1024/6b7cdce2gw1f6uttm5nyij20yg0dhtbp.jpg)
 由图可以清楚的看到控制器View的由生到死，两点注意：
+
 - 控制器的View是懒加载，所以只有当销毁View后才会重新创建View。
+
 - `viewWillUnload`、`viewDidUnload`现在已被系统弃用。
 
 ## UIViewController层级关系
