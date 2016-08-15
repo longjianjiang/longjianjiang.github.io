@@ -18,14 +18,18 @@ comments: true
 >这说明对于我们来讲，弄懂`copy`还是十分有必要的，下面就让我们来一起看看`copy`的黑魔法。
 
 * * *
+
 ## copy是什么，有什么用？
+
 ## 1.是什么？
 首先`copy`和`mutableCopy`是方法，是`NSObject`内定义的方法。还有对应的类方法`copyWithZone:(struct _NSZone *)zone`以及两个协议`NSCopying`和`NSMutableCopying`
 ![Snip20160715_1.png](http://upload-images.jianshu.io/upload_images/2050942-b998b949e0decf7e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 ![Snip20160715_2.png](http://upload-images.jianshu.io/upload_images/2050942-124f0ffc28569a8b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
 - 其中，`+copy:`、`+copyWithZone:`简单地说，是为了让"类"对象也符合NSCopying协议,也可以作为key插入`NSDictionary`中。又因为类对象全局只能存在一份，所以`+copy:`、`+copyWithZone:`方法只是简单返回self，而且这两个方法在ARC环境下也是不可用的。
 - 对于`-copy`、`-mutableCopy`，这两个方法被调用就会产生一个新的副本对象，里面会直接把`-copyWithZone:`、`-mutableCopyWithZone:`的值返回。但是NSObject并没有实现`-copyWithZone:`和`-mutableCopyWithZone:`，所以子类对象要使用`-copy`、`-mutableCopy`就必须去实现`NSCopying`和`NSMutableCopying`协议。不过常见的`NSString`、`NSArray`、`NSDictionary`等都已遵守了上面两个协议。
+
 - 最后`NSZone`已经被Apple抛弃，可不去追究。
 
 ## 2.有什么用？
@@ -67,6 +71,7 @@ copy顾名思义就是拷贝或者说克隆，所以copy的目的就是复制一
 
 ***
 但是对于容器对象有两点特殊的地方：
+
 - (1).`NSMutableArray`和`NSArray`多次copy有差别，请看图：
 
 
@@ -76,10 +81,13 @@ copy顾名思义就是拷贝或者说克隆，所以copy的目的就是复制一
 ![Snip20160717_12.png](http://upload-images.jianshu.io/upload_images/2050942-e2aa848b1cace317.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 也就是说：`NSMutableArray`多次copy每次都会新建对象而`NSArray`多次copy只新建一次对象。
+
+
 - (2)对于容器而言，其元素对象始终是指针复制。这样我们就可以修改一个容器的值从而影响到其他拷贝的容器。
 
 ![Snip20160717_13.png](http://upload-images.jianshu.io/upload_images/2050942-95a3fd612c2447ac.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 ***
+
 如何实现元素对象也是对象复制？可以用归档的方法实现了真正的元素对象拷贝。
 
 ![Snip20160717_14.png](http://upload-images.jianshu.io/upload_images/2050942-62d16965b8ce80cc.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
@@ -101,19 +109,25 @@ copy顾名思义就是拷贝或者说克隆，所以copy的目的就是复制一
 这里为什么用copy，原因依然是拷贝的目的***改变原来的内容不影响副本，改变副本也不影响原来的内容***，因为如果不使用copy，别人修改了外界的name属性也会受影响，也就没有达到拷贝的目的。
 - @property (nonatomic, copy) myBlock pBlock;block作为属性的时候也用copy，原因是：
  - 首先这涉及到MRC时代。因为MRC时期，为了防止block内用到的变量提前释放导致程序崩溃，使用copy将block存放到堆中，此时block会对内部变量进行一次retain操作，从而防止意外清空。同时block放入堆中也会带来一个新的问题，self持有block的引用，如果在block中使用self就会产生循环引用，所以不论MRC还是ARC，我们都分别用__blcok和__weak来修饰self。
+ 
  - 下面分别比较下MRC中retain和ARC中strong和copy的区别，看看strong是否也能达到同样的效果。
+ 
 * * *
+
 - 1.MRC下用retain修饰block.
 
 ![Snip20160716_4.png](http://upload-images.jianshu.io/upload_images/2050942-ca0d8ece6738f01c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 我们清楚的看到当点击屏幕调用blcok时，block内部用到的对象的提前释放，导致程序崩溃，而设置property属性的时候，Xcode也给了提示用copy替换retain。
+
 - 2.ARC下用strong修饰block.
 
 ![Snip20160716_5.png](http://upload-images.jianshu.io/upload_images/2050942-bd2ee190ef051d29.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 此时我们发现ARC下strong得效果和copy是一样的，同样可以防止内容对象被提前释放。
+
 ***
+
 ***所以结论copy是MRC下的产物，今天ARC时代为什么block依然使用copy，我想更多的是一种习惯问题***
-PS：感谢[王浙剑同学](http://weibo.com/damonone?from=feed&loc=at&nick=王浙剑)的提醒，让本文更加专业。
+
 
 ## 尾巴
 今天想用电脑通过屏幕共享 远程控制其他Mac 操作的，试了好几次，都没成功，最后还是QQ的远程好用，一键式的，以后做功能就得跟QQ学。
