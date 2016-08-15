@@ -17,16 +17,19 @@ UIViewController在开发中每天都要打交道的，通常我们用它来管�
 三种方式：
 
 - new
+
 ```
 UIViewController *vc = [UIViewController new];
 ```
 - 从Storyboard中创建
+
 ```
     UIStoryboard *sb = [UIStoryboard storyboardWithName:@"xxx" bundle:nil];
     UIViewController *vc = [sb instantiateInitialViewController];
 ```
 
 - 从Xib中创建
+
 ```
     UIViewController *vc = [[UIViewController alloc] initWithNibName:@"xxx" bundle:nil];
 ```
