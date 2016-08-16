@@ -27,8 +27,7 @@ sass:
 
 #Comments
 comment:
-    disqus: longjianjiang
-#disqus_shortname:   disqus_1ZX0kZ8JDa
+disqus_shortname:   longjianjiang
 
 # Social
 # if you don't have any of social below, comment the line.
