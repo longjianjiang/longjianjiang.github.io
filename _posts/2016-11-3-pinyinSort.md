@@ -35,6 +35,7 @@ comments: true
  CFStringTransform((CFMutableStringRef)mutableString, NULL, kCFStringTransformToLatin, false);
  CFStringTransform((CFMutableStringRef)mutableString, NULL, kCFStringTransformStripDiacritics, false);
  mutableString =(NSMutableString *)[mutableString stringByReplacingOccurrencesOfString:@" " withString:@""];
+ 
 ```
 
 为此我在原先数据模型中新增一个字段用来保存汉字转拼音的值，接着按这个字段将模型数组的数据进行排序即可。
