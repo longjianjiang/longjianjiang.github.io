@@ -30,6 +30,7 @@ comments: true
 >（PS:第三方转化的比较常用的是由George编写的，使用起来比较方便，这个库转化是将汉字转化成汉字的拼音首字母。有兴趣的同学可以自行搜索这个文件。）
 
 代码如下所示：
+
 ```
  NSMutableString *mutableString = [NSMutableString stringWithString:model.person_name];
  CFStringTransform((CFMutableStringRef)mutableString, NULL, kCFStringTransformToLatin, false);
