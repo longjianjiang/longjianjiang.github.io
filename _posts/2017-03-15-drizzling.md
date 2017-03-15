@@ -12,4 +12,8 @@ comments: true
 
 ![Drizzling](http://ocigwe4cv.bkt.clouddn.com/Icon-60@3x.png)
 
-<center><b>[Drizzling](https://itunes.apple.com/cn/app/drizzling/id1203140929?l=en&mt=8)</b></center>
+<center><b>Drizzling</b></center>
+
+This is my first app in app store 😄, so you know it's a simple one. but i want your gays can download on your phones to experience it, hope to enjoy to use! 
+
+you can download in app store [here](https://itunes.apple.com/cn/app/drizzling/id1203140929?l=en&mt=8)
