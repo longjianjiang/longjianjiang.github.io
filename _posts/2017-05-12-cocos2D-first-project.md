@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "第一个Cocos2D + Lua项目"
+title:  "【Cocos2D + Lua】第一个Cocos2D + Lua项目"
 date:   2017-05-12
 excerpt: "Cocos2D，Lua来进行开发的，因为自己也是第一次接触，所以借此机会，记录下自己开发的经历。（PS：我做的是iOS平台)"
 tag:
