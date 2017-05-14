@@ -16,7 +16,7 @@ comments: true
 ### 开始
 分享效果如下：
 
-![WechatIMG1.jpeg](http://upload-images.jianshu.io/upload_images/2050942-902f82eaba14a561.jpeg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![WechatIMG1.jpeg](http://ocigwe4cv.bkt.clouddn.com/WechatIMG1.jpeg)
 
 
 代码参考如下：
