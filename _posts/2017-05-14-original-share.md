@@ -25,12 +25,13 @@ let text = "This is a simple weather app but can allow you write something to sh
 let appURL = URL(string: "http://www.longjianjiang.com/drizzling/")
 let image = UIImage.init(named: "name")
             
-	    let textToShare = [text,appURL!] as [Any] //可以文字、图片、链接组合
+let textToShare = [text,appURL!] as [Any] //可以文字、图片、链接组合
 
-	    let activityViewController = UIActivityViewController(activityItems: textToShare, applicationActivities: nil)
+let activityViewController = UIActivityViewController(activityItems: textToShare, applicationActivities: nil)
 
-	     self.present(activityViewController, animated: true, completion: nil)
- ```	    
+self.present(activityViewController, animated: true, completion: nil)
+ ```	
+ 
  >注意在模拟器上显示的分享选项是不准确的，建议使用真机测试。
  
  经过测试：
@@ -38,4 +39,5 @@ let image = UIImage.init(named: "name")
  - 微信支持文字加网页链接和纯图片；
 
  ### 最后
+ 
  喜欢原生的UI效果😂
