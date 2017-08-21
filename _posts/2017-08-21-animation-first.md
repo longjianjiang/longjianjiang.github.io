@@ -3,7 +3,7 @@
 ## View Animation
 动画其实就是`UIView`基本属性(`animatable`)的操作，我们写动画的时候，其实不需要关心其中的数学计算，只需要熟悉API的特性即可。
 
-![屏幕快照 2017-08-20 22.45.54.png](http://upload-images.jianshu.io/upload_images/2050942-de373d39b9576aa7.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![屏幕快照 2017-08-20 22.45.54.png](http://ocigwe4cv.bkt.clouddn.com/animation_first_1.png)
 
 我们可以看到`UIView`中的属性中注明为`animatable`的，那么这个属性就是我们写动画可以用到的属性。还有一个`alpha`属性同样是`animatable`。
 
@@ -12,7 +12,7 @@
 ## animate
 `UIView`的一个extension里都是`animate`的类方法，如下图所示：
 
-![屏幕快照 2017-08-20 23.53.18.png](http://upload-images.jianshu.io/upload_images/2050942-0ff2a21696391911.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![屏幕快照 2017-08-20 23.53.18.png](http://ocigwe4cv.bkt.clouddn.com/animation_first_2.png)
 
 ### normal
 `UIView`的`animate`类方法是最简单的动画方法，相信大家一定都用过。
