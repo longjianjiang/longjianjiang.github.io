@@ -39,8 +39,6 @@ Lorem ipsum dolor sit amet, test link adipiscing elit. **This is strong**. Nulla
 
 HTML and CSS are our tools. Mauris a ante. Suspendisse quam sem, consequat at, commodo vitae, feugiat in, nunc. Morbi imperdiet augue quis tellus. Praesent mattis, massa quis luctus fermentum, turpis mi volutpat justo, eu volutpat enim diam eget metus.
 
-![Snip20160715_1.png](http://upload-images.jianshu.io/upload_images/2050942-b998b949e0decf7e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
-
 
 ### Blockquotes
 
