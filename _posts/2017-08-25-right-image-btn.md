@@ -9,7 +9,7 @@ comments: true
 ---
 
 ## 前言
-UIButton默认图片显示在左边，但实际更多的是将图片放在文字的左侧，比如下图所示：
+UIButton默认图片显示在左边，但实际更多的是将图片放在文字的右侧，比如下图所示：
 
 ![屏幕快照 2017-08-25 22.27.45.png](http://ocigwe4cv.bkt.clouddn.com/rightImageBtn_1.png)
 
