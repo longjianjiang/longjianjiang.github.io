@@ -43,6 +43,7 @@ springMoveLeftAnimation.isRemovedOnCompletion = false
 ![屏幕快照 2017-09-20 15.36.00.png](http://ocigwe4cv.bkt.clouddn.com/animation_second_01.png)
 
 > 如果想要延时执行某个动画，可以设置`beginTime`属性
+
 ```
 springMoveLeftAnimation.beginTime = CACurrentMediaTime() + 0.3 
 /// 根据CACurrentMediaTime()取得动画执行的时间，然后我们增加了0.3秒的延时
@@ -231,7 +232,7 @@ instanceDelay： 设置每个克隆和上一个克隆的动画延迟；
 
 利用`CAReplicatorLayer`上述特性，我们可以发挥想象做出一些酷炫的动画，例如下面这个动画：
 
-![WechatIMG3.jpeg](http://ocigwe4cv.bkt.clouddn.com/animation_second_06.png)
+![WechatIMG3.jpeg](http://ocigwe4cv.bkt.clouddn.com/animation_second_06.jpeg)
 
 完整的Demo下载地址[CAReplicatorLayerAnimationDemo](https://github.com/longjianjiang/BlogDemo/tree/master/CAReplicatorLayerDemo)
 
