@@ -238,4 +238,4 @@ instanceDelay： 设置每个克隆和上一个克隆的动画延迟；
 
 
 ## 最后
-未完待续
+未完待续[第三弹](http://www.longjianjiang.com/animation-third/)
