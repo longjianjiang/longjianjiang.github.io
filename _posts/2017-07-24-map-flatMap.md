@@ -4,7 +4,7 @@ title:  "【Tips】map & flatMap"
 date:   2017-07-24
 excerpt: "在RxSwift中，`map` , `flatMap`两个操作符用的比较算是比较频繁的，开始的时候对`flatMap`理解并不是那么深刻，下面就一个例子来说下自己对于`flatMap`的认识："
 tag:
-- RxSwift
+- Swift
 comments: true
 ---
 
