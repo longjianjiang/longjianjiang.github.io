@@ -4,7 +4,7 @@ title:  "认识Auto Layout"
 date:   2017-05-08
 excerpt: "开发中我们经常会遇到算高问题，比如文本控件中显示的内容是不确定的，再比如cell中的内容是不确定的，这样的情况都会导致该view的高度是不确定的，这个时候不可避免的就需要进行计算高度。"
 tag:
-- autolayout
+- iOS
 comments: true
 ---
 
