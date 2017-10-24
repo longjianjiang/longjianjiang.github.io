@@ -4,7 +4,7 @@ title:  "【Tips】Cell Subview内按钮点击无响应？"
 date:   2017-09-24
 excerpt: "今天写一个界面的时候，在Cell中添加了一个子view，该view里有几个星星按钮，但是发现点击星星的时候，并没有响应。"
 tag:
-- Event Handling
+- iOS
 comments: true
 ---
 
