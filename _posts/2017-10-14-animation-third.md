@@ -4,7 +4,7 @@ title:  "【iOS动画】学习笔记第三弹(ViewController Transition Animatio
 date:   2017-10-14
 excerpt: "本文是笔者学习ViewController Transition Animation的一些小总结,接第二弹"
 tag:
-- animation
+- iOS
 comments: true
 ---
 
