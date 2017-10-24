@@ -4,7 +4,7 @@ title:  "【iOS动画】学习笔记第二弹(Layer Animation)"
 date:   2017-10-08
 excerpt: "本文是笔者学习Layer Animation的一些小总结,接第一弹"
 tag:
-- animation
+- iOS
 comments: true
 ---
 
