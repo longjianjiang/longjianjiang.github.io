@@ -5,7 +5,7 @@ date:   2017-05-14
 excerpt: "开发中经常会用到分享功能，下面介绍下苹果自带的分享发方式，个人认为还是比较好用的。"
 
 tag:
-- share
+- iOS
 comments: true
 ---
 
