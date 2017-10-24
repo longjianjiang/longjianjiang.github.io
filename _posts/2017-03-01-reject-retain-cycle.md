@@ -4,8 +4,7 @@ title:  "【Tips】拒绝循环引用"
 date:   2017-03-01
 excerpt: "最近项目中检查是否有内存泄露，发现大部分的情况都是由于block的循环引用而导致的内存泄露，所以借此机会来记录下常见的循环引用的例子，如果不全，还请各位在评论区多多补充。"
 tag:
-- block
-- retain_cycle
+- iOS
 comments: true
 ---
 
