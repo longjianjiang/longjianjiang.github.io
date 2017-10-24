@@ -4,7 +4,7 @@ title:  "【Tips】iOS开发中的汉字拼音排序"
 date:   2016-11-03
 excerpt: "今天做项目，碰到一个需求，将列表中的cell按照姓名排序显示，其实也简单，就是把数据源里的模型按照姓名重置顺序即可。"
 tag:
-- Tips
+- Swift
 comments: true
 ---
 
