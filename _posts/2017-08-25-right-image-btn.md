@@ -4,7 +4,7 @@ title:  "【Tips】UIButton imageView 右边显示"
 date:   2017-08-25
 excerpt: "UIButton 默认图片显示在左边，但实际更多的将图片放在文字的左侧，比如--Follow➡️---"
 tag:
-- Tips 
+- iOS
 comments: true
 ---
 
