@@ -4,9 +4,8 @@ title:  "认识UIViewController"
 date:   2016-07-9
 excerpt: "UIViewController在开发中每天都要打交道的，通常我们用它来管理页面的View，现在就系统的研究下我们常说的MVC中的C。"
 tag:
-- UIviewController 
 - iOS
-- MVC
+
 comments: true
 ---
 
