@@ -4,8 +4,7 @@ title:  "【Tips】UIScrollView用autolayout设置约束无法滚动？"
 date:   2016-11-14
 excerpt: "今天做项目，碰到一个需求，在一个Cell中，因为需要适配4‘，所以需要将原本的一行按钮换成UIScrollView，可以滑动。"
 tag:
-- scrollView
-- autolayout
+- iOS
 comments: true
 ---
 
