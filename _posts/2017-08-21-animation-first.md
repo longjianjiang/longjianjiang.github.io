@@ -4,7 +4,7 @@ title:  "【iOS动画】学习笔记第一弹"
 date:   2017-08-21
 excerpt: "动画其实就是UIView基本属性(animatable)的操作，我们写动画的时候，其实不需要关心其中的数学计算，只需要熟悉API的特性即可。"
 tag:
-- Animation
+- iOS
 comments: true
 ---
 
