@@ -157,5 +157,95 @@ UIView.transition(from: oldView, to: newView, duration: 0.33,
 ## Auto Layout
 之前的动画都是设置`animatable`的属性，UIKit帮助我们实现对应的动画效果。但是现在我们大多更多的使用Auto Layout来进行布局界面，此时上面的几种动画方法同样也是有效的，只是此时我们操作的是约束。
 
+# UIViewPropertyAnimator 更新于2017-11-11
+UIViewPropertyAnimator 是iOS10新出的一个动画相关的类，通过这个类我们可以简单的创建更加**易于控制**的view animation，也就是说此时我们在一些场景中可以不去创建layer animation，通过UIViewPropertyAnimator也可以完成需要。
+
+UIViewPropertyAnimator和之前的UIView.animate系列方法是相辅相成的，也就是说有些简单的情况，我们只需要使用UIView.animate系列方法就可以了，没有必要去使用UIViewPropertyAnimator。
+
+一个简单的UIViewPropertyAnimator创建的动画如下：
+
+```
+let scale = UIViewPropertyAnimator(duration: 0.33, curve: .easeIn)
+   // addAnimations 也可以添加之前的上文所说的keyFrame animation等
+    scale.addAnimations {
+      view.alpha = 1.0
+    }
+    scale.addAnimations({
+      view.transform = CGAffineTransform.identity
+    }, delayFactor: 0.33) // 这里的delayFactor是一个相对比例（0-1），是相对于动画剩下的时间，这样就保证了延迟的时间不会超过总时间
+    scale.addCompletion {_ in
+      print("ready")
+    }
+```
+
+> 各种不同的animator 可以封装在单独的一个类，这样不同的view如果想要创建相同的动画直接调用方法然后start即可。
+
+### animation timing
+
+UIViewPropertyAnimator默认提供了以下的curve选择：
+
+```
+public enum UIViewAnimationCurve : Int {
+
+    
+    case easeInOut // slow at beginning and end
+
+    case easeIn // slow at beginning
+
+    case easeOut // slow at end
+
+    case linear
+}
+```
+
+其实这些curve都是控制两个control point形成的贝塞尔曲线，具体可以去这个网站实际体验下[curve](http://cubic-bezier.com/#.47,-0.32,.96,.88)；
+
+UIViewPropertyAnimator提供了自定义这两个control point的方法，可以让我们自定义timing 效果。
+
+```
+  public convenience init(duration: TimeInterval, controlPoint1 point1: CGPoint, controlPoint2 point2: CGPoint, animations: (() -> Swift.Void)? = nil)
+```
+
+除了使用自定义control point的方式来自定义timing，我们还可以通过下面这个方法来为animator提供自定义的timing方式：
+
+```
+public init(duration: TimeInterval, timingParameters parameters: UITimingCurveProvider)
+```
+
+UITimingCurveProvider是一个协议，UIKit提供了两个已经遵守该协议的类，我们可以方便的拿来使用。
+UICubicTimingParameters and UISpringTimingParameters.  例如下面这个spring timing：
+
+```
+ let spring = UISpringTimingParameters(dampingRatio: 0.55)
+    
+ let animator = UIViewPropertyAnimator(duration: 1.0, timingParameters: spring)
+```
+
+这样这个animator的动画运行时就是弹簧效果了。
+
+### animation state
+因为UIViewPropertyAnimator可以创建##易于控制##的动画，所以UIViewPropertyAnimator可以让我们知道现在动画的状态，以下是三个主要的状态属性：
+
+```
+1.isRunning(Bool): animator 的动画是否正在运行，默认是false，当调用`startAnimation`后变为true；
+2.isReversed(Bool): animator 的动画执行顺序，默认是false，当设置为true后，动画会反方向执行，此时才改变没有效果，也就是只能一次性设置；
+3.state: animator 动画的状态，具体见下图：
+```
+
+![屏幕快照 2017-11-11 16.57.24.png](http://ocigwe4cv.bkt.clouddn.com/%E5%B1%8F%E5%B9%95%E5%BF%AB%E7%85%A7%202017-11-11%2016.57.24.png)
+
+> fractionComplete可以接受一个animator的完成百分比，达到一种可交互的动画，类似3Dtouch 的重按动画效果；
+
+### ViewController Transition Animation
+同样的正是因为UIViewPropertyAnimator可以让我们控制动画的一系列状态，我们也可以使用它来实现控制器的可交互切换动画，下面方法是iOS10中新增的一个方法，允许提供一个animator：
+
+```
+func interruptibleAnimator(using transitionContext:
+  UIViewControllerContextTransitioning) -> UIViewImplicitlyAnimating
+```
+
+
+总的来说，UIViewPropertyAnimator是一个中间产物，为我们提供了多一种的选择，不及UIView.animate 来的简单，不及Layer Animation的全面。
+
 ## 最后
 未完待续[第二弹](http://www.longjianjiang.com/animation-second/)
