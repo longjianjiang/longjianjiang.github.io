@@ -237,7 +237,8 @@ UICubicTimingParameters and UISpringTimingParameters.  例如下面这个spring 
 > fractionComplete可以接受一个animator的完成百分比，达到一种可交互的动画，类似3Dtouch 的重按动画效果；
 
 ### ViewController Transition Animation
-同样的正是因为UIViewPropertyAnimator可以让我们控制动画的一系列状态，我们也可以使用它来实现控制器的可交互切换动画，下面方法是iOS10中新增的一个方法，允许提供一个animator：
+同样的正是因为UIViewPropertyAnimator可以让我们控制动画的一系列状态，我们也可以使用它来实现控制器的可交互切换动画，下面方法是iOS10中`UIViewControllerAnimatedTransitioning`协议中新增的一个方法，允许提供一个animator：
+
 
 ```
 func interruptibleAnimator(using transitionContext:
