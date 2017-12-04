@@ -53,6 +53,50 @@ RxSwift.Just<Swift.Int>
 ```
 此时数组是`["ab", "cc", "dd"]`,而且不是`Optional`类型，只是使用`flatMap`更佳简洁高效；因为内部使用了` if let`,所以达到了过滤空元素的效果。
 
-## 最后
-未完待续
+# Functor and Monad 更新于2017-12-04
+
+Functor and Monad是函数式编程的重要概念，笔者之前也不是太理解，只是听过名称而已，其实他们的定义和map，flatMap关系很大：
+
+> flatMap其实是一种特殊的map，所谓的降维是因为flat的原因;
+
+下面是笔者对于数组类型实现的map, flatten, flattenMap:
+
+```
+extension Array {
+    func myMap<T>(_ transform: (Element) -> T) -> [T] {
+        var result: [T] = []
+        result.reserveCapacity(count)
+        for x in self {
+            result.append(transform(x))
+        }
+        return result
+    }
+    
+    func myFlatten<T>(elements: [[T?]]) -> [T] {
+        var result: [T] = []
+        
+        for arr in elements {
+            for item in arr {
+                if let num = item {
+                    result.append(num)
+                }
+            }
+        }
+
+        return result
+    }
+    
+    func myFlattenMap<T>(_ transform: (Element) -> [T?]) -> [T] {
+        return myFlatten(elements: myMap(transform))
+    }
+    
+}
+```
+
+根据上面的代码，其实functor和monad的定义也就很容易理解了：
+
+> Functor: `map` 函数接受一个闭包作为参数，作用与容器类型（数组，optional，result），通过传入的闭包改变容器类型内部的值，从而得到一个全新的`容器`; 所谓functor就是实现了map功能的类型；
+
+> Monad: monad 是functor中的一种，相比functor不仅实现了map功能，而且实现了flattenMap的功能；
+
 
