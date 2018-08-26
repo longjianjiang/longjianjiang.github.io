@@ -16,9 +16,11 @@ comments: true
 
 ### Modal 动画
 
+
 ```
  present(modalVC, animated: true, completion: nil)
 ```
+
 
 我们经常会用上述方式显示一个控制器，默认的效果是从下往上的一个动画，但是系统允许我们进行自定义这个呈现的效果，步骤如下：
 
