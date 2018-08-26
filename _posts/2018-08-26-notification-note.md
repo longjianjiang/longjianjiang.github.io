@@ -23,9 +23,9 @@ iOS10开始，苹果重新封装了一个UserNotifications的framework，所以�
 ## iOS10 之前：
 
 ```
-            UIUserNotificationType notificationTypes = UIUserNotificationTypeBadge | UIUserNotificationTypeSound | UIUserNotificationTypeAlert;
-            UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTypes:notificationTypes categories:nil];
-            [application registerUserNotificationSettings:settings];
+UIUserNotificationType notificationTypes = UIUserNotificationTypeBadge | UIUserNotificationTypeSound | UIUserNotificationTypeAlert;
+UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTypes:notificationTypes categories:nil];
+[application registerUserNotificationSettings:settings];
 
 ```
 
@@ -69,7 +69,10 @@ UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotification
 ```
 注册远程通知成功，获得了deviceToken，将其上报给第三方SDK。
 
-`- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error`
+```
+- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
+```
+
 注册远程通知失败，一般模拟器上会失败。
 
 此时我们已经做好了通知的准备工作，下面就等着接收通知。
@@ -83,11 +86,13 @@ UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotification
 ```
 - (void)application:(UIApplication*)application didReceiveRemoteNotification:(NSDictionary*)userInfo
 ```
+
 当用户收到一个远程通知会走该方法
 
 ```
 - (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification 
 ```
+
 当用户收到一个本地通知会走该方法
 
 
@@ -98,11 +103,13 @@ UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotification
 ```
 -(void)userNotificationCenter:(UNUserNotificationCenter *)center willPresentNotification:(UNNotification *)notification withCompletionHandler:(void (^)(UNNotificationPresentationOptions))completionHandler
 ``` 
+
 当用户在前台收到一个通知，我们可以自定义是否要显示该通知，以及以什么样的方式显示，当不执行completionHandler则不会显示通知，执行completionHandler根据传入的UNNotificationPresentationOptions，以什么方式进行通知。
 
 ```
 - (void)userNotificationCenter:(UNUserNotificationCenter *)center didReceiveNotificationResponse:(UNNotificationResponse *)response withCompletionHandler:(void (^)(void))completionHandler
 ```
+
 该方法当用户点击通知，是我们处理用户对一条通知操作的地方。
 
 2> 静默通知
