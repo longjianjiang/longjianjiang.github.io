@@ -10,7 +10,7 @@ comments: true
 
 笔者第一个程序就是C语言的Hello World。
 
-```
+```C
 #include <stdio.h>
 
 int main(int argc, const char * argv[]) {
@@ -260,3 +260,27 @@ Mach-O 文件格式大致就是以上所述。
 ## fishhook
 
 了解完 Mach-O 格式后，我们可以看一看fishhook，一个可以hook C语言系统函数的库。
+
+还是Hello World的例子
+
+```C
+static int (*orig_printf)(const char *, ...);
+
+int new_printf(const char * str, ...) {
+    return orig_printf("%s [modified]",str);
+}
+
+int main(int argc, const char * argv[]) {
+    struct rebinding printf_rebinding = { "printf", new_printf, (void *)&orig_printf };
+    rebind_symbols((struct rebinding[1]){printf_rebinding}, 1);
+    
+    printf("Hello World");
+    return 0;
+}
+```
+
+上述程序输出的是 `Hello World [modified]`, 因为使用了fishhook，动态改变了printf函数。
+下面笔者分析下fishhook 动态改变printf函数的原理。
+
+### dyld
+ld(static linking) responsible for transfroming symbol references in code into indirect symbol lookups for dyld use later.
