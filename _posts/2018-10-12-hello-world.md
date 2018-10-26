@@ -181,8 +181,8 @@ struct mach_header_64 {
 };
 ```
 
-其中header中的flags表示dyld的加载标志位，具体取值可以去 `#include <mach-o/loader.h>` 中查看，头文件中有详细的注释。
-所以综上，header中包含一些类型的信息，表示运行的环境（cpu架构类型）。同时flags会影响可执行文件执行的流程。
+其中header中的flags表示dyld的加载标志位，flags会影响可执行文件执行的流程。具体取值可以去 `#include <mach-o/loader.h>` 中查看，头文件中有详细的注释。
+所以综上，header中包含一些类型的信息，运行的环境（cpu架构类型），加载命令的信息（加载命令的个数和大小）。
 
 ### load commands
 
@@ -211,11 +211,11 @@ LC_FUNCTION_STARTS		:		可执行文件的函数地址表
 LC_DATA_IN_CODE			: 		可执行代码中数据的位置，用来反汇编
 ```
 
-## data
+### data
 
-之前load commadns中 `LC_SEGEMENT_64` 将segment加载进内存 ，所谓segement就是一段数据，这种数据内部又分不同的section.
+之前load commands `LC_SEGEMENT_64` 将segment加载进内存 ，所谓segement就是一段数据，这种数据内部又分不同的section.
 
-### segement
+#### segement
 我们可执行文件中有四种不同的segement：
 
 ```
@@ -238,7 +238,7 @@ LC_DATA_IN_CODE			: 		可执行代码中数据的位置，用来反汇编
 					/* FVMLIB file types only */
 ```
 
-### section
+#### section
 
 section就是将segement中的数据按不同的分类分别存放。
 
@@ -247,7 +247,7 @@ section就是将segement中的数据按不同的分类分别存放。
 ```
 __TEXT,__text			: 主程序代码
 __TEXT,__stubs			: 用来重定向指针表（懒加载和非懒加载）
-__TEXT,__stub_helper	: 
+__TEXT,__stub_helper	: 懒加载指针表中指针指向该区域，当用到懒加载中的符号时，通过改区域表中的offset进行重定向
 __TEXT,__cstring		: C语言字符串
 __TEXT,__unwind_info    : 可执行代码的展开信息，用于异常处理
 
@@ -283,4 +283,11 @@ int main(int argc, const char * argv[]) {
 下面笔者分析下fishhook 动态改变printf函数的原理。
 
 ### dyld
-ld(static linking) responsible for transfroming symbol references in code into indirect symbol lookups for dyld use later.
+dyld (dynamic linker) ，简单的说负责将可执行文件中需要的镜像加载到内存中，同时也负责绑定懒加载和非懒加载的symbol。
+
+所以fishhook的原理就是，首先注册了一个回调，`_dyld_register_func_for_add_image`, 该方法会执行当有新的镜像（也就是系统的动态库）加载时执行，同时第一次也会为之前已经加载进内存的镜像执行一次回调。这个时候更新可执行文件中symbol，用新的函数指针替换原先的函数指针，从而达到hook的效果。
+
+## References
+
+[https://www.mikeash.com/pyblog/friday-qa-2012-11-09-dyld-dynamic-linking-on-os-x.html](https://www.mikeash.com/pyblog/friday-qa-2012-11-09-dyld-dynamic-linking-on-os-x.html)
+[https://www.mikeash.com/pyblog/friday-qa-2012-11-30-lets-build-a-mach-o-executable.html](https://www.mikeash.com/pyblog/friday-qa-2012-11-30-lets-build-a-mach-o-executable.html)
