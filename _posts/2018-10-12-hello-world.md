@@ -72,10 +72,10 @@ L_.str:                                 ## @.str
 .cfi_startproc
 .cfi_endproc
 
+## 主要是为了调试需要，debugger可以根据这些信息展开调用栈
 .cfi_def_cfa_offset 16
 .cfi_offset %rbp, -16
 .cfi_def_cfa_register %rbp
-
 ```
 
 ### 栈
@@ -333,3 +333,4 @@ String Table（strtab）: 字符串表存放了符号表中可读的字符串，
 
 [https://www.mikeash.com/pyblog/friday-qa-2012-11-09-dyld-dynamic-linking-on-os-x.html](https://www.mikeash.com/pyblog/friday-qa-2012-11-09-dyld-dynamic-linking-on-os-x.html)
 [https://www.mikeash.com/pyblog/friday-qa-2012-11-30-lets-build-a-mach-o-executable.html](https://www.mikeash.com/pyblog/friday-qa-2012-11-30-lets-build-a-mach-o-executable.html)
+[https://www.objc.io/issues/6-build-tools/mach-o-executables/](https://www.objc.io/issues/6-build-tools/mach-o-executables/)
