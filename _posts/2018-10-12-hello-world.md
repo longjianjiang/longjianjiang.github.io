@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Hello World 入门"
+title:  "Hello World 学习笔记"
 date:   2018-10-12
 excerpt:  "本文是笔者对以Hello World 学习汇编，Mach-O格式以及fishhook的笔记"
 tag:
@@ -10,7 +10,7 @@ comments: true
 
 笔者第一个程序就是C语言的Hello World。
 
-```C
+```
 #include <stdio.h>
 
 int main(int argc, const char * argv[]) {
@@ -32,7 +32,7 @@ int main(int argc, const char * argv[]) {
 	.globl	_main                   								## 指定开始函数 main，对外可见
 	.p2align	4, 0x90												## 指定后面代码 2^4 也就是 16字节对齐， 如果需要用0x90补齐
 
-## 冒号结尾的（例如L_.str:) 称为一个label用来标识一段汇编代码的名字，是这段汇编代码的入口地址。以_开头的label表示是一个函数（例如_main: )，可以用`call` 调用
+## 冒号结尾的（例如L_.str:) 称为一个label用来标识一段汇编代码的名字，也是这段汇编代码的入口地址。以_开头的label表示是一个函数（例如_main: )，可以用`call` 调用
 _main:                                  ## @main
 	.cfi_startproc
 ## %bb.0:
@@ -247,7 +247,7 @@ section就是将segement中的数据按不同的分类分别存放。
 ```
 __TEXT,__text			: 主程序代码
 __TEXT,__stubs			: 用来重定向指针表（懒加载和非懒加载）
-__TEXT,__stub_helper	: 懒加载指针表中指针指向该区域，当用到懒加载中的符号时，通过改区域表中的offset进行重定向
+__TEXT,__stub_helper	: 懒加载指针表中指针指向该区域，当用到懒加载中的符号时，通过该区域表中的offset进行重定向
 __TEXT,__cstring		: C语言字符串
 __TEXT,__unwind_info    : 可执行代码的展开信息，用于异常处理
 
@@ -263,7 +263,7 @@ Mach-O 文件格式大致就是以上所述。
 
 还是Hello World的例子
 
-```C
+```
 static int (*orig_printf)(const char *, ...);
 
 int new_printf(const char * str, ...) {
@@ -283,9 +283,51 @@ int main(int argc, const char * argv[]) {
 下面笔者分析下fishhook 动态改变printf函数的原理。
 
 ### dyld
+
 dyld (dynamic linker) ，简单的说负责将可执行文件中需要的镜像加载到内存中，同时也负责绑定懒加载和非懒加载的symbol。
 
 所以fishhook的原理就是，首先注册了一个回调，`_dyld_register_func_for_add_image`, 该方法会执行当有新的镜像（也就是系统的动态库）加载时执行，同时第一次也会为之前已经加载进内存的镜像执行一次回调。这个时候更新可执行文件中symbol，用新的函数指针替换原先的函数指针，从而达到hook的效果。
+
+### 源码
+
+如果去看fishhook的源代码，里面的主要工作就是在之前我们说到的懒加载符号表和非懒加载符号表（这两个表保存这字符串对应的函数指针）中寻找和我们需要hook的函数一致的函数名，然后将双方的函数指针指向进行替换。
+
+> 所谓懒加载表中的符号就是指，当用到时dyld才会通过`dyld_stub_binder`去链接到指定的动态链接库，然后再去执行；而非懒加载则当动态链接库第一次被绑定时就会被加载。
+
+所以上述fishhook的主要工作就是在于寻找到需要hook的函数名，这里用到了额外三张表，动态符号表，符号表和字符串表,这三个表都是在`__LINKEDIT`段的。
+
+```
+Symbol Table（symtab）: 符号表记录了符号的映射。在 Mach-O 中，符号表是由结构体 n_list 构成。
+
+Dynamic Symbol Table(Indirect Symbols): 动态符号表主要是为了提供index从而在符号表中找到对应的符号，其本身就是一个uint32_t的index数组。
+
+String Table（strtab）: 字符串表存放了符号表中可读的字符串，字符串末尾自带的 \0 为分隔符（机器码00）
+```
+
+所以fishhook寻找的主要步骤如下：
+
+### rebind_symbols_for_image 方法
+- 找到`LC_SEGEMENT_64(__LINKEDIT)`, `LC_SYMTAB`, `LC_DYSYMTAB` 三个加载命令
+
+- 根据以上三个加载命令，找到动态符号表、符号表和字符串表的地址
+
+- 找到懒加载表和非懒加载表section，准备进行下一步操作（替换该section中的符号对应的函数指针）
+
+### perform_rebinding_with_section 方法
+
+- 首先找到section对应的动态符号表的数组指针，然后遍历section，从动态符号表中取到符号表的index，然后根据index取到结构体n_list, 接着根据n_list中的n_strx也就是该符号名在字符串表中的偏移量，最后用字符串表的地址就可以得到该符号的名字。这个时候遍历我们开始传递过去的一个`rebinding`结构体，比较name是否相等，则进行函数指针替换。
+
+所以我们调用printf，会调用到new_printf, 而new_printf中调用orig_printf会调用原来的printf，因为我们将先前传递的函数指针的实现替换成了系统的函数的实现。
+
+上述步骤中涉及了很多关于偏移的计算，其实这些规则在apple提供的头文件中都有说明，这里就不具体说明了。
+
+唯一想说明的是动态符号表中其实区分了多个不同的section，所以开始取的时候需要根据section的`reserved1`偏移和动态符号表的地址进行获取。
+
+以上就是fishhook的全部流程，具体各位可以去参看源代码。
+
+## 最后
+
+一个小小的hello world，背后的东西，远远比想象的多的多，本文也只是简单的分析了下其中的一些方面。
 
 ## References
 
