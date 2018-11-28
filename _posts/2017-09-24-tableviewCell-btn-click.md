@@ -11,7 +11,8 @@ comments: true
 ### 前言
 今天写一个界面的时候，在Cell中添加了一个子view，该view里有几个星星按钮，但是发现点击星星的时候，并没有响应。**为啥？？**
 
-![屏幕快照 2017-09-24 00.48.55.png](http://ocigwe4cv.bkt.clouddn.com/%5Btips%5D_tableviewCell_btn_click_1.png)
+
+![屏幕快照 2017-09-24 00.48.55.png]({{site.url}}/assets/images/blog/tableviewCell_btn_click_1.png)
 
 
 ### 番外
@@ -28,7 +29,7 @@ comments: true
 
  touch, press事件通过`hitTest(_:with:) `方法找到`first responder`。找到`first responder`后，`first responder`有三种选择,下面以touch事件为例说明，点击蓝色的View，此时`first responder`为蓝色的View：
 
-![屏幕快照 2017-09-24 22.32.24.png](http://ocigwe4cv.bkt.clouddn.com/%5Btips%5D_tableviewCell_btn_click_2.png)
+![屏幕快照 2017-09-24 22.32.24.png]({{site.url}}/assets/images/blog/tableviewCell_btn_click_2.png)
 
 - 蓝色的View实现了`touchesBegan:withEvent:`，同时调用`super`,让事件进行传递，让下一个响应者做一些事情；
 
@@ -36,7 +37,7 @@ comments: true
 
 - 蓝色的View没有实现`touchesBegan:withEvent:`方法，此时会根据`Responder Chain`进行寻找下一个响应者，如图所示：
 
-![屏幕快照 2017-09-24 22.56.47.png](http://ocigwe4cv.bkt.clouddn.com/%5Btips%5D_tableviewCell_btn_click_3.png)
+![屏幕快照 2017-09-24 22.56.47.png]({{site.url}}/assets/images/blog/tableviewCell_btn_click_3.png)
 
 #### UIControl Action
 当用户点击一个绑定target／action的按钮后，一个点击事件会被发送给`UIApplication`,然后`UIApplication`会通知到按钮去执行这个action。

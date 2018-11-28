@@ -10,7 +10,7 @@ comments: true
 
 > 本文是笔者学习ARC相关的笔记，以下是笔记思路：
 
-![图1](http://ocigwe4cv.bkt.clouddn.com/memory_analyze_1.png)
+![图1]({{site.url}}/assets/images/blog/memory_analyze_1.png)
 
 # 内存管理
 

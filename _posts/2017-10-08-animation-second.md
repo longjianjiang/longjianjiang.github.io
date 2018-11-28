@@ -40,7 +40,7 @@ springMoveLeftAnimation.isRemovedOnCompletion = false
 #####  fillMode
 `fillMode`是`CAMediaTiming`协议中一个属性，用来控制动画序列的开始和结束的行为，默认是`kCAFillModeRemoved`,默认效果如下图所示：
 
-![屏幕快照 2017-09-20 15.36.00.png](http://ocigwe4cv.bkt.clouddn.com/animation_second_01.png)
+![屏幕快照 2017-09-20 15.36.00.png]({{site.url}}/assets/images/blog/animation_second_01.png)
 
 > 如果想要延时执行某个动画，可以设置`beginTime`属性
 
@@ -51,18 +51,18 @@ springMoveLeftAnimation.beginTime = CACurrentMediaTime() + 0.3
 
 - kCAFillModeBackwards
 
-![屏幕快照 2017-09-20 15.43.24.png](http://ocigwe4cv.bkt.clouddn.com/animation_second_02.png)
+![屏幕快照 2017-09-20 15.43.24.png]({{site.url}}/assets/images/blog/animation_second_02.png)
 
 如图所示，设置`fillMode`为`kCAFillModeBackwards`,不论是否设置延时，都会提前显示动画的第一帧。
 
 - kCAFillModeForwards
 
-![屏幕快照 2017-09-20 15.46.24.png](http://ocigwe4cv.bkt.clouddn.com/animation_second_03.png)
+![屏幕快照 2017-09-20 15.46.24.png]({{site.url}}/assets/images/blog/animation_second_03.png)
 如图所示，设置`fillMode`为`kCAFillModeForwards`,当动画被移除之前会保留动画的最后一帧。
 
 - kCAFillModeBoth
 
-![屏幕快照 2017-09-20 15.49.05.png](http://ocigwe4cv.bkt.clouddn.com/animation_second_04.png)
+![屏幕快照 2017-09-20 15.49.05.png]({{site.url}}/assets/images/blog/animation_second_04.png)
 如图所示，设置`fillMode`为`kCAFillModeBoth`,相当于是上面两个属性的结合。
 
 当动画结束后会保留最后一帧，然后设置`isRemovedOnCompletion`为`false`，所以动画就不会被移除，这样`colorView`就能够保持动画后的模样。但是现在因为不是真正的`colorView`，所以就不能做任何操作了，当`colorView`为输入框时，此时因为是`presentation layer `，也就不能响应用户的输入。而且这样做也会有性能问题，所以不建议设置`isRemovedOnCompletion`为`false`。
@@ -216,7 +216,7 @@ endPoint: 结束的点；
 
 iOS之前的滑动进行解锁的动画就可以使用`CAGradientLayer`来实现：
 
-![WechatIMG1.png](http://ocigwe4cv.bkt.clouddn.com/animation_second_05.png)
+![WechatIMG1.png]({{site.url}}/assets/images/blog/animation_second_05.png)
 
 完整的Demo下载地址[CAGradientLayerAnimationDemo](https://github.com/longjianjiang/BlogDemo/tree/master/CAGradientLayerDemo)
 
@@ -232,7 +232,7 @@ instanceDelay： 设置每个克隆和上一个克隆的动画延迟；
 
 利用`CAReplicatorLayer`上述特性，我们可以发挥想象做出一些酷炫的动画，例如下面这个动画：
 
-![WechatIMG3.jpeg](http://ocigwe4cv.bkt.clouddn.com/animation_second_06.jpeg)
+![WechatIMG3.jpeg]({{site.url}}/assets/images/blog/animation_second_06.jpeg)
 
 完整的Demo下载地址[CAReplicatorLayerAnimationDemo](https://github.com/longjianjiang/BlogDemo/tree/master/CAReplicatorLayerDemo)
 

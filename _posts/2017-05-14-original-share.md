@@ -16,7 +16,8 @@ comments: true
 ### 开始
 分享效果如下：
 
-![WechatIMG1.jpeg](http://ocigwe4cv.bkt.clouddn.com/WechatIMG1.jpeg)
+
+![WechatIMG1.jpeg]({{site.url}}/assets/images/blog/original_share_1.jpeg)
 
 
 代码参考如下：

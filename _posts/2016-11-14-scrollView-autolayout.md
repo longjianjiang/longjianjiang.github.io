@@ -12,7 +12,7 @@ comments: true
 
 今天做项目，碰到一个需求，在一个Cell中，因为需要适配4‘，所以需要将原本的一行按钮换成UIScrollView，可以滑动。如图：
 
-![屏幕快照 2016-11-14 上午10.31.11.png](http://ocigwe4cv.bkt.clouddn.com/scrollView-autolayout_1.png)
+![屏幕快照 2016-11-14 上午10.31.11.png]({{site.url}}/assets/images/blog/scrollView-autolayout_1.png)
 
 
 #### 开始
@@ -21,7 +21,7 @@ comments: true
 怎么办？又仔细查看了一遍，发现没有什么地方有写错阿。
 然后Google了下，发现好像是autolayout这货的问题，于是我就试着不用autolayout看看能不能滚动，直接用frame来设置位置和大小，结果果然可以滚动了！
 
-![屏幕快照 2016-11-14 上午11.01.10.png](http://ocigwe4cv.bkt.clouddn.com/scrollView-autolayout_2.png)
+![屏幕快照 2016-11-14 上午11.01.10.png]({{site.url}}/assets/images/blog/scrollView-autolayout_2.png)
 
 #### 然后
 
@@ -29,7 +29,7 @@ comments: true
 
 >  The UIScrollView class scrolls its content by changing the origin of its bounds. To make this work with Auto Layout, the top, left, bottom, and right edges within a scroll view now mean the edges of its content view.
 
-![Snip20161114_1.png](http://ocigwe4cv.bkt.clouddn.com/scrollView-autolayout_3.png)
+![Snip20161114_1.png]({{site.url}}/assets/images/blog/scrollView-autolayout_3.png)
 
 如上图所示，之前我们设置的四个约束（上下左加宽度），其实参照物不是`scrollView`,而应该是外面的`contentSize`,为什么呢？因为`scrollView`是会滚动的，所以如果参照的是`scrollView`的话，那么按钮的位置就不是确定的了，所以参照的其实是`contentSize`。换句话说其实，`scrollView`就是根据内部按钮的frame计算出`scrollView`的`contentSize`。（因为autolayout本质依然是frame）。
 

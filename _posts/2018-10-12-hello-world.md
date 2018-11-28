@@ -148,7 +148,7 @@ eax: 一般存储函数返回值
 
 Mach-O 包含三部分内容
 
-![Mach-O](https://66.media.tumblr.com/55e540d09e6d4997fa794b0a2e499d2b/tumblr_phx9uvxKwg1xft6nho1_500.png)
+![Mach-O]({{site.url}}/assets/images/blog/hello_world_1.png)
 
 如上图所示可执行文件由header、Load Commands、Data组成。
 

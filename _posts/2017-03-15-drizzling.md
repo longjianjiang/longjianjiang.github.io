@@ -10,7 +10,7 @@ comments: true
 ---
 
 
-![Drizzling](http://ocigwe4cv.bkt.clouddn.com/Icon-60@3x.png)
+![Drizzling]({{site.url}}/assets/images/blog/Icon-60@3x.png)
 
 <center><b>Drizzling</b></center>
 

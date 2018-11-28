@@ -14,15 +14,15 @@ comments: true
 
 #### 开始
 这个之前还真没遇到过，于是找好朋友`Google`,果然给力，第一个结果就是我想要的。
-![屏幕快照 2016-11-03 下午4.26.44.png](http://ocigwe4cv.bkt.clouddn.com/pinyinSort_1.png)
+![屏幕快照 2016-11-03 下午4.26.44.png]({{site.url}}/assets/images/blog/pinyinSort_1.png)
 
 结果发现不但是我想要的，而且还简单，于是就写了个Demo，发现果然可以实现。
 
 主要利用数组的`sortedArrayUsingFunction:context:`方法，传入一个自定义的比较方法，该方法利用`NSString`的`localizedCompare:`方法。
-![屏幕快照 2016-11-03 下午4.31.47.png](http://ocigwe4cv.bkt.clouddn.com/pinyinSort_2.png)
+![屏幕快照 2016-11-03 下午4.31.47.png]({{site.url}}/assets/images/blog/pinyinSort_2.png)
 
 但是我用同样的方法在项目中，发现并没有完全实现排序，顺序还是错乱，于是我新建了一个iOS平台下的Demo，发现果然是有问题的。
-![屏幕快照 2016-11-03 下午4.35.34.png](http://ocigwe4cv.bkt.clouddn.com/pinyinSort_3.png)
+![屏幕快照 2016-11-03 下午4.35.34.png]({{site.url}}/assets/images/blog/pinyinSort_3.png)
 同样的代码，换了个平台出问题了，不知怎么回事，如果有大神知道，还请指教。
 
 #### 然后

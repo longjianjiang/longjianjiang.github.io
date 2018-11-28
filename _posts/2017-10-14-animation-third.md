@@ -76,7 +76,7 @@ extension ViewController: UIViewControllerTransitioningDelegate {
 ```
 
 
-![屏幕快照 2017-10-13 10.21.27.png](http://ocigwe4cv.bkt.clouddn.com/animation_third_1.png)
+![屏幕快照 2017-10-13 10.21.27.png]({{site.url}}/assets/images/blog/animation_third_1.png)
 
 > `transitionContext`在实现动画中非常重要，因为它提供了你需要做动画的对象，以Modal为例，默认的控制器的view叫做fromView，modal出来的控制器的view叫做toView，fromView和toView都是放到containerView中显示的，当动画结束后，fromView会从containerView中移除。
 
@@ -106,8 +106,8 @@ navigationController?.pushViewController(DetailViewController(), animated: true)
 
 下面给出一个Push时候进行放大图形进行展示新控制器View的动画，Pop时候进行放缩当前View直到消失的动画，效果如下图：
 
-![屏幕快照 2017-10-13 14.31.16.png](http://ocigwe4cv.bkt.clouddn.com/animation_third_2.png)
-![屏幕快照 2017-10-13 14.27.25.png](http://ocigwe4cv.bkt.clouddn.com/animation_third_3.png)
+![屏幕快照 2017-10-13 14.31.16.png]({{site.url}}/assets/images/blog/animation_third_2.png)
+![屏幕快照 2017-10-13 14.27.25.png]({{site.url}}/assets/images/blog/animation_third_3.png)
 
 完整的Demo下载地址[VCPushPopAnimationDemo](https://github.com/longjianjiang/BlogDemo/tree/master/VCPushPopAnimationDemo)
 

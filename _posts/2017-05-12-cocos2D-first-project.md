@@ -16,8 +16,11 @@ comments: true
 - 执行Python脚本：./setup.py
 - 执行完之后，最后一句应该是如下所示：
 
-![Snip20170512_1.png](http://ocigwe4cv.bkt.clouddn.com/Snip20170512_1.png)
+
+![Snip20170512_1.png]({{site.url}}/assets/images/blog/cocos2D_first_project_1.png)
+
 此时我们只需要按照它的要求，继续执行给出的指令即可
+
 - 现在我们就可以使用命令来创建一个Cocos2D-X的项目了，只需要执行以下指令 :
 >`cocos new firstCocos -p com.longjianjiang.firstCocos -l lua -d "/Users/longjianjiang/Desktop"`
 `firstCocos` -> 项目的名字

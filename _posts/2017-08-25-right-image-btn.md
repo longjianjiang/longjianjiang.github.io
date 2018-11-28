@@ -11,7 +11,7 @@ comments: true
 ## 前言
 UIButton默认图片显示在左边，但实际更多的是将图片放在文字的右侧，比如下图所示：
 
-![屏幕快照 2017-08-25 22.27.45.png](http://ocigwe4cv.bkt.clouddn.com/rightImageBtn_1.png)
+![屏幕快照 2017-08-25 22.27.45.png]({{site.url}}/assets/images/blog/rightImageBtn_1.png)
 
 ## 开始
 所以得改造下UIButton，下面给出几种方法：

@@ -12,7 +12,7 @@ comments: true
 >今天熟悉了Lua的语法，同时学习了Cocos中`ClippingNode`的使用，这个节点通常是用来做动画的，示例如下：
 
 
-![clip.gif](http://ocigwe4cv.bkt.clouddn.com/clip.gif)
+![clip.gif]({{site.url}}/assets/images/blog/cocos2D_clippingNode_1.gif)
 
 			
 ### 开始
