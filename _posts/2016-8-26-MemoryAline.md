@@ -9,14 +9,15 @@ comments: true
 ---
 
 ## 先看一个例子！
-![Snip20160826_1.png](http://ocigwe4cv.bkt.clouddn.com/Snip20160826_1.png)
+
+![Snip20160826_1.png]({{site.url}}/assets/images/blog/memoryAline_1.png)
 
 >我们发现两个结构体中存放的是相同类型的三个数据，只是顺序有所不同，通过`sizeof()`函数计算出所占字节数目也完全不同。
 其实我们在学习C语言的时候应该已经说过这种现象是因为内存对齐所导致的，不过下面我们来进一步了解下内存对齐的规则。
 
 **PS:阿里校招的测评有一题就是考了这个，见下图：**
 
-![Snip20160826_2.png](http://ocigwe4cv.bkt.clouddn.com/Snip20160826_2.png)
+![Snip20160826_2.png]({{site.url}}/assets/images/blog/memoryAline_2.png)
 
 ## 为什么需要内存对齐
 所谓内存对齐，其实是为了加快CPU读取数据的速度，因为CPU读取数据是按块(X64架构的计算机是8个字节为一个块)来读取的，所以按照一定的对齐规则存储数据，会大大提高CPU的读取效率。
