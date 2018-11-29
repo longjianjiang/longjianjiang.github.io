@@ -232,7 +232,7 @@ UICubicTimingParameters and UISpringTimingParameters.  例如下面这个spring 
 3.state: animator 动画的状态，具体见下图：
 ```
 
-![屏幕快照 2017-11-11 16.57.24.png](http://ocigwe4cv.bkt.clouddn.com/%E5%B1%8F%E5%B9%95%E5%BF%AB%E7%85%A7%202017-11-11%2016.57.24.png)
+![屏幕快照 2017-11-11 16.57.24.png]({{site.url}}/assets/images/blog/animation_first_3.png)
 
 > fractionComplete可以接受一个animator的完成百分比，达到一种可交互的动画，类似3Dtouch 的重按动画效果；
 

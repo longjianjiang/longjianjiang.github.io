@@ -31,11 +31,11 @@ comments: true
 ### 项目结构
 项目创建之后，可以从下图路径下用Xcode打开：
 
-![屏幕快照 2017-05-12 22.56.46.png](http://ocigwe4cv.bkt.clouddn.com/%E5%B1%8F%E5%B9%95%E5%BF%AB%E7%85%A7%202017-05-12%2022.56.46.png)
+![屏幕快照 2017-05-12 22.56.46.png]({{site.url}}/assets/images/blog/cocos2D_first_project_2.png)
 
 之后我们任务就是在下图的Resources路径下进行Lua开发
 
-![屏幕快照 2017-05-12 22.58.34.png](http://ocigwe4cv.bkt.clouddn.com/%E5%B1%8F%E5%B9%95%E5%BF%AB%E7%85%A7%202017-05-12%2022.58.34.png)
+![屏幕快照 2017-05-12 22.58.34.png]({{site.url}}/assets/images/blog/cocos2D_first_project_3.png)
 
 
 ### 尾巴

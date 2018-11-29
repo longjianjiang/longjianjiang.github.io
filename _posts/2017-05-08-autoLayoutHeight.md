@@ -18,7 +18,7 @@ comments: true
 
 下面来看个栗子：`view`的层级如下图所示：
 
-![屏幕快照 2017-05-05 18.08.27.png](http://ocigwe4cv.bkt.clouddn.com/%E5%B1%8F%E5%B9%95%E5%BF%AB%E7%85%A7%202017-05-05%2018.08.27.png)
+![屏幕快照 2017-05-05 18.08.27.png]({{site.url}}/assets/images/blog/auto_layout_height_1.png)
 
 代码如下:
 
@@ -55,7 +55,7 @@ Auto Layout内部是如何计算出`msgLabel` 、`contentView`的高度来的呢
 
 `intrinsicContentSize`是`UIView`的一个属性，`intrinsicContentSize`是基于`view`的内容进行计算出来的，比如说`UILabel`的`intrinsicContentSize`是基于`text`和`font`(猜想内部可能通过调用`boundingRect`方法来计算出`size`)。但是并不是所有的view都有`intrinsicContentSize`，常见的`view`的`intrinsicContentSize`如下图所示：
 
-![屏幕快照 2017-05-07 09.41.27.png](http://ocigwe4cv.bkt.clouddn.com/%E5%B1%8F%E5%B9%95%E5%BF%AB%E7%85%A7%202017-05-07%2009.41.27.png)
+![屏幕快照 2017-05-07 09.41.27.png]({{site.url}}/assets/images/blog/auto_layout_height_2.png)
 
 如上例，我们在设置约束的时候，可以使用`view`的`intrinsicContentSize`在我们的布局中，这样可以使我们的布局适应当view的内容发生改变，同时也可以减少设置约束的数量。
 
@@ -97,7 +97,7 @@ View.width <= 0.0 * NotAnAttribute + IntrinsicWidth
 
 下面同样看一个栗子，view的层级图如下所示（PS：内容摘自sunny UITableView-FDTemplateLayoutCell Demo中的data.json）：
 
-![屏幕快照 2017-05-08 15.31.25.png](http://ocigwe4cv.bkt.clouddn.com/%E5%B1%8F%E5%B9%95%E5%BF%AB%E7%85%A7%202017-05-08%2015.31.25.png)
+![屏幕快照 2017-05-08 15.31.25.png]({{site.url}}/assets/images/blog/auto_layout_height_3.png)
 
 Cell中有四部分内容：`titleLabel`,` contentLabel`, `contentImageView`,` usernameLabel`, 同时`titleLabel`,` contentLabel`, `contentImageView`都是可能没有的。 所以tableview在返回高度的时候必然要根据内容显示计算cell的高度。但是这时我们可以利用Auto Layout的fitting size，帮我们计算cell内容的高度，下面就是返回tableViewCell高度方法的实现：
 
@@ -127,7 +127,7 @@ Cell中有四部分内容：`titleLabel`,` contentLabel`, `contentImageView`,` u
 
 下面来看一个栗子，view的层级图如下所示
 
-![屏幕快照 2017-05-08 16.37.58.png](http://ocigwe4cv.bkt.clouddn.com/%E5%B1%8F%E5%B9%95%E5%BF%AB%E7%85%A7%202017-05-08%2016.37.58.png)
+![屏幕快照 2017-05-08 16.37.58.png]({{site.url}}/assets/images/blog/auto_layout_height_4.png)
 
 如图所示红色的是`label`，白色的为`textView`。之前在说到`IntrinsicContentSize`的时候，提到UITextView在可以滚动的时候是没有`IntrinsicContentSize`的，此时可以使用`sizeThatFits：`方法来计算出`textView`内容的高度，进行更新约束，这样就可以显示，否则图中白色的`textView`是不能显示出来的，使用`sizeThatFits：`方法的代码如下所示：
 
