@@ -13,7 +13,7 @@ comments: true
 
 ## Transfrom Operator
 
-#### `map`
+#### map
 
 - map
 
@@ -91,6 +91,9 @@ toArray
 
 #### flatMap
 
+flatMap 可以看作是Flatten 和 Map 的结合， 所以我们先看下flatten 操作
+
+- flatten
 
 
 
