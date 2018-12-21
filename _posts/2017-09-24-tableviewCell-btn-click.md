@@ -64,6 +64,8 @@ override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
 
 ![屏幕快照 2017-09-24 22.56.47.png]({{site.url}}/assets/images/blog/tableviewCell_btn_click_3.png)
 
+> 我们也可以重写 `UIResponder` 的 `next` 属性重新指定下一个响应者。
+
 ### UIControl Action
 
 当用户点击一个绑定target／action的按钮后，一个点击事件会被发送给`UIApplication`,然后`UIApplication`会通知到按钮去执行这个action。
@@ -81,7 +83,7 @@ override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
 
 ### 系统事件
 
-系统事件会直接发送给给`UIApplication`，然后会分发到`AppDelegate`进行处理。
+系统事件会直接发送给`UIApplication`，然后会分发到`AppDelegate`进行处理。
 
 
 ## 开始
