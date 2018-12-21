@@ -1,0 +1,17 @@
+---
+layout: post
+title:  "【Runtime源码】对象的创建"
+date:   2018-12-21
+excerpt:  "本文是笔者阅读Runtime源码关于对象创建的笔记"
+tag:
+- SourceCode
+comments: true
+---
+
+#define fastpath(x) (__builtin_expect(bool(x), 1))
+
+#define slowpath(x) (__builtin_expect(bool(x), 0))
+
+`__builtin_expect(EXP, N)` 是一个指令，用来告诉编译器将最有可能执行的分支告诉编译器。 也就是 EXP 等于 N的概率比较大，这样编译器可以对分支转移进行优化，减少指令的跳转。
+
+所以上面两个宏，slowpath 表示 表达式 x 等于 false 的概率比较大，fastpath 表示 表达式 x 等于 true 的概率比较大。
