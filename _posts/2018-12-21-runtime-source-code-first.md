@@ -45,6 +45,8 @@ SUPPORT_INDEXED_ISA: 这个宏为 1 时，此时 isa 中并没有直接存储 cl
 SUPPORT_NONPOINTER_ISA: 这个宏就是根据上面两个宏来得到的，当上述有一个为 1，该宏也为1，说明此时 isa 中不再是单纯的指针，还存储了其他的信息。
 ```
 
+> SUPPORT_INDEXED_ISA 不支持 iOS平台，下面笔者摘录的代码中就去除了 SUPPORT_INDEXED_ISA 为 1 的情况。
+
 👇是 isa_t 声明，以及结构体各个成员的作用：
 
 ```
@@ -119,7 +121,7 @@ objc_object::initIsa(Class cls, bool nonpointer, bool hasCxxDtor)
 }
 ```
 
-> 上述代码去除了一些 assert 和注释，同时假定nonpointer 为 true，省略了 SUPPORT_INDEXED_ISA 为 1 的情况。
+> 上述代码去除了一些 assert 和注释，同时假定nonpointer 为 true。
 
 上述代码就是内部用来初始化 isa 的方法，我们看到如果 nonpointer 为false，直接赋值 cls 存储类的信息。
 
@@ -153,8 +155,61 @@ objc_object::ISA()
 }
 ```
 
-> 上述代码去除了一些 assert 和 注释，同时去除了 SUPPORT_INDEXED_ISA 为 1 的分支。
+> 上述代码去除了一些 assert 和 注释。
 
 简单的通过 & 运算取得结构体中44位存储 cls 信息的将其转成 Class 类型返回。
 
-将 newisa 赋值给 isa 成员变量，至次初始化 isa 结束。
+将 newisa 赋值给 isa 成员变量，至此初始化 isa 结束。我们知道了 OC对象和类中一个重要的成员 isa，以及 isa 内部的结构。至于 `objc_class` 的其他成员笔者将在接下来的文章叙述。
+
+## class method
+
+下面笔者来实际证实下 isa_t 存储 Class 的信息，以及 NSObject 的 `class` 方法中返回的值的一致性。
+
+```
++ (Class)class {
+    return self;
+}
+
+- (Class)class {
+    return object_getClass(self);
+}
+```
+
+```
+Person *p = [[Person alloc] init];
+NSLog(@"Person instance %p", [p class]);
+NSLog(@"Person class %p",[Person class]);
+NSLog(@"NSObject class %p",[NSObject class]);
+
+2018-12-24 16:22:01.054257+0800 debug-objc[4399:411284] Person instance 0x1000011e8
+2018-12-24 16:22:01.054292+0800 debug-objc[4399:411284] Person class 0x1000011e8
+2018-12-24 16:22:01.054317+0800 debug-objc[4399:411284] NSObject class 0x100b14140
+```
+
+我们在 `_class_createInstanceFromZone` 方法末尾打断点：
+
+![runtime_source_code_first_2]({{site.url}}/assets/images/blog/runtime_source_code_first_2.png)
+
+$1 是存储 Person 类地址的地方，我们知道 nonpointer 类型 isa 中结构体有44位存储 Class 地址，所以将 $1 与 0x00007ffffffffff8ULL 进行 & 运算的结果就是 Person 类的地址。其实也就是 `_class_createInstanceFromZone` 方法中 cls 参数的地址。
+
+![runtime_source_code_first_3]({{site.url}}/assets/images/blog/runtime_source_code_first_3.png)
+
+我们看到 $2 和 $4 地址相同，也就是我们打印出的 Person instance 和 Person class 的地址。
+
+![runtime_source_code_first_4]({{site.url}}/assets/images/blog/runtime_source_code_first_4.png)
+
+首先我们取得 Person 类的isa 地址 $5, 根据上面的方法我们取到 Person MetaClass地址 记做 $7。
+
+然后我们取得 Person MetaClass的 isa 地址 $8, 还是根据上面的方法我们取到 root meta class 的地址记做 $10。
+
+然后我们取得 root meta class的isa 地址 $11, 发现 $11 地址和 $8 相同，也就是符合了之前的那张图，root meta class 的 isa 指向了自己。
+
+![runtime_source_code_first_5]({{site.url}}/assets/images/blog/runtime_source_code_first_5.png)、
+
+我们根据 NSObject 地址取得 NSObject isa 地址 $13, 发现和之前Person MetaClass isa 地址 $8 相同，也符合前面的那张图。
+
+## References
+
+[http://www.sealiesoftware.com/blog/archive/2009/04/14/objc_explain_Classes_and_metaclasses.html](http://www.sealiesoftware.com/blog/archive/2009/04/14/objc_explain_Classes_and_metaclasses.html)
+
+[http://www.sealiesoftware.com/blog/archive/2013/09/24/objc_explain_Non-pointer_isa.html](http://www.sealiesoftware.com/blog/archive/2013/09/24/objc_explain_Non-pointer_isa.html)
