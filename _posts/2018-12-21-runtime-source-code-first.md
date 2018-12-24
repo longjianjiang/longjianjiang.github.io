@@ -173,7 +173,14 @@ objc_object::ISA()
 - (Class)class {
     return object_getClass(self);
 }
+
+Class object_getClass(id obj) {
+    if (obj) return obj->getIsa();
+    else return Nil;
+}
 ```
+
+我们看到对象的 `class` 方法其实就是调用了 `objc_objct` 中取 isa 的方法，因为isa 中存储了 cls 的信息。
 
 ```
 Person *p = [[Person alloc] init];
@@ -207,6 +214,49 @@ $1 是存储 Person 类地址的地方，我们知道 nonpointer 类型 isa 中�
 ![runtime_source_code_first_5]({{site.url}}/assets/images/blog/runtime_source_code_first_5.png)、
 
 我们根据 NSObject 地址取得 NSObject isa 地址 $13, 发现和之前Person MetaClass isa 地址 $8 相同，也符合前面的那张图。
+
+## isKindOfClass & isMemberOfClass method
+
+最后我们来看个之前很火的runtime 测试题：
+
+```
+BOOL res1 = [[NSObject class] isKindOfClass:[NSObject class]];
+BOOL res2 = [[NSObject class] isMemberOfClass:[NSObject class]];
+BOOL res3 = [[Person class] isKindOfClass:[Person class]];
+BOOL res4 = [[Person class] isMemberOfClass:[Person class]];
+
+NSLog(@"%d %d %d %d", res1, res2, res3, res4);
+```
+
+```
++ (BOOL)isMemberOfClass:(Class)cls {
+    return object_getClass((id)self) == cls;
+}
+
+- (BOOL)isMemberOfClass:(Class)cls {
+    return [self class] == cls;
+}
+
++ (BOOL)isKindOfClass:(Class)cls {
+    for (Class tcls = object_getClass((id)self); tcls; tcls = tcls->superclass) {
+        if (tcls == cls) return YES;
+    }
+    return NO;
+}
+
+- (BOOL)isKindOfClass:(Class)cls {
+    for (Class tcls = [self class]; tcls; tcls = tcls->superclass) {
+        if (tcls == cls) return YES;
+    }
+    return NO;
+}
+```
+
+其实根据源代码，isKindOfClass & isMemberOfClass 两个方法内部还是调用了 `objc_objct` 中取 isa 的方法，对于类取isa 得到的是 metaClass，而metaClass 和 class 是两个不同的对象。
+
+所以后面三个都是false，而对于第一个来说，因为root meta class 的 superClass 是 NSObject ，所以第一个为true。
+
+其实理解了前面那种图，也就很简单了。
 
 ## References
 
