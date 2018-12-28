@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  "【Runtime源码】类的结构"
+title:  "【Runtime源码】类的结构(isa)"
 date:   2018-12-21
-excerpt:  "本文是笔者阅读Runtime源码关于类的结构的笔记"
+excerpt:  "本文是笔者阅读Runtime源码关于isa的笔记"
 tag:
 - SourceCode
 comments: true
