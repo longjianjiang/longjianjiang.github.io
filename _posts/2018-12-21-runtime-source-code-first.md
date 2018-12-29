@@ -8,7 +8,7 @@ tag:
 comments: true
 ---
 
-> 本文笔者根据 Runtime 750 源码分析OC中类和对象的具体结构。
+> 本文笔者根据 Runtime 750 源码分析OC中对象 isa 的结构及与其相关的一些方法。
 
 OC中的对象都是 `objc_object` 结构体，OC中的类都是 `objc_class` 结构体，`objc_class` 又继承自 `objc_object`，所以OC中大家都是对象。
 
