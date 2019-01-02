@@ -21,6 +21,32 @@ struct objc_class : objc_object {
 
 之前笔者分析过 `objc_class` 结构体中继承自 `objc_object` 的 `isa` 成员，本文笔者来分析 `class_data_bits_t` 成员的作用与结构。
 
+## 测试代码
+
+```
+@interface Person : NSObject {
+    NSString *_nickName;
+}
+
+@property (nonatomic, copy) NSString *name;
+
+- (void)say;
+- (void)write;
+@end
+
+@implementation Person
+- (void)say {
+    NSLog(@"hello world");
+}
+
+- (void)write {
+    NSLog(@"write some letter");
+}
+@end
+```
+
+笔者以👆代码来进行测试。
+
 ## class_data_bits_t
 
 ```
@@ -98,5 +124,45 @@ struct class_ro_t {
 };
 ```
 
-我们看到 `class_rw_t` 中含有 `class_ro_t` 结构体。`class_ro_t` 我们看到有关于method，protocol，ivar，property的信息，其中除了protocol其他三个都是继承自 `entsize_list_tt` 类型的结构体。
+我们看到 `class_rw_t` 中含有 `class_ro_t` 结构体。`class_ro_t` 我们看到有关于method，protocol，ivar，property的信息，其中除了protocol其他三个都是继承自 `entsize_list_tt` 类型的结构体。这个结构体中存储了类在编译时就确定的信息，也就是前面所说的四种信息。
+
+```
+template <typename Element, typename List, uint32_t FlagMask>
+struct entsize_list_tt {
+    uint32_t entsizeAndFlags;
+    uint32_t count;
+    Element first;
+
+    uint32_t entsize() const {
+        return entsizeAndFlags & ~FlagMask;
+    }
+
+    Element& getOrEnd(uint32_t i) const { 
+        assert(i <= count);
+        return *(Element *)((uint8_t *)&first + i*entsize()); 
+    }
+    Element& get(uint32_t i) const { 
+        assert(i < count);
+        return getOrEnd(i);
+    }
+    
+    // iterator implementation at objc-runtime-new.h
+};
+```
+
+`entsize_list_tt` 定义了一种类似数组的顺序存储的结构，内置了 Random Access Iterator, 提供了根据索引获取存储Element的方法 `get(uint32_t idx)`。
+
+`class_ro_t` 的 flags 存储了一些类在编译时期就确定的信息，也是以标记位的形式来存储，这些标记位以 `RO_` 来头，如下所示，这里只取了部分:
+
+```
+// class is a metaclass
+#define RO_META               (1<<0)
+// class is a root class
+#define RO_ROOT               (1<<1)
+// class has .cxx_construct/destruct implementations
+#define RO_HAS_CXX_STRUCTORS  (1<<2)
+```
+
+`class_ro_t` 的 `instanceStart` 和 `instanceSize` 则和 non-fragile ivars 有关，关于 non-fragile ivars 可以参考笔者之前的[Runtime学习笔记](http://www.longjianjiang.com/runtime/)。
+
 
