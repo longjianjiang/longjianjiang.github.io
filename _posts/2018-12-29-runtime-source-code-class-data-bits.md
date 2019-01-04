@@ -164,55 +164,16 @@ private:
         uintptr_t arrayAndFlag;
     };
 
-    bool hasArray() const {
-        return arrayAndFlag & 1;
-    }
-
-    array_t *array() {
-        return (array_t *)(arrayAndFlag & ~1);
-    }
-
-    void setArray(array_t *array) {
-        arrayAndFlag = (uintptr_t)array | 1;
-    }
-
 public:
-    void attachLists(List* const * addedLists, uint32_t addedCount) {
-         if (addedCount == 0) return;
-
-        if (hasArray()) {
-            // many lists -> many lists
-            uint32_t oldCount = array()->count;
-            uint32_t newCount = oldCount + addedCount;
-            setArray((array_t *)realloc(array(), array_t::byteSize(newCount)));
-            array()->count = newCount;
-            memmove(array()->lists + addedCount, array()->lists, 
-                    oldCount * sizeof(array()->lists[0]));
-            memcpy(array()->lists, addedLists, 
-                   addedCount * sizeof(array()->lists[0]));
-        }
-        else if (!list  &&  addedCount == 1) {
-            // 0 lists -> 1 list
-            list = addedLists[0];
-        } 
-        else {
-            // 1 list -> many lists
-            List* oldList = list;
-            uint32_t oldCount = oldList ? 1 : 0;
-            uint32_t newCount = oldCount + addedCount;
-            setArray((array_t *)malloc(array_t::byteSize(newCount)));
-            array()->count = newCount;
-            if (oldList) array()->lists[addedCount] = oldList;
-            memcpy(array()->lists, addedLists, 
-                   addedCount * sizeof(array()->lists[0]));
-        }
-    }
+    void attachLists(List* const * addedLists, uint32_t addedCount) { ... }
 };
 ```
 
-上述就是 `list_array_tt` 的大致结构，省略了一些代码实现。这个结构内部创建了一个类似数组的叫 `array_t` 的结构体，内部有个 `lists` 数组 存储 `List *` 指针类型。如果 List 的个数大于1了就需要使用这个`lists`了，一个重要的方法就是 `attachLists`， 就是在该方法中将 `class_ro_t` 中方法，属性，协议等信息加入到 `class_rw_t` 的对应 `list_array_tt` 类型的属性中的。同时通过分类给类增加方法也是通过该方法加入的，具体添加过程笔者这里不展开。
+上述就是 `list_array_tt` 的大致结构，省略了一些代码实现。这个结构内部创建了一个类似数组的叫 `array_t` 的结构体，内部有个 `lists` 数组 存储 `List *` 指针类型。如果 List 的个数大于1了就需要使用这个`lists`了，否则使用联合的 `list` 成员。
 
-通过 `attachLists` 方法实现，可以看到内部会将新添加的List移动到最前面，将之前的元素移动到新添加List的尾部。
+一个重要的方法就是 `attachLists`， 就是在该方法中将 `class_ro_t` 中方法，属性，协议等信息加入到 `class_rw_t` 的对应 `list_array_tt` 类型的属性中的。同时通过分类给类增加方法也是通过该方法加入的，具体添加过程笔者这里不展开。
+
+通过 `attachLists` 方法内部会将新添加的List移动到最前面，将之前的元素移动到新添加List的尾部。
 
 `class_rw_t` 的 flags 也存储了一些类相关的信息，也是以标记位的形式来存储，这些标记位以 `RW_` 来头，这些信息不是编译期间确定的，这里只取了部分:
 

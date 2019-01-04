@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "【Runtime源码】前言"
-date:   2019-01-03
+date:   2018-12-20
 excerpt:  "本文是笔者阅读Runtime源码的自我计划"
 tag:
 - SourceCode
@@ -22,5 +22,12 @@ Runtime的源码就比较多了，而且关于Runtime源码的文章也很多，
 类的结构(isa)
 类的结构(class_data_bits_t)
 类的加载过程
+
+## 最后
+
+通过阅读Runtime的源码，笔者总结了一些自己学到的东西。
+
+- 判断的代码必不可少，Runtime源码中可以发现很多方法都有加断言，这样可以避免问题的发生和问题的定位。
+
 
 
