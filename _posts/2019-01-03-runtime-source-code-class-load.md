@@ -241,5 +241,28 @@ static Class realizeClass(Class cls) {
 
 经过前面的处理，到了一个关键的步骤就是 `methodizeClass`, 这个方法内部会更新cls 的 `class_rw_t` 方法列表、协议列表、属性列表。
 
+{% highlight cpp %}
+int myPartitionVersion2(vector<int>& list, int left, int right) {
+    int pivot = list[left];
+    int i = left, j = right;
+    while (1) {
+        while (list[i] < pivot) {
+            i++;
+        }
+        while (list[j] > pivot) {
+            j--;
+        }
 
+        if (i == j) {
+            return i;
+        } else if (i > j) {
+            return i-1;
+        }
+
+        swap(list[i], list[j]);
+        i++;
+        j--;
+    }
+}
+{% endhighlight %}
 
