@@ -13,7 +13,7 @@ comments: true
 # 开始
 因为在ResponderChain的对象交互方式使用strategy模式进行事件处理OC中可以使用NSInvocation， 但是Swift中并不支持NSInvocation，所以笔者查阅资料做了一个类似的方案，相当于使用C语言函数去调用，达到了invoke的效果，代码如下：
 
-```
+{% highlight swift %}
  func extractMethodFrom(owner: AnyObject, selector: Selector) -> (([String : Any]?) -> Void)? {
         let method: Method?
         if owner is AnyClass {
@@ -36,19 +36,19 @@ comments: true
             return nil
         }
  }
-```
+{% endhighlight %}
 
 这样我们类似维护这样一个事件数组：
 
 > 注意： 这里的selector得是OC中的，不然通过class_getxxx 方法返回会为空,并且方法也必须是标记@objc的；
 
-```
+{% highlight swift %}
 let eventStrategy: [String: String] =  [kCTOrderProfileFooterEventTappedReceivingBtn: "clickFooterBtn:"]
-```
+{% endhighlight %}
 
 然后我们在router中这样调用：
 
-```
+{% highlight swift %}
  override func routerEventWithName(_ eventName: String, userInfo: [String : Any]?) {
         let methodName = eventStrategy[eventName]
         if let name = methodName {
@@ -59,18 +59,17 @@ let eventStrategy: [String: String] =  [kCTOrderProfileFooterEventTappedReceivin
         }
         
     }
-
-```
+{% endhighlight %}
 
 OC中router如下：
 
-```
+{% highlight objective_c %}
 - (void)routerEventWithName:(NSString *)eventName userInfo:(NSDictionary *)userInfo {
     NSInvocation *invocation = self.eventStrategy[eventName];
     [invocation setArgument:&userInfo atIndex:2];
     [invocation invoke];
 }
-```
+{% endhighlight %}
 
 一个通过NSInvocation设置参数，一个通过函数设置参数，效果是类似的。
 

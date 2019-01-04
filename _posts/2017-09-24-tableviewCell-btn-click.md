@@ -40,7 +40,7 @@ touch, press事件通过`hitTest(_:with:) `方法找到`first responder`。
 
 比如上图是一个画板，侧边的礼物是一个 collectionView， 这个时候要求在侧边也需要可以绘制，就需要在侧边的礼物View中重写 `hitTest(_:with:) ` 方法，判断如果不是点击了cell，那么就将点击事件传递给外面的 subview。这样当用户绘制的区域不是点击cell的时候，就可以正常绘制了。
 
-```
+{% highlight swift %}
 override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
     let hitView = super.hitTest(point, with: event)
     if hitView == collectionView {
@@ -48,7 +48,7 @@ override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
     }
     return hitView
 }
-```
+{% endhighlight %}
 
 > 👆代码中当 hitView 是 collectionView 时，返回 nil， 这个时候会找另一个subview 包含 point；也可以返回其他 subview 来代替自己。
 
@@ -76,9 +76,9 @@ override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
 
 所以我们可以通过如下方式隐藏键盘
 
-```
+{% highlight swift %}
 [[UIApplication sharedApplication] sendAction:@selector(resignFirstResponder) to:nil from:nil forEvent:nil];
-```
+{% endhighlight %}
 
 
 ### 系统事件
@@ -89,10 +89,12 @@ override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
 ## 开始
 
 回归正题，找到我们按钮添加事件的代码：
-```
+
+{% highlight swift %}
  starOne.addTarget(self, action: #selector(clickStar(_:)), for: .touchDown)
  starTwo.addTarget(self, action: #selector(clickStar(_:)), for: .touchDown)
-```
+{% endhighlight %}
+
 扯了那么多，Cell中的按钮不能响应点击事件，说明当我们点击星星的时候，`UIApplication`并没有找到按钮添加的target，也就是`self`(EvaluateView),说明cell中的`evaluateView`并没有正确的显示，才导致按钮的点击没有正常的响应。
 
 于是找到Cell中添加`evaluateView`的地方，发现问题了，设置约束不完整，少了一个底部的😂，添加以后`evaluateView`，正常显示，按钮的点击事件也就正常了。

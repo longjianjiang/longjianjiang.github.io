@@ -18,7 +18,7 @@ comments: true
 下面给出笔者使用ruby实现的答案：
 
 
-```
+{% highlight ruby %}
 def search(s, left, right, idx, len, vars)
   step = 1
   while left - step >= 0 && right + step < s.length
@@ -53,7 +53,7 @@ def longest_palindrome_(s)
 
   return s[idx, len]
 end
-```
+{% endhighlight %}
 
 ### 方法二
 
@@ -108,7 +108,7 @@ p[] = 0 1 0 3 0 3 0
 
 笔者自己理解的大致思路就是这样，下面给出使用ruby实现的答案：
 
-```
+{% highlight ruby %}
 def addPrefix(s)
   result = '^'
   for i in 0...s.length
@@ -151,4 +151,4 @@ def longest_palindrome(s)
 
   return s[((res_idx-1-res_len) / 2), res_len]
 end
-```
+{% endhighlight %}

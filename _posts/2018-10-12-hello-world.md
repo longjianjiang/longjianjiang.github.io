@@ -10,14 +10,14 @@ comments: true
 
 笔者第一个程序就是C语言的Hello World。
 
-```
+{% highlight cpp %}
 #include <stdio.h>
 
 int main(int argc, const char * argv[]) {
     printf("Hello World");
     return 0;
 }
-```
+{% endhighlight %}
 
 上述的Hello World 程序非常简单，在控制台输出 "Hello World"， 下面笔者一步一步分析这个简单的程序。
 
@@ -164,7 +164,7 @@ MH_MAGIC_64  X86_64        ALL LIB64     EXECUTE    15       1216   NOUNDEFS DYL
 
 header的结构体定义如下：
 
-```
+{% highlight cpp %}
 /*
  * The 64-bit mach header appears at the very beginning of object files for
  * 64-bit architectures.
@@ -179,7 +179,7 @@ struct mach_header_64 {
 	uint32_t	flags;		/* flags */
 	uint32_t	reserved;	/* reserved */
 };
-```
+{% endhighlight %}
 
 其中header中的flags表示dyld的加载标志位，flags会影响可执行文件执行的流程。具体取值可以去 `#include <mach-o/loader.h>` 中查看，头文件中有详细的注释。
 所以综上，header中包含一些类型的信息，运行的环境（cpu架构类型），加载命令的信息（加载命令的个数和大小）。
@@ -188,12 +188,12 @@ struct mach_header_64 {
 
 加载命令表示了可执行文件的逻辑结构和内存布局。每个加载命令前面都包含了加载命令的类型和加载命令的的size。
 
-```
+{% highlight cpp %}
 struct load_command {
 	uint32_t cmd;		/* type of load command */
 	uint32_t cmdsize;	/* total size of command in bytes */
 };
-```
+{% endhighlight %}
 
 下面给出我们可执行文件中的所有load commands
 
@@ -263,7 +263,7 @@ Mach-O 文件格式大致就是以上所述。
 
 还是Hello World的例子
 
-```
+{% highlight cpp %}
 static int (*orig_printf)(const char *, ...);
 
 int new_printf(const char * str, ...) {
@@ -277,7 +277,7 @@ int main(int argc, const char * argv[]) {
     printf("Hello World");
     return 0;
 }
-```
+{% endhighlight %}
 
 上述程序输出的是 `Hello World [modified]`, 因为使用了fishhook，动态改变了printf函数。
 下面笔者分析下fishhook 动态改变printf函数的原理。

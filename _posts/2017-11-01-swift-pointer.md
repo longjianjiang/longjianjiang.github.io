@@ -30,9 +30,9 @@ UnsafeRawPointer: 相当于UnsafePointer<Void>, 也就是C语言中的Void *
 
 笔者记得OC中有些方法是通过传入一个NSError指针(二级指针)返回错误的， 也有一些通过指针参数进行传递参数的：
 
-```
+{% highlight objective_c %}
 - (BOOL)writeToURL:(NSURL *)url options:(NSDataWritingOptions)writeOptionsMask error:(NSError **)errorPtr;
-```
+{% endhighlight %}
 
 以上方法Swift中可以通过传入UnsafeMutablePointer<NSError>  error类型即可，方法内部通过给error的pointee 属性赋一个定义好的NSError即可。
 
@@ -40,11 +40,11 @@ UnsafeRawPointer: 相当于UnsafePointer<Void>, 也就是C语言中的Void *
 
 不过这种通过指针传递参数的，Swift中同样的是使用了UnsafeMutable类的指针进行传递的：
 
-```
+{% highlight swift %}
 - (void)popoverPresentationController:(UIPopoverPresentationController *)popoverPresentationController willRepositionPopoverToRect:(inout CGRect *)rect inView:(inout UIView  * __nonnull * __nonnull)view;
 
 optional public func popoverPresentationController(_ popoverPresentationController: UIPopoverPresentationController, willRepositionPopoverTo rect: UnsafeMutablePointer<CGRect>, in view: AutoreleasingUnsafeMutablePointer<UIView>)
-```
+{% endhighlight %}
 
 > AutoreleasingUnsafeMutablePointer 这种类型的指针不引用对象，只存储对应的改变给指针的值
 

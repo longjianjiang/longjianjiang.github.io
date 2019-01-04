@@ -22,14 +22,14 @@ comments: true
 
 所以用上述两个位运算符即可实现加法，代码如下：
 
-```
+{% highlight cpp %}
 int add(int a, int b) {
   if (b == 0) return a;
   sum = a ^ b;
   carry = (a & b) << 1;
   return add(sum, carry);
 }
-```
+{% endhighlight %}
 
 ### 减法
 
@@ -39,11 +39,11 @@ int add(int a, int b) {
 
 所以减法实现如下：
 
-```
+{% highlight cpp %}
 int subtract(int a, int b) {
   return add(a, add(~b, 1));
 }
-```
+{% endhighlight %}
 
 ### 除法
 
@@ -51,7 +51,7 @@ int subtract(int a, int b) {
 
 所以除法实现如下：
 
-```
+{% highlight cpp %}
 int divide(int a, int b) {
   // 先取两数的绝对值，计算出结果，最后再判断奇偶性
 
@@ -72,7 +72,7 @@ int divide(int a, int b) {
 
   return quotient;
 }
-```
+{% endhighlight %}
 
 不过上述实现除法的方法，存在效率问题，如果除数很大，被除数很小，会执行很多次。
 
@@ -80,7 +80,7 @@ int divide(int a, int b) {
 
 改进后的除法实现如下：
 
-```
+{% highlight cpp %}
 int divide(int a, int b) {
   // 先取两数的绝对值，计算出结果，最后再判断奇偶性
 
@@ -104,5 +104,5 @@ int divide(int a, int b) {
 
   return result;
 }
-```
+{% endhighlight %}
 

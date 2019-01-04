@@ -12,7 +12,7 @@ comments: true
 
 OC中的对象都是 `objc_object` 结构体，OC中的类都是 `objc_class` 结构体，`objc_class` 又继承自 `objc_object`，所以OC中大家都是对象。
 
-```
+{% highlight cpp %}
 typedef struct objc_class *Class;
 typedef struct objc_object *id;
 
@@ -27,7 +27,7 @@ struct objc_class : objc_object {
     cache_t cache;             // formerly cache pointer and vtable
     class_data_bits_t bits;    // class_rw_t * plus custom rr/alloc flags
 };
-```
+{% endhighlight %}
 
 根据上面代码我们知道了 `id` 和 `Class` 指的是什么，也看到了两个结构体中所包含的属性。
 
@@ -49,7 +49,7 @@ SUPPORT_NONPOINTER_ISA: 这个宏就是根据上面两个宏来得到的，当�
 
 👇是 isa_t 声明，以及结构体各个成员的作用：
 
-```
+{% highlight cpp %}
 union isa_t {
     isa_t() { }
     isa_t(uintptr_t value) : bits(value) { }
@@ -71,7 +71,7 @@ union isa_t {
     };
 #endif
 };
-```
+{% endhighlight %}
 
 > isa_t 根据平台的不同结构体中的成员所占的位数不一样，👆摘录了 x86 的实现；
 
@@ -83,10 +83,10 @@ union isa_t {
 
 正因为这样， `objc_object` 中有以下方法来初始化 isa.
 
-```
+{% highlight cpp %}
 void initClassIsa(Class cls /*nonpointer=maybe*/);
 void initInstanceIsa(Class cls, bool hasCxxDtor);
-```
+{% endhighlight %}
 
 上面两个初始化 isa 的方法，内部都会调用 `objc_object::initIsa(Class cls, bool nonpointer, bool hasCxxDtor) ` 进行初始化。
 
@@ -100,7 +100,7 @@ void initInstanceIsa(Class cls, bool hasCxxDtor);
 
 这个参数用来说明当前对象中有没有C++析构函数，为了兼容 .mm，如果是 .mm 需要做一些额外的析构工作。
 
-```
+{% highlight cpp %}
 define ISA_MAGIC_VALUE 0x001d800000000001ULL
 
 inline void 
@@ -119,7 +119,7 @@ objc_object::initIsa(Class cls, bool nonpointer, bool hasCxxDtor)
         isa = newisa;
     }
 }
-```
+{% endhighlight %}
 
 > 上述代码去除了一些 assert 和注释，同时假定nonpointer 为 true。
 
@@ -145,7 +145,7 @@ objc_object::initIsa(Class cls, bool nonpointer, bool hasCxxDtor)
 
 - ISA()
 
-```
+{% highlight cpp %}
 define ISA_MASK        0x00007ffffffffff8ULL
 
 inline Class 
@@ -153,7 +153,7 @@ objc_object::ISA()
 {
     return (Class)(isa.bits & ISA_MASK);
 }
-```
+{% endhighlight %}
 
 > 上述代码去除了一些 assert 和 注释。
 
@@ -165,7 +165,7 @@ objc_object::ISA()
 
 下面笔者来实际证实下 isa_t 存储 Class 的信息，以及 NSObject 的 `class` 方法中返回的值的一致性。
 
-```
+{% highlight objective_c %}
 + (Class)class {
     return self;
 }
@@ -178,11 +178,11 @@ Class object_getClass(id obj) {
     if (obj) return obj->getIsa();
     else return Nil;
 }
-```
+{% endhighlight %}
 
 我们看到对象的 `class` 方法其实就是调用了 `objc_objct` 中取 isa 的方法，因为isa 中存储了 cls 的信息。
 
-```
+{% highlight objective_c %}
 Person *p = [[Person alloc] init];
 NSLog(@"Person instance %p", [p class]);
 NSLog(@"Person class %p",[Person class]);
@@ -191,7 +191,7 @@ NSLog(@"NSObject class %p",[NSObject class]);
 2018-12-24 16:22:01.054257+0800 debug-objc[4399:411284] Person instance 0x1000011e8
 2018-12-24 16:22:01.054292+0800 debug-objc[4399:411284] Person class 0x1000011e8
 2018-12-24 16:22:01.054317+0800 debug-objc[4399:411284] NSObject class 0x100b14140
-```
+{% endhighlight %}
 
 我们在 `_class_createInstanceFromZone` 方法末尾打断点：
 
@@ -219,16 +219,16 @@ $1 是存储 Person 类地址的地方，我们知道 nonpointer 类型 isa 中�
 
 最后我们来看个之前很火的runtime 测试题：
 
-```
+{% highlight objective_c %}
 BOOL res1 = [[NSObject class] isKindOfClass:[NSObject class]];
 BOOL res2 = [[NSObject class] isMemberOfClass:[NSObject class]];
 BOOL res3 = [[Person class] isKindOfClass:[Person class]];
 BOOL res4 = [[Person class] isMemberOfClass:[Person class]];
 
 NSLog(@"%d %d %d %d", res1, res2, res3, res4);
-```
+{% endhighlight %}
 
-```
+{% highlight objective_c %}
 + (BOOL)isMemberOfClass:(Class)cls {
     return object_getClass((id)self) == cls;
 }
@@ -250,7 +250,7 @@ NSLog(@"%d %d %d %d", res1, res2, res3, res4);
     }
     return NO;
 }
-```
+{% endhighlight %}
 
 其实根据源代码，isKindOfClass & isMemberOfClass 两个方法内部还是调用了 `objc_objct` 中取 isa 的方法，对于类取isa 得到的是 metaClass，而metaClass 和 class 是两个不同的对象。
 

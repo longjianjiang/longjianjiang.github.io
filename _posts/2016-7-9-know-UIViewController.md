@@ -17,21 +17,22 @@ UIViewController在开发中每天都要打交道的，通常我们用它来管�
 
 - new
 
-```
+{% highlight objective_c %}
 UIViewController *vc = [UIViewController new];
-```
+{% endhighlight %}
+
 - 从Storyboard中创建
 
-```
-    UIStoryboard *sb = [UIStoryboard storyboardWithName:@"xxx" bundle:nil];
-    UIViewController *vc = [sb instantiateInitialViewController];
-```
+{% highlight objective_c %}
+UIStoryboard *sb = [UIStoryboard storyboardWithName:@"xxx" bundle:nil];
+UIViewController *vc = [sb instantiateInitialViewController];
+{% endhighlight %}
 
 - 从Xib中创建
 
-```
-    UIViewController *vc = [[UIViewController alloc] initWithNibName:@"xxx" bundle:nil];
-```
+{% highlight objective_c %}
+UIViewController *vc = [[UIViewController alloc] initWithNibName:@"xxx" bundle:nil];
+{% endhighlight %}
 
 ## 创建UIViewController的View
 我们知道每个控制器都有一个页面也就是常写的`self.view`。先看一张草图：

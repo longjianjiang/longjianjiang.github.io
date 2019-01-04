@@ -12,7 +12,7 @@ comments: true
 
 在阅读MMKV源代码中，读到计算一个方法用于计算int型value实际占的位数，代码如下：
 
-```
+{% highlight objective_c %}
 int32_t pbRawVarint32Size(int32_t value) {
 	if ((value & (0xffffffff << 7)) == 0)
 		return 1;
@@ -24,7 +24,7 @@ int32_t pbRawVarint32Size(int32_t value) {
 		return 4;
 	return 5;
 }
-```
+{% endhighlight %}
 
 第一次看这个方法其实我能理解第一次为什么是左移动7位，因为最高位是符号位。但是再在当value占16位的时候，为什么左移14位，而不是15位呢，符号位只有一位啊。
 

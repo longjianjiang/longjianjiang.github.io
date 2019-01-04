@@ -33,21 +33,19 @@ comments: true
 
 代码如下所示：
 
-```
+{% highlight objective_c %}
  NSMutableString *mutableString = [NSMutableString stringWithString:model.person_name];
  CFStringTransform((CFMutableStringRef)mutableString, NULL, kCFStringTransformToLatin, false);
  CFStringTransform((CFMutableStringRef)mutableString, NULL, kCFStringTransformStripDiacritics, false);
  mutableString =(NSMutableString *)[mutableString stringByReplacingOccurrencesOfString:@" " withString:@""];
- 
-```
+{% endhighlight %}
 
 为此我在原先数据模型中新增一个字段用来保存汉字转拼音的值，接着按这个字段将模型数组的数据进行排序即可。
 
-```
+{% highlight objective_c %}
   NSArray *sortDescriptors = [NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"person_name_pinyin" ascending:YES]];//person_name_pinyin为新增的保存拼音的字段
   [unSortedModelArray sortUsingDescriptors:sortDescriptors];
-
-```
+{% endhighlight %}
 
 #### 最后
 完成，拼音排序。

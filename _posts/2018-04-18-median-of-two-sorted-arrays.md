@@ -41,7 +41,7 @@ comments: true
 下面是笔者使用ruby解答的答案:
 
 
-```
+{% highlight ruby %}
 def find_kth(nums1, nums2, k)
   m = nums1.length
   n = nums2.length
@@ -67,4 +67,4 @@ def find_median_sorted_arrays(nums1, nums2)
 
   return ( find_kth(nums1, nums2, m) + find_kth(nums1, nums2, n) ) / 2.0
 end
-```
+{% endhighlight %}

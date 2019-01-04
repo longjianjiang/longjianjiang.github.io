@@ -17,24 +17,24 @@ comments: true
 ### Modal 动画
 
 
-```
- present(modalVC, animated: true, completion: nil)
-```
+{% highlight swift %}
+present(modalVC, animated: true, completion: nil)
+{% endhighlight %}
 
 
 我们经常会用上述方式显示一个控制器，默认的效果是从下往上的一个动画，但是系统允许我们进行自定义这个呈现的效果，步骤如下：
 
 1. 遵守`UIViewControllerTransitioningDelegate`协议
 
-```
-        let modalVC = ModalViewController()
-        modalVC.transitioningDelegate = self
-        present(modalVC, animated: true, completion: nil)
-```
+{% highlight swift %}
+let modalVC = ModalViewController()
+modalVC.transitioningDelegate = self
+present(modalVC, animated: true, completion: nil)
+{% endhighlight %}
 
 2. 实现两个协议的方法
 
-```
+{% highlight swift %}
 extension ViewController: UIViewControllerTransitioningDelegate {
     func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
         return transition
@@ -44,7 +44,7 @@ extension ViewController: UIViewControllerTransitioningDelegate {
         return transition
     }
 }
-```
+{% endhighlight %}
 
 这里如果返回`nil`，那么UIKit还是会用系统默认的动画效果进行呈现。
 
@@ -55,7 +55,7 @@ extension ViewController: UIViewControllerTransitioningDelegate {
 
 下面给出一个渐变的Modal和Dismiss动画栗子：
 
-```
+{% highlight swift %}
  func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
         return animationDuration
     }
@@ -73,7 +73,7 @@ extension ViewController: UIViewControllerTransitioningDelegate {
             transitionContext.completeTransition(true)
         })
     }
-```
+{% endhighlight %}
 
 
 ![屏幕快照 2017-10-13 10.21.27.png]({{site.url}}/assets/images/blog/animation_third_1.png)
@@ -83,23 +83,28 @@ extension ViewController: UIViewControllerTransitioningDelegate {
 [VCModalAnimationDemo](https://github.com/longjianjiang/BlogDemo/tree/master/VCModalAnimationDemo)只是简单的一个效果，实际需要中，我们完全可以做出更加酷炫的转场动画。
 
 ### Push/Pop 动画
-```
+
+{% highlight swift %}
 navigationController?.pushViewController(DetailViewController(), animated: true)
-```
+{% endhighlight %}
+
 导航控制器进行Push操作的时候，默认的UIKit会提供一个从右往左的动画，同样的UIKit也允许我们进行自定义这个呈现效果，步骤如下：
 
 1. 遵守`UINavigationControllerDelegate`协议
-```
+
+{% highlight swift %}
  navigationController?.delegate = self
-```
+{% endhighlight %}
 
 2. 实现协议方法
-```
+
+{% highlight swift %}
  func navigationController(_ navigationController: UINavigationController, animationControllerFor operation: UINavigationControllerOperation, from fromVC: UIViewController, to toVC: UIViewController) -> UIViewControllerAnimatedTransitioning? {
         transition.operation = operation
         return transition
     }
-```
+{% endhighlight %}
+
 这里如果返回nil，那么UIKit还是会用系统默认的动画效果进行呈现。
 
 3. 实现 UIViewControllerAnimatedTransitioning两个方法,这里其实和Modal动画是一样的，同样的是协议中两个必须要实现的方法。
@@ -117,16 +122,17 @@ navigationController?.pushViewController(DetailViewController(), animated: true)
 
 1. 实现`UINavigationControllerDelegate`协议方法
 
-```
+{% highlight swift %}
  func navigationController(_ navigationController: UINavigationController, interactionControllerFor animationController: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
         return transition.transitionInProgress ? transition : nil
     }
-```
+{% endhighlight %}
+
 默认返回nil则不能控制动画；
 
 上述代码中返回的`transition`对象是`UIPercentDrivenInteractiveTransition`的子类，该类遵守了`UIViewControllerInteractiveTransitioning`协议，使用该类我们不需要进行每一帧每一帧的控制动画，只需要传入根据手势移动的位移即可，该类会自动显示。
 
-```
+{% highlight swift %}
  @objc func handlePanGesture(recognizer: UIPanGestureRecognizer) {
         let translation = recognizer.translation(in: recognizer.view?.superview) // nivigation's view
         var progress: CGFloat = abs(translation.x / 200.0)
@@ -149,7 +155,8 @@ navigationController?.pushViewController(DetailViewController(), animated: true)
             break
         }
     }
-```
+{% endhighlight %}
+
 完整的Demo下载地址[VCInteractiveNavigationAnimationDemo](https://github.com/longjianjiang/BlogDemo/tree/master/VCInteractiveNavigationAnimation)
 
 ## 最后

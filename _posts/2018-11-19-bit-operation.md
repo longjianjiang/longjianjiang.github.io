@@ -16,7 +16,7 @@ comments: true
 
 所以我们每次可以分别计算 a 与 b 的进位与和，直到进位为0，此时我们也就得出了和。
 
-```
+{% highlight cpp %}
 int getSum(int a, int b) {
     while (b) {
         int left = (a & b) << 1; 
@@ -25,7 +25,8 @@ int getSum(int a, int b) {
     }
     return a;
 }
-```
+{% endhighlight %}
+
 > (a & b) << 1 找到需要进位的位将其进位，也就是左移一位，也就是往高位加1； 其实我们进行十进制计算也是这样的，当个位需要进位时，会将十位加1。
 
 比如现在需要计算 3 + 1, 也就是0011 + 0001。

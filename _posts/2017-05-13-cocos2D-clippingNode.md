@@ -16,9 +16,11 @@ comments: true
 
 			
 ### 开始
+
 下面就让我们来利用`ClippingNode`来作出一个类似上面的这种效果！
 代码参考如下所示：
-```
+
+{% highlight lua %}
 function init_element()
     self._layer = cc.LayerColor:create(cc.c3b(0,255,0))
     local scale = uiex.ui_fit:min_scale()
@@ -47,13 +49,15 @@ function init_element()
 
     clip:addChild(logo)
 end
-```
+{% endhighlight %}
 
 ### 接着
+
 其实这个动画的原理如下：
 >想象有一个洞，然后有一块内容不断的移动同时经过这个洞，这样也就有了上述的动画效果。
 
 上述代码中有两个主要的Node，一个是我们利用`stencil`创建的`ClippingNode`,这个就是一个洞；然后我们创建了`logo`,这就是内容了；下面对`logo`进行`runAction`,也就是相当于不断的移动内容；最后需要将内容作为子节点加入到洞中，这样动画就完成了。
 
 ### 尾巴
+
 Lua写Cocos真心蛋疼，尤其是我这样的初学者😂

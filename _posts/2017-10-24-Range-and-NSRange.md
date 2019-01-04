@@ -16,51 +16,51 @@ comments: true
 
 NSRange OC中用来表示范围的，笔者第一次接触到是在截取字符串中：
 
-```
+{% highlight swift %}
  let nsStr: NSString = "com.longjianjiang"
  let nsNameRange = nsStr.range(of: "com")
-```
+{% endhighlight %}
 
 上述结果为{0, 3}， 0为截取字符串的位置，3为截取字符串的长度，信息很直观；
 
 但是笔者接触到Swift后，第一次使用的Swift中的Range要算是for循环中：
 
-```
+{% highlight swift %}
 for i in 0..<5 {
      print(i)
  }
-```
+{% endhighlight %}
 
 而且Swift中把很多之前OC中用NSRange来表示范围的都替换成了新的Range类型，比如同样的字符串截取：
 
-```
+{% highlight swift %}
  let str = "com😂.longjianjiang"
  let nameRange = str.range(of: "com😂")
-```
+{% endhighlight %}
 
 上述结果为Index(offset: 0)..<Index(offset: 20), 是一个开区间，上述offset指的的是作为Unicode的字符偏移；
 
 > 用NSRange来进行截取字符串时，如果字符串中含有emoji，此时就会少截，因为emoji比普通字符多占一个
 
-```
-        let myNSRange = NSRange(location: 3, length: 3)
-        
-        let myNSString: NSString = "longjianjiang"
-        print(myNSString.substring(with: myNSRange)) // "gji"
-        
-        let myNSString2: NSString = "com😂.longjianjiang"
-        print(myNSString2.substring(with: myNSRange)) // "😂."  少了 l 
-```
+{% highlight swift %}
+  let myNSRange = NSRange(location: 3, length: 3)
+  
+  let myNSString: NSString = "longjianjiang"
+  print(myNSString.substring(with: myNSRange)) // "gji"
+  
+  let myNSString2: NSString = "com😂.longjianjiang"
+  print(myNSString2.substring(with: myNSRange)) // "😂."  少了 l 
+{% endhighlight %}
 
 
 > Swift4中的String类的subString方法标记为过时，建议使用切片下标, 看来很推荐使用Range类型
 
 但是在处理富文本的时候，方法中的范围参数依然是之前的NSRange（不知道未来会不会也替换为Range）所以这时就涉及了如何两个不同范围类型的转换,不过很简单，系统有提供方法；
 
-```
+{% highlight swift %}
   let nsRange = NSRange(nameRange!, in: str) // str 为nameRange所在的字符串
   let range = Range.init(nsRange)
-```
+{% endhighlight %}
 
 对比两者，其实我们可以发现新的Range类型所表达的东西比NSRange更多，用途也更加广泛，不仅仅可以表示范围，而且也可以用在循环中，所以这就引出了Range的不同类型：
 

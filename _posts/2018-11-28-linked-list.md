@@ -14,7 +14,7 @@ comments: true
 
 链表是一种离散型的存储数据结构，通过指针将节点连接起来。 下面给出一个自己实现的单链表，也是Leetcode上707 design linked list的参考答案。
 
-```
+{% highlight cpp %}
 class MyLinkedList {
 public:
     /** Initialize your data structure here. */
@@ -89,7 +89,7 @@ private:
     Node *head, *tail;
     int size;
 };
-```
+{% endhighlight %}
 
 其实我们看的出来对链表的操作主要集中在对next节点的操作，因为不论是插入还是查询都需要next节点进行寻找。    
 
@@ -117,7 +117,7 @@ private:
 
 其实当我们想到了方法后，写出来其实只需要注意节点的操作就可以，下面是笔者的答案：
 
-```
+{% highlight cpp %}
 class Solution {
 public:
     ListNode* removeNthFromEnd(ListNode* head, int n) {
@@ -148,7 +148,7 @@ public:
         return head;
     }
 };
-```
+{% endhighlight %}
 
 上述代码需要注意两个地方:
 
@@ -173,7 +173,7 @@ public:
 
 假设链表为1-2-3-4-5，迭代的方式就是遍历链表将其每次转为1-NULL, 2-1-NULL, ... , 5-4-3-2-1-NULL。也就是每次遍历前面增加一个原链表后面的节点，最后原链表中最后的节点就到了新链表的最前面。
 
-```
+{% highlight cpp %}
 ListNode* reverseList(ListNode* head) {
     ListNode *left = head;
     ListNode *right = NULL;
@@ -185,11 +185,11 @@ ListNode* reverseList(ListNode* head) {
     }
     return right;
 }
-```
+{% endhighlight %}
 
 递归的方式则更加简单，假设链表为1-2-3-4-5，首先我们将链表进行拆分为两部分，一部分为首节点1，另一部分为剩余节点2-3-4-5，对剩余节点进行递归，递归后的结果应当是反转好的结果，也就是5-4-3-2, 这个时候让2这个节点的next指向第一部分的节点，此时反转结束。
 
-```
+{% highlight cpp %}
 ListNode* reverseList(ListNode* head) {
     if (head == NULL || head->next == NULL) { return head; }
     ListNode *node = head->next;
@@ -198,7 +198,7 @@ ListNode* reverseList(ListNode* head) {
     node->next = head;
     return newHead;
 }
-```
+{% endhighlight %}
 
 ### 求链表的中间节点
 
@@ -208,7 +208,7 @@ ListNode* reverseList(ListNode* head) {
 
 使用快慢指针，到快指针指向NULL(偶数）或者指向尾节点(奇数) 时，慢指针指向的就是中间节点了。
 
-```
+{% highlight cpp %}
 ListNode* middleNode(ListNode* head) {
     ListNode *slow = head, *fast = head;
     while(fast && fast->next) {
@@ -217,7 +217,7 @@ ListNode* middleNode(ListNode* head) {
     }
     return slow;
 }
-```
+{% endhighlight %}
 
 ### 判断链表是否成环
 

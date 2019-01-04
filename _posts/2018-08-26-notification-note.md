@@ -22,16 +22,15 @@ iOS10开始，苹果重新封装了一个UserNotifications的framework，所以�
 
 ## iOS10 之前：
 
-```
+{% highlight objective_c %}
 UIUserNotificationType notificationTypes = UIUserNotificationTypeBadge | UIUserNotificationTypeSound | UIUserNotificationTypeAlert;
 UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTypes:notificationTypes categories:nil];
 [application registerUserNotificationSettings:settings];
-
-```
+{% endhighlight %}
 
 注意如果App没有注册远程通知，也就是不进行下面的第二步，此时想要获取用户是否允许通知，需要实现👇方法
 
-```
+{% highlight objective_c %}
 - (void)application:(UIApplication *)application didRegisterUserNotificationSettings:(UIUserNotificationSettings *)notificationSettings {
   if (notificationSettings.types == UIUserNotificationTypeNone) {
     NSLog(@"user deny notification");
@@ -39,12 +38,12 @@ UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTy
     NSLog(@"user allow notification");
   }
 }
-```
+{% endhighlight %}
 
 
 ## iOS10 之后：
 
-```
+{% highlight objective_c %}
 UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
         [center requestAuthorizationWithOptions:UNAuthorizationOptionAlert | UNAuthorizationOptionBadge | UNAuthorizationOptionSound completionHandler:^(BOOL granted, NSError * _Nullable error) {
             if (granted) {
@@ -52,26 +51,27 @@ UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotification
                 NSLog(@"User denied notification.");
             }
         }];
-```
+{% endhighlight %}
 
 2> 注册远程通知
 上一步只是开启了App的通知权限，不过因为我们需要远程推送，还需要调用下面方法来注册APNs服务：
 
-```
+{% highlight objective_c %}
 [application registerForRemoteNotifications];
-```
+{% endhighlight %}
 
 调用该方法会回调👇两个方法中其中一个：
 
 
-```
+{% highlight objective_c %}
 - (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
-```
+{% endhighlight %}
+
 注册远程通知成功，获得了deviceToken，将其上报给第三方SDK。
 
-```
+{% highlight objective_c %}
 - (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
-```
+{% endhighlight %}
 
 注册远程通知失败，一般模拟器上会失败。
 
@@ -83,15 +83,15 @@ UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotification
 
 ## iOS10 之前：
 
-```
+{% highlight objective_c %}
 - (void)application:(UIApplication*)application didReceiveRemoteNotification:(NSDictionary*)userInfo
-```
+{% endhighlight %}
 
 当用户收到一个远程通知会走该方法
 
-```
+{% highlight objective_c %}
 - (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification 
-```
+{% endhighlight %}
 
 当用户收到一个本地通知会走该方法
 
@@ -100,23 +100,24 @@ UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotification
 
 新的UserNotifications框架统一了本地通知和远程通知的入口，两个回调方法都在 `UNUserNotificationCenterDelegate` 中。
 
-```
+{% highlight objective_c %}
 -(void)userNotificationCenter:(UNUserNotificationCenter *)center willPresentNotification:(UNNotification *)notification withCompletionHandler:(void (^)(UNNotificationPresentationOptions))completionHandler
-``` 
+{% endhighlight %}
 
 当用户在前台收到一个通知，我们可以自定义是否要显示该通知，以及以什么样的方式显示，当不执行completionHandler则不会显示通知，执行completionHandler根据传入的UNNotificationPresentationOptions，以什么方式进行通知。
 
-```
+{% highlight objective_c %}
 - (void)userNotificationCenter:(UNUserNotificationCenter *)center didReceiveNotificationResponse:(UNNotificationResponse *)response withCompletionHandler:(void (^)(void))completionHandler
-```
+{% endhighlight %}
 
 该方法当用户点击通知，是我们处理用户对一条通知操作的地方。
 
 2> 静默通知
 
-```
+{% highlight objective_c %}
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler 
-```
+{% endhighlight %}
+
 静默通知是iOS7开始新加的一种类型的通知，属于特殊的远程推送通知，其目的不是为了弹出通知框提醒用户，而是用于后台运行的App和服务端同步数据。
 
 推送数据格式, aps 字典中需添加 ` "content-available" : 1 ` ，用来标记是静默通知。
@@ -127,7 +128,7 @@ UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotification
 
 iOS 10 之后我们可以注册通知Category，这样可以根据用户对通知的不同action进行处理，注册通知代码如下：
 
-```
+{% highlight objective_c %}
 - (void)createCustomNotificationCategory {
   // 自定义`action1`和`action2`
   UNNotificationAction *action1 = [UNNotificationAction actionWithIdentifier:@"action1" title:@"test1" options: UNNotificationActionOptionNone];
@@ -140,11 +141,11 @@ iOS 10 之后我们可以注册通知Category，这样可以根据用户对通�
   // 注册category到通知中心
   [[UNUserNotificationCenter currentNotificationCenter] setNotificationCategories:[NSSet setWithObjects:category, nil]];
 }
-```
+{% endhighlight %}
 
 注册完以后当用户点击通知就可以根据不同的action进行处理，处理代码如下：
 
-```
+{% highlight objective_c %}
 - (void)userNotificationCenter:(UNUserNotificationCenter *)center didReceiveNotificationResponse:(UNNotificationResponse *)response withCompletionHandler:(void (^)(void))completionHandler {
     NSString *userAction = response.actionIdentifier;
     // ① 点击通知打开
@@ -171,8 +172,7 @@ iOS 10 之后我们可以注册通知Category，这样可以根据用户对通�
   
     completionHandler();
 }
-
-```
+{% endhighlight %}
 
 
 # 通知Service Extension
@@ -188,10 +188,10 @@ iOS 10 之后我们可以注册通知Category，这样可以根据用户对通�
 
 因为要存储通知消息到本地，因为Extension与App是独立的，所以需要建立一个App Group来将存储内容放到一个公共的区域，这样Extension中存储的地方，和App读取的地方是同一个，下面是系统提供的一个公共区域用来同步数据：
 
-```
+{% highlight objective_c %}
 NSString *appGroupName = @"";
 NSURL *containerURL = [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:appGroupName];
-```
+{% endhighlight %}
 
 
 # 最后

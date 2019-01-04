@@ -19,7 +19,7 @@ comments: true
 
 map 顾名思义， 将Observable中的元素放入map的block中处理，返回一个新的Observable。
 
-```
+{% highlight swift %}
 let signal = SignalProducer<Int, NoError> { (innerObserver, _) in
     innerObserver.send(value: 5)
     innerObserver.send(value: 7)
@@ -28,7 +28,7 @@ let signal = SignalProducer<Int, NoError> { (innerObserver, _) in
 
 signal.map { $0 * 10}
    .startWithValues { print("map valu \($0)") }
-```
+{% endhighlight %}
 
 转换图如下所示：
 
@@ -48,7 +48,7 @@ $0 * 10
 
 > `mapWithIndex` 在新版本中的RxSwift中提示让我们使用 enumerated().map() 替换，效果还是一样的
 
-```
+{% highlight swift %}
  Observable<Int>.of(1, 2, 3, 4, 5)
             .enumerated()
             .map {index, number in
@@ -56,7 +56,7 @@ $0 * 10
             }
             .subscribe(onNext: { print($0)})
             .disposed(by: bag)
-```
+{% endhighlight %}
 
 转换图如下所示：
 
@@ -72,12 +72,12 @@ number % 2 == 1 ? number * 2 : number
 
 此方法可以将Observable元素转成用一个数组包装
 
-```
+{% highlight swift %}
 Observable<Int>.of(5, 7)
     .toArray()
     .subscribe(onNext: { print($0 )})
     .disposed(by: bag)
-```
+{% endhighlight %}
 
 转换图如下所示：
 
