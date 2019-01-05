@@ -241,5 +241,31 @@ static Class realizeClass(Class cls) {
 
 经过前面的处理，到了一个关键的步骤就是 `methodizeClass`, 这个方法内部会更新cls 的 `class_rw_t` 方法列表、协议列表、属性列表。
 
+{% highlight cpp %}
+static void methodizeClass(Class cls) {
+    bool isMeta = cls->isMetaClass();
+    auto rw = cls->data();
+    auto ro = rw->ro;
+
+    method_list_t *list = ro->baseMethods();
+    if (list) {
+        prepareMethodLists(cls, &list, 1, YES, isBundleClass(cls));
+        rw->methods.attachLists(&list, 1);
+    }
+    property_list_t *proplist = ro->baseProperties;
+    if (proplist) {
+        rw->properties.attachLists(&proplist, 1);
+    }
+
+    protocol_list_t *protolist = ro->baseProtocols;
+    if (protolist) {
+        rw->protocols.attachLists(&protolist, 1);
+    }
+
+    ...
+}
+{% endhighlight %}
+
+可以看到这里通过 cls 获得 rw，ro，将ro 里编译期存在的方法，协议，属性加到 rw 中，使用的就是之前说过的 `list_array_tt` 的`attachLists` 方法，具体实现可以参考[class_data_bits](http://www.longjianjiang.com/runtime-source-code-class-data-bits/)。
 
 
