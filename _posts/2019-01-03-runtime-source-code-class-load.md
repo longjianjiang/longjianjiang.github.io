@@ -241,7 +241,7 @@ static Class realizeClass(Class cls) {
 
 经过前面的处理，到了一个关键的步骤就是 `methodizeClass`, 这个方法内部会更新cls 的 `class_rw_t` 方法列表、协议列表、属性列表。
 
-```cpp
+{% highlight cpp %}
 static void methodizeClass(Class cls) {
     bool isMeta = cls->isMetaClass();
     auto rw = cls->data();
@@ -264,8 +264,107 @@ static void methodizeClass(Class cls) {
 
     ...
 }
-```
+{% endhighlight %}
 
 可以看到这里通过 cls 获得 rw，ro，将ro 里编译期存在的方法，协议，属性加到 rw 中，使用的就是之前说过的 `list_array_tt` 的`attachLists` 方法，具体实现可以参考[class_data_bits](http://www.longjianjiang.com/runtime-source-code-class-data-bits/)。
 
+{% highlight cpp %}
+static NXMapTable *namedSelectors;
 
+static SEL __sel_registerName(const char *name, bool shouldLock, bool copy) {
+    SEL result = 0;
+
+    if (!name) return (SEL)0;
+
+    result = search_builtins(name);
+    if (result) return result;
+    
+    if (namedSelectors) {
+        result = (SEL)NXMapGet(namedSelectors, name);
+    }
+    if (result) return result;
+
+    if (!namedSelectors) {
+        namedSelectors = NXCreateMapTable(NXStrValueMapPrototype, 
+                                          (unsigned)SelrefCount);
+    }
+    if (!result) {
+        result = sel_alloc(name, copy);
+        NXMapInsert(namedSelectors, sel_getName(result), result);
+    }
+
+    return result;
+}
+
+SEL sel_registerNameNoLock(const char *name, bool copy) {
+    return __sel_registerName(name, 0, copy);  // NO lock, maybe copy
+}
+
+static void 
+fixupMethodList(method_list_t *mlist, bool bundleCopy, bool sort) {
+    assert(!mlist->isFixedUp());
+    {
+        for (auto& meth : *mlist) {
+            const char *name = sel_cname(meth.name);
+            meth.name = sel_registerNameNoLock(name, bundleCopy);
+        }
+    }
+
+    if (sort) {
+        method_t::SortBySELAddress sorter;
+        std::stable_sort(mlist->begin(), mlist->end(), sorter);
+    }
+    
+    mlist->setFixedUp();
+}
+
+static void 
+prepareMethodLists(Class cls, method_list_t **addedLists, int addedCount, 
+                   bool baseMethods, bool methodsFromBundle) {
+    if (addedCount == 0) return;
+
+    if (baseMethods) {
+        assert(!scanForCustomRR  &&  !scanForCustomAWZ);
+    }
+
+    for (int i = 0; i < addedCount; i++) {
+        method_list_t *mlist = addedLists[i];
+        assert(mlist);
+
+        if (!mlist->isFixedUp()) {
+            fixupMethodList(mlist, methodsFromBundle, true/*sort*/);
+        }
+    }
+}
+{% endhighlight %}
+
+> prepareMethodLists 方法中省略了关于 内存管理方法 和 allocWithZone 方法的设置；
+
+不过在添加方法到 rw 中时，多了一个 prepare 的步骤。这个方法主要是调用 `fixupMethodList`, 这个 fixup 方法主要将方法的 SEL 注册到一个全局的 `NXMapTable` 中，完成后标记 `method_list_t` fixup 完成。
+
+{% highlight cpp %}
+static Class realizeClass(Class cls) {
+    ...
+
+    // Root classes get bonus method implementations if they don't have 
+    // them already. These apply before category replacements.
+    if (cls->isRootMetaclass()) {
+        // root metaclass
+        addMethod(cls, SEL_initialize, (IMP)&objc_noop_imp, "", NO);
+    }
+
+    // Attach categories.
+    category_list *cats = unattachedCategoriesForClass(cls, true /*realizing*/);
+    attachCategories(cls, cats, false /*don't flush caches*/);
+    
+    if (cats) free(cats);
+
+    ...
+}
+{% endhighlight %}
+
+这里首先判断当前 cls 是不是 rootMetaClass，也就是NSObject 的 metaClass，如果是给这个类增加了一个方法，`addMethod` 的具体实现这里不展开。
+
+接着会尝试更新类的协议列表，具体获取和添加的过程具体实现这里不展开。
+
+至此，第一次初始化类的工作全部完成。
