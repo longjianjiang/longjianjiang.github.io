@@ -56,10 +56,11 @@ UIViewController *vc = [[UIViewController alloc] initWithNibName:@"xxx" bundle:n
 ## UIViewController层级关系
 - 单控制器
 根控制器决定了这个控制器的View是否可以被显示，此时只有一个控制器。
-```
+
+{% highlight objective_c %}
 LJOneViewController *oneVC = [LJOneViewController new];
 self.window.rootViewController = oneVC;
-```
+{% endhighlight %}
 
 - 多控制器
  - 显然实际肯定不止一个控制器，比如最常见的`UINavigationController`是一种多控制器的组合，所以它显示的内容由子控制器的View和导航栏（有时还有工具条）组成。此时导航控制器的View始终在在Window的最上层。

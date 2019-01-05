@@ -93,7 +93,7 @@ UIView.transition(with: animationContainerView,
 .transitionCrossDissolve
 .transitionFlipFromTop
 .transitionFlipFromBottom
-{% endhighlight %}
+```
 
 当我们想替换view时，可以使用下面的方法
 
