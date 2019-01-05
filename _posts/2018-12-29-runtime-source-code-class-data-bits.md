@@ -141,7 +141,7 @@ struct entsize_list_tt {
 
 下面我们来看 `class_rw_t` 结构体同样存在关于方法，属性，协议的属性，他们的类型都继承自 `list_array_tt`。类刚初始化的时候，这些属性的值都是空。
 
-{% highlight cpp %}
+```cpp
 template <typename Element, typename List>
 class list_array_tt {
     struct array_t {
@@ -208,7 +208,7 @@ public:
         }
      }
 };
-{% endhighlight %}
+```
 
 上述就是 `list_array_tt` 的大致结构，省略了一些代码实现。这个结构内部创建了一个类似数组的叫 `array_t` 的结构体，内部有个 `lists` 数组 存储 `List *` 指针类型。如果 List 的个数大于1了就需要使用这个`lists`了，否则使用联合的 `list` 成员。
 
