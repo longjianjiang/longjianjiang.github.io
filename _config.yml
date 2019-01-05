@@ -1,6 +1,6 @@
 # Site
 title:              longjianjiang
-bio:                'iOS Developer.'
+bio:                'Apple Developer.'
 description:        "个人博客."
 reading_time:       true
 words_per_minute:   200
@@ -16,6 +16,7 @@ markdown:           kramdown
 highlighter:        rouge
 kramdown:
   auto_ids:         true
+  syntax_highlighter: rouge
   footnote_nr:      1
   entity_output:    as_char
   toc_levels:       1..6
