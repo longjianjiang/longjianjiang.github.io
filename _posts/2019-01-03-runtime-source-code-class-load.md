@@ -157,7 +157,7 @@ static Class realizeClass(Class cls) {
 }
 {% endhighlight %}
 
-这里判断当前类的 instanceStart 如果小于父类的 instanceSize，说明父类中新加属性，导致子类内存布局和父类重叠，所以需要调整，具体调整实现在 `moveIvars`, 具体实现笔者会在关于 ivar 中详细叙述。
+这里判断当前类的 instanceStart 如果小于父类的 instanceSize，说明父类中新加属性，导致子类内存布局和父类重叠，所以需要调整，具体调整实现在 `moveIvars`, 具体实现笔者会在关于 [ivar](http://www.longjianjiang.com/runtime-source-code-property-and-ivar/) 中详细叙述。
 
 {% highlight cpp %}
 static Class _firstRealizedClass = nil;

@@ -87,7 +87,7 @@ struct ivar_t {
 };
 {% endhighlight %}
 
-我们看到 ivar 的结构就稍微复杂点了，多了不少属性。
+我们看到 ivar 的结构就稍微复杂点了，多了不少成员，offset 是用来寻址成员的地址的。这里注意 offset 是一个指针类型的，是因为后面 `moveIvars` 中会更新这个 offset。
 
 ![runtime_source_code_property_and_ivar_2]({{site.url}}/assets/images/blog/runtime_source_code_property_and_ivar_2.png)
 
@@ -170,3 +170,19 @@ static void reconcileInstanceVariables(Class cls, Class supercls, const class_ro
 5. 最后依然使用 diff，更新子类 ro 的 instanceStart 和 instanceSize
 ```
 
+完成后，就不会存在子父类内存重叠的情况发生了，也就是之前所说的 Non Fragile ivars。
+
+## ivar layout
+
+{% highlight cpp %}
+struct class_ro_t {
+    const uint8_t * ivarLayout;
+    const uint8_t * weakIvarLayout;
+}
+{% endhighlight %}
+
+最后看下 ro 中两个与 ivar 有关的成员，这两个成员是存储类的ivar 的内存管理属性的，具体可以参考[ivarLayout](http://blog.sunnyxx.com/2015/09/13/class-ivar-layout/)。
+
+## 最后
+
+本文主要介绍了类的property 和 ivar，以及Non Fragile ivars 的实现。

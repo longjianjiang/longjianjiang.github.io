@@ -137,7 +137,7 @@ struct entsize_list_tt {
 #define RO_HAS_CXX_STRUCTORS  (1<<2)
 {% endhighlight %}
 
-`class_ro_t` 的 `instanceStart` 和 `instanceSize` 则和 non-fragile ivars 有关，关于 non-fragile ivars 可以参考笔者之前的[Runtime学习笔记](http://www.longjianjiang.com/runtime/)。编译时期这两个属性就已经被赋值, 初始化类时会判断当前类的 `instanceStart` 如果小于父类的 `instanceStart` 就会进行调整，这样当 `NSObject`等基类中增加了属性，我们编写的代码不用重新编译，Runtime会自动调整，这就是所谓的 non-fragile ivars 特性，具体实现笔者会在关于 ivar 中详细叙述。
+`class_ro_t` 的 `instanceStart` 和 `instanceSize` 则和 non-fragile ivars 有关，关于 non-fragile ivars 可以参考笔者之前的[Runtime学习笔记](http://www.longjianjiang.com/runtime/)。编译时期这两个属性就已经被赋值, 初始化类时会判断当前类的 `instanceStart` 如果小于父类的 `instanceStart` 就会进行调整，这样当 `NSObject`等基类中增加了属性，我们编写的代码不用重新编译，Runtime会自动调整，这就是所谓的 non-fragile ivars 特性，具体实现笔者会在关于 [ivar](http://www.longjianjiang.com/runtime-source-code-property-and-ivar/) 中详细叙述。
 
 下面我们来看 `class_rw_t` 结构体同样存在关于方法，属性，协议的属性，他们的类型都继承自 `list_array_tt`。类刚初始化的时候，这些属性的值都是空。
 
