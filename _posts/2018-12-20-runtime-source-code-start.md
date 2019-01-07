@@ -22,6 +22,7 @@ Runtime的源码就比较多了，而且关于Runtime源码的文章也很多，
 类的结构(isa)
 类的结构(class_data_bits_t)
 类的加载过程
+类的propety 和 ivar
 
 ## 最后
 

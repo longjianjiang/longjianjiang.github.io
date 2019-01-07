@@ -365,6 +365,10 @@ static Class realizeClass(Class cls) {
 
 这里首先判断当前 cls 是不是 rootMetaClass，也就是NSObject 的 metaClass，如果是给这个类增加了一个方法，`addMethod` 的具体实现这里不展开。
 
-接着会尝试更新类的协议列表，具体获取和添加的过程具体实现这里不展开。
+接着会尝试更新类的分类列表，具体获取和添加的过程具体实现这里不展开。
 
 至此，第一次初始化类的工作全部完成。
+
+## 最后
+
+通过上面分析，我们知道了 `realizeClass` 的作用及其内部工作流程。
