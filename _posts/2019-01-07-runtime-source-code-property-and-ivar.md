@@ -190,9 +190,11 @@ struct class_ro_t {
     __strong id ivar0;
     __weak id ivar1;
     __weak id ivar2;
-
+    int ivar3;
 }
+
 @property (nonatomic, copy) NSString *name;
+
 @end
 {% endhighlight %}
 
