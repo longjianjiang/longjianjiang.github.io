@@ -4,7 +4,7 @@ title:  "【Runtime源码】类的加载过程"
 date:   2019-01-03
 excerpt:  "本文是笔者阅读Runtime源码关于类的加载的笔记"
 tag:
-- SourceCode
+- Runtime
 comments: true
 ---
 

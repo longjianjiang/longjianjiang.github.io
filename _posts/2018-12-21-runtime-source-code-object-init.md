@@ -4,7 +4,7 @@ title:  "【Runtime源码】对象的创建和销毁"
 date:   2018-12-21
 excerpt:  "本文是笔者阅读Runtime源码关于对象创建的笔记"
 tag:
-- SourceCode
+- Runtime
 comments: true
 ---
 
