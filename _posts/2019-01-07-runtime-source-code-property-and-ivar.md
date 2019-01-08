@@ -181,8 +181,38 @@ struct class_ro_t {
 }
 {% endhighlight %}
 
-最后看下 ro 中两个与 ivar 有关的成员，这两个成员是存储类的ivar 的内存管理属性的，具体可以参考[ivarLayout](http://blog.sunnyxx.com/2015/09/13/class-ivar-layout/)。
+最后看下 ro 中两个与 ivar 有关的成员，这两个成员是存储类的ivar 的内存管理属性的，规则如下:
+
+> 十六进制形式的字符串一个字节为一组记做: "\xAB", A表示有A个非strong/weak ivar，B表示后面有B个strong/weak ivar, 具体取决于是 ivarLayout 还是 weakIvarLayout
+
+{% highlight objective_c %}
+@interface Person : NSObject {
+    __strong id ivar0;
+    __weak id ivar1;
+    __weak id ivar2;
+
+}
+@property (nonatomic, copy) NSString *name;
+@end
+{% endhighlight %}
+
+![runtime_source_code_property_and_ivar_4]({{site.url}}/assets/images/blog/runtime_source_code_property_and_ivar_4.png)
+
+我们可以看到 ivarLayout 指向字符串 "\x011", weakIvarLayout 指向字符串 "\x12"。
+
+> 这里 ivarLayout 后的第二个1 的 ASCII 码的十六进制 表示的是 31
+
+所以根据以上我们可以推测如下:
+
+- 根据ivarLayout可知，第一个ivar是strong，后面三个ivar是非strong，最后一个ivar是strong
+- 同时我们知道了Person中一共有5个ivar
+- 根据weakIvarLayout可知，第一个ivar为非weak，后面两个是weak
+- 综上我们知道，第一个ivar为strong，后面两个ivar为weak，第4个既不是strong也不是weak，可能是基本数据类型或者__unsafe_unretained类型，第5个是strong
 
 ## 最后
 
 本文主要介绍了类的property 和 ivar，以及Non Fragile ivars 的实现。
+
+## References
+
+[http://blog.sunnyxx.com/2015/09/13/class-ivar-layout/](http://blog.sunnyxx.com/2015/09/13/class-ivar-layout/)
