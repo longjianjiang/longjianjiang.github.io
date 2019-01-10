@@ -281,15 +281,12 @@ didReceiveResponse:(NSURLResponse *)response
                             UIImage *image = [[SDWebImageCodersManager sharedInstance] decodedImageWithData:imageData];
                             NSString *key = [[SDWebImageManager sharedManager] cacheKeyForURL:self.request.URL];
                             image = [self scaledImageForKey:key image:image];
-                            
-                            BOOL shouldDecode = YES;
 
-                            if (shouldDecode) {
-                                if (self.shouldDecompressImages) {
-                                    BOOL shouldScaleDown = self.options & SDWebImageDownloaderScaleDownLargeImages;
-                                    image = [[SDWebImageCodersManager sharedInstance] decompressedImageWithImage:image data:&imageData options:@{SDWebImageCoderScaleDownLargeImagesKey: @(shouldScaleDown)}];
-                                }
+                            if (self.shouldDecompressImages) {
+                                BOOL shouldScaleDown = self.options & SDWebImageDownloaderScaleDownLargeImages;
+                                image = [[SDWebImageCodersManager sharedInstance] decompressedImageWithImage:image data:&imageData options:@{SDWebImageCoderScaleDownLargeImagesKey: @(shouldScaleDown)}];
                             }
+
                             CGSize imageSize = image.size;
                             if (imageSize.width == 0 || imageSize.height == 0) {
                                 [self callCompletionBlocksWithError:[NSError errorWithDomain:SDWebImageErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey : @"Downloaded image has 0 pixels"}]];
@@ -311,6 +308,15 @@ didReceiveResponse:(NSURLResponse *)response
 }
 {% endhighlight %}
 
+请求结束，进行回调completedBlock:
+
+- 判断`callbackBlocks`中是否存在completedBlock
+- 判断之前接收的imageData是否为空
+- 判断是否需要直接走URLCache 逻辑
+- 解码imageData，尝试压缩图片
+- 判断图片size
+- 最后使用imageData和解码后的image，回调completedBlock
+
 {% highlight objective_c %}
 - (void)URLSession:(NSURLSession *)session
           dataTask:(NSURLSessionDataTask *)dataTask
@@ -329,7 +335,7 @@ didReceiveResponse:(NSURLResponse *)response
 }
 {% endhighlight %}
 
-最后是一个是否需要URLCache的回调，处理也很简单，如果设置了SDWebImageDownloaderUseNSURLCache flag 则cache 响应。
+最后是一个是否需要URLCache的回调，处理也很简单，如果设置了 `SDWebImageDownloaderUseNSURLCache` flag 则 cache 响应。
 
 至此，SDWebImageDownloaderOperation的工作结束。
 
