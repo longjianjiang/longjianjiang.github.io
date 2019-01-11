@@ -703,5 +703,28 @@ SDWebImageManager 这个类主要是封装了之前说的下载和缓存类的�
 
 SDWebImageCombinedOperation 实现了 SDWebImageOperation 协议，提供了cancel 方法。内部调用了下载的cancel方法。
 
-下面是SD中最长的一个方法，不过最新的5.x版本，已经将这个方法进行了拆分。
+`loadImageWithURL:options:progress:completed:`是SD中最长的一个方法，不过最新的5.x版本，已经将这个方法进行了拆分,下面笔者将该方法进行拆分来说明:
+
+{% highlight objective_c %}
+- (id <SDWebImageOperation>)loadImageWithURL:(nullable NSURL *)url
+                                     options:(SDWebImageOptions)options
+                                    progress:(nullable SDWebImageDownloaderProgressBlock)progressBlock
+                                   completed:(nullable SDInternalCompletionBlock)completedBlock {
+    NSAssert(completedBlock != nil, @"If you mean to prefetch the image, use -[SDWebImagePrefetcher prefetchURLs] instead");
+
+    if ([url isKindOfClass:NSString.class]) {
+        url = [NSURL URLWithString:(NSString *)url];
+    }
+
+    if (![url isKindOfClass:NSURL.class]) {
+        url = nil;
+    }
+}
+{% endhighlight %}
+
+这一步对传进来的url进行合法性判断，防止crash的产生。
+
+
+
+
 
