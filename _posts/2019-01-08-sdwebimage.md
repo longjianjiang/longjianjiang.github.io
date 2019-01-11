@@ -10,7 +10,7 @@ comments: true
 
 SDWebImage是一个异步图片加载库(下面笔者简称为SD)，下面笔者来分析下它的源代码(v4.4.3)。
 
-> 本文中的代码，笔者删减了部分，具体可以参看源码。
+> 本文中的代码，笔者删减了图片解码和编码等部分，具体可以参看源码。
 
 ## 接口
 
@@ -706,6 +706,21 @@ SDWebImageCombinedOperation 实现了 SDWebImageOperation 协议，提供了canc
 `loadImageWithURL:options:progress:completed:`是SD中最长的一个方法，不过最新的5.x版本，已经将这个方法进行了拆分,下面笔者将该方法进行拆分来说明:
 
 {% highlight objective_c %}
+@interface SDWebImageManager ()
+
+@property (strong, nonatomic, readwrite, nonnull) SDImageCache *imageCache;
+@property (strong, nonatomic, readwrite, nonnull) SDWebImageDownloader *imageDownloader;
+@property (strong, nonatomic, nonnull) NSMutableSet<NSURL *> *failedURLs;
+@property (strong, nonatomic, nonnull) dispatch_semaphore_t failedURLsLock; // a lock to keep the access to `failedURLs` thread-safe
+@property (strong, nonatomic, nonnull) NSMutableSet<SDWebImageCombinedOperation *> *runningOperations;
+@property (strong, nonatomic, nonnull) dispatch_semaphore_t runningOperationsLock; // a lock to keep the access to `runningOperations` thread-safe
+
+@end
+{% endhighlight %}
+
+> 首先给出SDWebImageManager中的属性。
+
+{% highlight objective_c %}
 - (id <SDWebImageOperation>)loadImageWithURL:(nullable NSURL *)url
                                      options:(SDWebImageOptions)options
                                     progress:(nullable SDWebImageDownloaderProgressBlock)progressBlock
@@ -724,7 +739,437 @@ SDWebImageCombinedOperation 实现了 SDWebImageOperation 协议，提供了canc
 
 这一步对传进来的url进行合法性判断，防止crash的产生。
 
+{% highlight objective_c %}
+- (id <SDWebImageOperation>)loadImageWithURL:(nullable NSURL *)url
+                                     options:(SDWebImageOptions)options
+                                    progress:(nullable SDWebImageDownloaderProgressBlock)progressBlock
+                                   completed:(nullable SDInternalCompletionBlock)completedBlock {
+    SDWebImageCombinedOperation *operation = [SDWebImageCombinedOperation new];
+    operation.manager = self;
 
+    BOOL isFailedUrl = NO;
+    if (url) {
+        LOCK(self.failedURLsLock);
+        isFailedUrl = [self.failedURLs containsObject:url];
+        UNLOCK(self.failedURLsLock);
+    }
 
+    if (url.absoluteString.length == 0 || (!(options & SDWebImageRetryFailed) && isFailedUrl)) {
+        [self callCompletionBlockForOperation:operation completion:completedBlock error:[NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorFileDoesNotExist userInfo:nil] url:url];
+        return operation;
+    }
+}
+{% endhighlight %}
 
+failedURLs 是内部一个 mutableSet 用来存储无效的图片URL，这一步主要是判断如果图片URL无效，则直接返回，不尝试下载了。
 
+{% highlight objective_c %}
+- (id <SDWebImageOperation>)loadImageWithURL:(nullable NSURL *)url
+                                     options:(SDWebImageOptions)options
+                                    progress:(nullable SDWebImageDownloaderProgressBlock)progressBlock
+                                   completed:(nullable SDInternalCompletionBlock)completedBlock {
+    LOCK(self.runningOperationsLock);
+    [self.runningOperations addObject:operation];
+    UNLOCK(self.runningOperationsLock);
+    NSString *key = [self cacheKeyForURL:url];
+    
+    SDImageCacheOptions cacheOptions = 0;
+    if (options & SDWebImageQueryDataWhenInMemory) cacheOptions |= SDImageCacheQueryDataWhenInMemory;
+    if (options & SDWebImageQueryDiskSync) cacheOptions |= SDImageCacheQueryDiskSync;
+    if (options & SDWebImageScaleDownLargeImages) cacheOptions |= SDImageCacheScaleDownLargeImages;
+}
+{% endhighlight %}
+
+runningOperations 是内部存储的当前正在执行的operation，这一步主要根据 WebImageManager 中 options 准备 cache 的 options。
+
+{% highlight objective_c %}
+- (id <SDWebImageOperation>)loadImageWithURL:(nullable NSURL *)url
+                                     options:(SDWebImageOptions)options
+                                    progress:(nullable SDWebImageDownloaderProgressBlock)progressBlock
+                                   completed:(nullable SDInternalCompletionBlock)completedBlock {
+    __weak SDWebImageCombinedOperation *weakOperation = operation;
+
+    operation.cacheOperation = [self.imageCache queryCacheOperationForKey:key options:cacheOptions done:^(UIImage *cachedImage, NSData *cachedData, SDImageCacheType cacheType) {
+         __strong __typeof(weakOperation) strongOperation = weakOperation;
+    }];
+
+    return operation;
+}
+{% endhighlight %}
+
+使用内部 imageCache 实例调用 queryCache 方法，同时将方法返回的一个NSOperation赋值给 内部的combinedOperation。主要的逻辑都在doneBlock中。
+
+{% highlight objective_c %}
+- (id <SDWebImageOperation>)loadImageWithURL:(nullable NSURL *)url
+                                     options:(SDWebImageOptions)options
+                                    progress:(nullable SDWebImageDownloaderProgressBlock)progressBlock
+                                   completed:(nullable SDInternalCompletionBlock)completedBlock {
+    operation.cacheOperation = [self.imageCache queryCacheOperationForKey:key options:cacheOptions done:^(UIImage *cachedImage, NSData *cachedData, SDImageCacheType cacheType) {
+        if (!strongOperation || strongOperation.isCancelled) {
+            [self safelyRemoveOperationFromRunning:strongOperation];
+            return;
+        }
+    }];
+
+    return operation;
+}
+- (void)safelyRemoveOperationFromRunning:(nullable SDWebImageCombinedOperation*)operation {
+    if (!operation) {
+        return;
+    }
+    LOCK(self.runningOperationsLock);
+    [self.runningOperations removeObject:operation];
+    UNLOCK(self.runningOperationsLock);
+}
+{% endhighlight %}
+
+这一步判断combinedOperation 是否被cancel，否则直接从runningOperations中删除这个operation。
+
+{% highlight objective_c %}
+- (id <SDWebImageOperation>)loadImageWithURL:(nullable NSURL *)url
+                                     options:(SDWebImageOptions)options
+                                    progress:(nullable SDWebImageDownloaderProgressBlock)progressBlock
+                                   completed:(nullable SDInternalCompletionBlock)completedBlock {
+    operation.cacheOperation = [self.imageCache queryCacheOperationForKey:key options:cacheOptions done:^(UIImage *cachedImage, NSData *cachedData, SDImageCacheType cacheType) {
+        BOOL shouldDownload = (!(options & SDWebImageFromCacheOnly))
+            && (!cachedImage || options & SDWebImageRefreshCached)
+            && (![self.delegate respondsToSelector:@selector(imageManager:shouldDownloadImageForURL:)] || [self.delegate imageManager:self shouldDownloadImageForURL:url]);
+    }];
+
+    return operation;
+}
+{% endhighlight %}
+
+这一步根据外界的设置，判断是否需要去下载图片。
+
+{% highlight objective_c %}
+- (id <SDWebImageOperation>)loadImageWithURL:(nullable NSURL *)url
+                                     options:(SDWebImageOptions)options
+                                    progress:(nullable SDWebImageDownloaderProgressBlock)progressBlock
+                                   completed:(nullable SDInternalCompletionBlock)completedBlock {
+    operation.cacheOperation = [self.imageCache queryCacheOperationForKey:key options:cacheOptions done:^(UIImage *cachedImage, NSData *cachedData, SDImageCacheType cacheType) {
+       if (shouldDownload) {
+            if (cachedImage && options & SDWebImageRefreshCached) {
+                [self callCompletionBlockForOperation:strongOperation completion:completedBlock image:cachedImage data:cachedData error:nil cacheType:cacheType finished:YES url:url];
+            }
+       }
+    }];
+
+    return operation;
+}
+{% endhighlight %}
+
+这一步判断如果存在cachedImage 同时 设置了 SDWebImageRefreshCached flag，则首先回调 completedBlock，然后重新下载。
+
+{% highlight objective_c %}
+- (id <SDWebImageOperation>)loadImageWithURL:(nullable NSURL *)url
+                                     options:(SDWebImageOptions)options
+                                    progress:(nullable SDWebImageDownloaderProgressBlock)progressBlock
+                                   completed:(nullable SDInternalCompletionBlock)completedBlock {
+    operation.cacheOperation = [self.imageCache queryCacheOperationForKey:key options:cacheOptions done:^(UIImage *cachedImage, NSData *cachedData, SDImageCacheType cacheType) {
+       if (shouldDownload) {
+            SDWebImageDownloaderOptions downloaderOptions = 0;
+            if (options & SDWebImageLowPriority) downloaderOptions |= SDWebImageDownloaderLowPriority;
+            if (options & SDWebImageProgressiveDownload) downloaderOptions |= SDWebImageDownloaderProgressiveDownload;
+            if (options & SDWebImageRefreshCached) downloaderOptions |= SDWebImageDownloaderUseNSURLCache;
+            if (options & SDWebImageContinueInBackground) downloaderOptions |= SDWebImageDownloaderContinueInBackground;
+            if (options & SDWebImageHandleCookies) downloaderOptions |= SDWebImageDownloaderHandleCookies;
+            if (options & SDWebImageAllowInvalidSSLCertificates) downloaderOptions |= SDWebImageDownloaderAllowInvalidSSLCertificates;
+            if (options & SDWebImageHighPriority) downloaderOptions |= SDWebImageDownloaderHighPriority;
+            if (options & SDWebImageScaleDownLargeImages) downloaderOptions |= SDWebImageDownloaderScaleDownLargeImages;
+            
+            if (cachedImage && options & SDWebImageRefreshCached) {
+                downloaderOptions &= ~SDWebImageDownloaderProgressiveDownload;
+                downloaderOptions |= SDWebImageDownloaderIgnoreCachedResponse;
+            }
+       }
+    }];
+
+    return operation;
+}
+{% endhighlight %}
+
+这一步准备下载options。
+
+{% highlight objective_c %}
+- (id <SDWebImageOperation>)loadImageWithURL:(nullable NSURL *)url
+                                     options:(SDWebImageOptions)options
+                                    progress:(nullable SDWebImageDownloaderProgressBlock)progressBlock
+                                   completed:(nullable SDInternalCompletionBlock)completedBlock {
+    operation.cacheOperation = [self.imageCache queryCacheOperationForKey:key options:cacheOptions done:^(UIImage *cachedImage, NSData *cachedData, SDImageCacheType cacheType) {
+       if (shouldDownload) {
+            __weak typeof(strongOperation) weakSubOperation = strongOperation;
+            strongOperation.downloadToken = [self.imageDownloader downloadImageWithURL:url options:downloaderOptions progress:progressBlock completed:^(UIImage *downloadedImage, NSData *downloadedData, NSError *error, BOOL finished) {
+            }];
+       }
+    }];
+
+    return operation;
+}
+{% endhighlight %}
+
+这里则使用内部 imageDownloader 的 下载方法进行下载图片了，同时将返回的downToken赋值给combinedOperation。主要逻辑在下载方法的completedBlock中。
+
+{% highlight objective_c %}
+- (id <SDWebImageOperation>)loadImageWithURL:(nullable NSURL *)url
+                                     options:(SDWebImageOptions)options
+                                    progress:(nullable SDWebImageDownloaderProgressBlock)progressBlock
+                                   completed:(nullable SDInternalCompletionBlock)completedBlock {
+    operation.cacheOperation = [self.imageCache queryCacheOperationForKey:key options:cacheOptions done:^(UIImage *cachedImage, NSData *cachedData, SDImageCacheType cacheType) {
+       if (shouldDownload) {
+            __weak typeof(strongOperation) weakSubOperation = strongOperation;
+            strongOperation.downloadToken = [self.imageDownloader downloadImageWithURL:url options:downloaderOptions progress:progressBlock completed:^(UIImage *downloadedImage, NSData *downloadedData, NSError *error, BOOL finished) {
+                 __strong typeof(weakSubOperation) strongSubOperation = weakSubOperation;
+                if (!strongSubOperation || strongSubOperation.isCancelled) { 
+                    // 当operation被cancel，什么也不做。
+                } else if (error) {
+                    [self callCompletionBlockForOperation:strongSubOperation completion:completedBlock error:error url:url];
+                    BOOL shouldBlockFailedURL;
+                    if ([self.delegate respondsToSelector:@selector(imageManager:shouldBlockFailedURL:withError:)]) {
+                        shouldBlockFailedURL = [self.delegate imageManager:self shouldBlockFailedURL:url withError:error];
+                    } else {
+                        shouldBlockFailedURL = (   error.code != NSURLErrorNotConnectedToInternet
+                                                && error.code != NSURLErrorCancelled
+                                                && error.code != NSURLErrorTimedOut
+                                                && error.code != NSURLErrorInternationalRoamingOff
+                                                && error.code != NSURLErrorDataNotAllowed
+                                                && error.code != NSURLErrorCannotFindHost
+                                                && error.code != NSURLErrorCannotConnectToHost
+                                                && error.code != NSURLErrorNetworkConnectionLost);
+                    }
+                    
+                    if (shouldBlockFailedURL) {
+                        LOCK(self.failedURLsLock);
+                        [self.failedURLs addObject:url];
+                        UNLOCK(self.failedURLsLock);
+                    }
+                } else {
+                     if ((options & SDWebImageRetryFailed)) {
+                        LOCK(self.failedURLsLock);
+                        [self.failedURLs removeObject:url];
+                        UNLOCK(self.failedURLsLock);
+                    }
+                }
+            }];
+       }
+    }];
+
+    return operation;
+}
+{% endhighlight %}
+
+当下载完成，如果下载失败，根据设置将无效的url添加到failedURLsLock中。同时当下载成功根据设置，尝试从failedURLsLock移除之前添加的无效url。
+
+{% highlight objective_c %}
+- (id <SDWebImageOperation>)loadImageWithURL:(nullable NSURL *)url
+                                     options:(SDWebImageOptions)options
+                                    progress:(nullable SDWebImageDownloaderProgressBlock)progressBlock
+                                   completed:(nullable SDInternalCompletionBlock)completedBlock {
+    operation.cacheOperation = [self.imageCache queryCacheOperationForKey:key options:cacheOptions done:^(UIImage *cachedImage, NSData *cachedData, SDImageCacheType cacheType) {
+       if (shouldDownload) {
+            __weak typeof(strongOperation) weakSubOperation = strongOperation;
+            strongOperation.downloadToken = [self.imageDownloader downloadImageWithURL:url options:downloaderOptions progress:progressBlock completed:^(UIImage *downloadedImage, NSData *downloadedData, NSError *error, BOOL finished) {
+                 __strong typeof(weakSubOperation) strongSubOperation = weakSubOperation;
+                if (!strongSubOperation || strongSubOperation.isCancelled) { 
+                } else if (error) {
+                } else {
+                    BOOL cacheOnDisk = !(options & SDWebImageCacheMemoryOnly);
+
+                     if (options & SDWebImageRefreshCached && cachedImage && !downloadedImage) {
+                        // Image refresh hit the NSURLCache cache, do not call the completion block
+                    } else {
+                        if (downloadedImage && finished) {
+                           [self.imageCache storeImage:downloadedImage imageData:downloadedData forKey:key toDisk:cacheOnDisk completion:nil];
+                        }
+                        [self callCompletionBlockForOperation:strongSubOperation completion:completedBlock image:downloadedImage data:downloadedData error:nil cacheType:SDImageCacheTypeNone finished:finished url:url];
+                    }
+                }
+
+                 if (finished) {
+                    [self safelyRemoveOperationFromRunning:strongSubOperation];
+                }
+            }];
+       }
+    }];
+
+    return operation;
+}
+{% endhighlight %}
+
+- 当图片从URLCache中获得，不回调completedBlock
+- 去除了关于图片transform的部分
+- 这里则是图片成功下载，将其缓存，同时回调completedBlock
+
+最后如果下载完成，runningOperations中删除当前operation。
+
+{% highlight objective_c %}
+- (id <SDWebImageOperation>)loadImageWithURL:(nullable NSURL *)url
+                                     options:(SDWebImageOptions)options
+                                    progress:(nullable SDWebImageDownloaderProgressBlock)progressBlock
+                                   completed:(nullable SDInternalCompletionBlock)completedBlock {
+    operation.cacheOperation = [self.imageCache queryCacheOperationForKey:key options:cacheOptions done:^(UIImage *cachedImage, NSData *cachedData, SDImageCacheType cacheType) {
+       if (shouldDownload) {
+       } else if (cachedImage) {
+            [self callCompletionBlockForOperation:strongOperation completion:completedBlock image:cachedImage data:cachedData error:nil cacheType:cacheType finished:YES url:url];
+            [self safelyRemoveOperationFromRunning:strongOperation];
+       } else {
+            [self callCompletionBlockForOperation:strongOperation completion:completedBlock image:nil data:nil error:nil cacheType:SDImageCacheTypeNone finished:YES url:url];
+            [self safelyRemoveOperationFromRunning:strongOperation];
+       }
+    }];
+
+    return operation;
+}
+{% endhighlight %}
+
+- 有缓存的时候不让下载，这里判断cachedImage是否存在，回调completedBlock，runningOperations中删除当前operation。
+- 缓存不存在，代理方法不让下载的情况。
+
+至此，分析完了 SDWebImageManager 加载图片的实现，我们可以发现这个过程虽然比较多，不过都是建立在之前我们说过的缓存和下载两部分。
+
+现在我们可以看最开始说到的 `sd_internalSetImageWithURL:placeholderImage:options:operationKey:setImageBlock:progress:completed:context:` 方法了。
+
+{% highlight objective_c %}
+- (void)sd_internalSetImageWithURL:(nullable NSURL *)url
+                  placeholderImage:(nullable UIImage *)placeholder
+                           options:(SDWebImageOptions)options
+                      operationKey:(nullable NSString *)operationKey
+                     setImageBlock:(nullable SDSetImageBlock)setImageBlock
+                          progress:(nullable SDWebImageDownloaderProgressBlock)progressBlock
+                         completed:(nullable SDExternalCompletionBlock)completedBlock
+                           context:(nullable NSDictionary<NSString *, id> *)context {
+
+    NSString *validOperationKey = operationKey ?: NSStringFromClass([self class]);
+    [self sd_cancelImageLoadOperationWithKey:validOperationKey];
+    objc_setAssociatedObject(self, &imageURLKey, url, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    
+    if (!(options & SDWebImageDelayPlaceholder)) {
+        dispatch_main_async_safe(^{
+            [self sd_setImage:placeholder imageData:nil basedOnClassOrViaCustomSetImageBlock:setImageBlock];
+        });
+    }
+}
+{% endhighlight %}
+
+这里首先取消当前View上的加载操作。然后设置占位图。
+
+{% highlight objective_c %}
+- (void)sd_internalSetImageWithURL:(nullable NSURL *)url
+                  placeholderImage:(nullable UIImage *)placeholder
+                           options:(SDWebImageOptions)options
+                      operationKey:(nullable NSString *)operationKey
+                     setImageBlock:(nullable SDSetImageBlock)setImageBlock
+                          progress:(nullable SDWebImageDownloaderProgressBlock)progressBlock
+                         completed:(nullable SDExternalCompletionBlock)completedBlock
+                           context:(nullable NSDictionary<NSString *, id> *)context {
+    if (url) {
+        self.sd_imageProgress.totalUnitCount = 0;
+        self.sd_imageProgress.completedUnitCount = 0;
+        
+        SDWebImageManager *manager = [context objectForKey:SDWebImageExternalCustomManagerKey];
+        if (!manager) {
+            manager = [SDWebImageManager sharedManager];
+        }
+        
+        __weak __typeof(self)wself = self;
+        SDWebImageDownloaderProgressBlock combinedProgressBlock = ^(NSInteger receivedSize, NSInteger expectedSize, NSURL * _Nullable targetURL) {
+            wself.sd_imageProgress.totalUnitCount = expectedSize;
+            wself.sd_imageProgress.completedUnitCount = receivedSize;
+            if (progressBlock) {
+                progressBlock(receivedSize, expectedSize, targetURL);
+            }
+        };
+    } else {
+        if (completedBlock) {
+                NSError *error = [NSError errorWithDomain:SDWebImageErrorDomain code:-1 userInfo:@{NSLocalizedDescriptionKey : @"Trying to load a nil url"}];
+                completedBlock(nil, error, SDImageCacheTypeNone, url);
+        }
+    }
+}
+{% endhighlight %}
+
+- url不为空，准备下载进度回调，初始化 SDWebImageManager。
+- url为空，直接回调completedBlock
+
+{% highlight objective_c %}
+- (void)sd_internalSetImageWithURL:(nullable NSURL *)url
+                  placeholderImage:(nullable UIImage *)placeholder
+                           options:(SDWebImageOptions)options
+                      operationKey:(nullable NSString *)operationKey
+                     setImageBlock:(nullable SDSetImageBlock)setImageBlock
+                          progress:(nullable SDWebImageDownloaderProgressBlock)progressBlock
+                         completed:(nullable SDExternalCompletionBlock)completedBlock
+                           context:(nullable NSDictionary<NSString *, id> *)context {
+    if (url) {
+        id <SDWebImageOperation> operation = [manager loadImageWithURL:url options:options progress:combinedProgressBlock completed:^(UIImage *image, NSData *data, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+        }];
+        [self sd_setImageLoadOperation:operation forKey:validOperationKey];
+    } 
+}
+{% endhighlight %}
+
+这一步就是使用 SDWebImageManager 的获取图片方法，完成后将返回的 combineOperation&URL 存储到分类的字典中。
+
+{% highlight objective_c %}
+- (void)sd_internalSetImageWithURL:(nullable NSURL *)url
+                  placeholderImage:(nullable UIImage *)placeholder
+                           options:(SDWebImageOptions)options
+                      operationKey:(nullable NSString *)operationKey
+                     setImageBlock:(nullable SDSetImageBlock)setImageBlock
+                          progress:(nullable SDWebImageDownloaderProgressBlock)progressBlock
+                         completed:(nullable SDExternalCompletionBlock)completedBlock
+                           context:(nullable NSDictionary<NSString *, id> *)context {
+    if (url) {
+        id <SDWebImageOperation> operation = [manager loadImageWithURL:url options:options progress:combinedProgressBlock completed:^(UIImage *image, NSData *data, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+            
+            BOOL shouldCallCompletedBlock = finished || (options & SDWebImageAvoidAutoSetImage);
+            BOOL shouldNotSetImage = ((image && (options & SDWebImageAvoidAutoSetImage)) ||
+                                      (!image && !(options & SDWebImageDelayPlaceholder)));
+            SDWebImageNoParamsBlock callCompletedBlockClojure = ^{
+                if (!sself) { return; }
+                if (!shouldNotSetImage) {
+                    [sself sd_setNeedsLayout];
+                }
+                if (completedBlock && shouldCallCompletedBlock) {
+                    completedBlock(image, error, cacheType, url);
+                }
+            };
+
+            if (shouldNotSetImage) {
+                dispatch_main_async_safe(callCompletedBlockClojure);
+                return;
+            }
+
+            UIImage *targetImage = nil;
+            NSData *targetData = nil;
+            if (image) {
+                // case 2a: we got an image and the SDWebImageAvoidAutoSetImage is not set
+                targetImage = image;
+                targetData = data;
+            } else if (options & SDWebImageDelayPlaceholder) {
+                // case 2b: we got no image and the SDWebImageDelayPlaceholder flag is set
+                targetImage = placeholder;
+                targetData = nil;
+            }
+
+            SDWebImageTransition *transition = nil;
+            [sself sd_setImage:targetImage imageData:targetData basedOnClassOrViaCustomSetImageBlock:setImageBlock transition:transition cacheType:cacheType imageURL:imageURL];
+
+            callCompletedBlockClojure();
+        }];
+    } 
+}
+{% endhighlight %}
+
+- shouldCallCompletedBlock 是否回调 completedBlock， shouldNotSetImage 是否设置图片，否则默认用户自己在 completedBlock中取image设置
+- 定义了一个完成的回调 callCompletedBlockClojure
+- 如果 shouldNotSetImage 为true，执行 callCompletedBlockClojure，返回
+- shouldNotSetImage 为false，设置图片到View，执行 callCompletedBlockClojure
+
+至此，图片就可以显示到对应的View上。
+
+## 最后
+
+看完了SD，对网络图片异步加载的过程有了新的认识，其中关于多线程和图片编解码的内容还需要后面进行补充。
+
+写完感觉文章比较冗长，还需要多多改进。
