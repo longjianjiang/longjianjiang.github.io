@@ -306,6 +306,18 @@ didReceiveResponse:(NSURLResponse *)response
         }
     }
 }
+- (void)callCompletionBlocksWithError:(nullable NSError *)error {
+    [self callCompletionBlocksWithImage:nil imageData:nil error:error finished:YES];
+}
+- (void)callCompletionBlocksWithImage:(nullable UIImage *)image
+                            imageData:(nullable NSData *)imageData
+                                error:(nullable NSError *)error
+                             finished:(BOOL)finished {
+    NSArray<id> *completionBlocks = [self callbacksForKey:kCompletedCallbackKey];
+    for (SDWebImageDownloaderCompletedBlock completedBlock in completionBlocks) {
+        completedBlock(image, imageData, error, finished);
+    }
+}
 {% endhighlight %}
 
 请求结束，进行回调completedBlock:
@@ -335,9 +347,187 @@ didReceiveResponse:(NSURLResponse *)response
 }
 {% endhighlight %}
 
-最后是一个是否需要URLCache的回调，处理也很简单，如果设置了 `SDWebImageDownloaderUseNSURLCache` flag 则 cache 响应。
+最后是一个是否需要URLCache的回调，处理也很简单，如果设置了 `SDWebImageDownloaderUseNSURLCache` flag 则 cache response。
 
 至此，SDWebImageDownloaderOperation的工作结束。
+
+### SDWebImageDownloader
+
+{% highlight objective_c %}
+@interface SDWebImageDownloader () <NSURLSessionTaskDelegate, NSURLSessionDataDelegate>
+
+@property (strong, nonatomic, nonnull) NSOperationQueue *downloadQueue;
+@property (weak, nonatomic, nullable) NSOperation *lastAddedOperation;
+@property (assign, nonatomic, nullable) Class operationClass;
+@property (strong, nonatomic, nonnull) NSMutableDictionary<NSURL *, NSOperation<SDWebImageDownloaderOperationInterface> *> *URLOperations;
+@property (strong, nonatomic, nullable) SDHTTPHeadersMutableDictionary *HTTPHeaders;
+@property (strong, nonatomic, nonnull) dispatch_semaphore_t operationsLock; // a lock to keep the access to `URLOperations` thread-safe
+@property (strong, nonatomic, nonnull) dispatch_semaphore_t headersLock; // a lock to keep the access to `HTTPHeaders` thread-safe
+
+@property (strong, nonatomic) NSURLSession *session;
+
+@end
+{% endhighlight %}
+
+{% highlight objective_c %}
+typedef NSDictionary<NSString *, NSString *> SDHTTPHeadersDictionary;
+typedef NSMutableDictionary<NSString *, NSString *> SDHTTPHeadersMutableDictionary;
+- (nonnull instancetype)initWithSessionConfiguration:(nullable NSURLSessionConfiguration *)sessionConfiguration {
+    if ((self = [super init])) {
+        _operationClass = [SDWebImageDownloaderOperation class];
+        _shouldDecompressImages = YES;
+        _executionOrder = SDWebImageDownloaderFIFOExecutionOrder;
+        _downloadQueue = [NSOperationQueue new];
+        _downloadQueue.maxConcurrentOperationCount = 6;
+        _downloadQueue.name = @"com.hackemist.SDWebImageDownloader";
+        _URLOperations = [NSMutableDictionary new];
+        SDHTTPHeadersMutableDictionary *headerDictionary = [SDHTTPHeadersMutableDictionary dictionary];
+
+        NSString *userAgent = [NSString stringWithFormat:@"%@/%@ (%@; iOS %@; Scale/%0.2f)", [[NSBundle mainBundle] infoDictionary][(__bridge NSString *)kCFBundleExecutableKey] ?: [[NSBundle mainBundle] infoDictionary][(__bridge NSString *)kCFBundleIdentifierKey], [[NSBundle mainBundle] infoDictionary][@"CFBundleShortVersionString"] ?: [[NSBundle mainBundle] infoDictionary][(__bridge NSString *)kCFBundleVersionKey], [[UIDevice currentDevice] model], [[UIDevice currentDevice] systemVersion], [[UIScreen mainScreen] scale]];
+
+        if (userAgent) {
+            if (![userAgent canBeConvertedToEncoding:NSASCIIStringEncoding]) {
+                NSMutableString *mutableUserAgent = [userAgent mutableCopy];
+                if (CFStringTransform((__bridge CFMutableStringRef)(mutableUserAgent), NULL, (__bridge CFStringRef)@"Any-Latin; Latin-ASCII; [:^ASCII:] Remove", false)) {
+                    userAgent = mutableUserAgent;
+                }
+            }
+            headerDictionary[@"User-Agent"] = userAgent;
+        }
+
+        headerDictionary[@"Accept"] = @"image/*;q=0.8";
+
+        _HTTPHeaders = headerDictionary;
+        _operationsLock = dispatch_semaphore_create(1);
+        _headersLock = dispatch_semaphore_create(1);
+        _downloadTimeout = 15.0;
+
+        [self createNewSessionWithConfiguration:sessionConfiguration];
+    }
+    return self;
+}
+{% endhighlight %}
+
+现在回到 `SDWebImageDownloader`, 这个类内部有一个NSOperationQueue，同时初始化做了下载请求header的构造工作，同时有一个 `URLOperations` 字典存储URL&Operation。
+
+{% highlight objective_c %}
+- (NSOperation<SDWebImageDownloaderOperationInterface> *)createDownloaderOperationWithUrl:(nullable NSURL *)url
+                                                                                  options:(SDWebImageDownloaderOptions)options {
+    NSTimeInterval timeoutInterval = self.downloadTimeout;
+    if (timeoutInterval == 0.0) {
+        timeoutInterval = 15.0;
+    }
+
+    NSURLRequestCachePolicy cachePolicy = options & SDWebImageDownloaderUseNSURLCache ? NSURLRequestUseProtocolCachePolicy : NSURLRequestReloadIgnoringLocalCacheData;
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:url
+                                                                cachePolicy:cachePolicy
+                                                            timeoutInterval:timeoutInterval];
+    
+    request.HTTPShouldHandleCookies = (options & SDWebImageDownloaderHandleCookies);
+    request.HTTPShouldUsePipelining = YES;
+    request.allHTTPHeaderFields = [self allHTTPHeaderFields];
+
+    NSOperation<SDWebImageDownloaderOperationInterface> *operation = [[self.operationClass alloc] initWithRequest:request inSession:self.session options:options];
+    operation.shouldDecompressImages = self.shouldDecompressImages;
+    
+    if (self.urlCredential) {
+        operation.credential = self.urlCredential;
+    } else if (self.username && self.password) {
+        operation.credential = [NSURLCredential credentialWithUser:self.username password:self.password persistence:NSURLCredentialPersistenceForSession];
+    }
+    
+    if (options & SDWebImageDownloaderHighPriority) {
+        operation.queuePriority = NSOperationQueuePriorityHigh;
+    } else if (options & SDWebImageDownloaderLowPriority) {
+        operation.queuePriority = NSOperationQueuePriorityLow;
+    }
+
+    return operation;
+}
+{% endhighlight %}
+
+上面方法就是构造request创建一个DownloadOperation 的过程，默认也就是我们之前说的 `SDWebImageDownloaderOperation` 实例。
+
+
+{% highlight objective_c %}
+@interface SDWebImageDownloadToken ()
+
+@property (nonatomic, weak, nullable) NSOperation<SDWebImageDownloaderOperationInterface> *downloadOperation;
+
+@end
+{% endhighlight %}
+
+{% highlight objective_c %}
+- (nullable SDWebImageDownloadToken *)downloadImageWithURL:(nullable NSURL *)url
+                                                   options:(SDWebImageDownloaderOptions)options
+                                                  progress:(nullable SDWebImageDownloaderProgressBlock)progressBlock
+                                                 completed:(nullable SDWebImageDownloaderCompletedBlock)completedBlock {
+    if (url == nil) {
+        if (completedBlock != nil) {
+            completedBlock(nil, nil, nil, NO);
+        }
+        return nil;
+    }
+    
+    NSOperation<SDWebImageDownloaderOperationInterface> *operation = [self.URLOperations objectForKey:url];
+    if (!operation || operation.isFinished) {
+        operation = [self createDownloaderOperationWithUrl:url options:options];
+        __weak typeof(self) wself = self;
+        operation.completionBlock = ^{
+            __strong typeof(wself) sself = wself;
+            if (!sself) {
+                return;
+            }
+            LOCK(sself.operationsLock);
+            [sself.URLOperations removeObjectForKey:url];
+            UNLOCK(sself.operationsLock);
+        };
+        [self.URLOperations setObject:operation forKey:url];
+        [self.downloadQueue addOperation:operation];
+    }
+
+    id downloadOperationCancelToken = [operation addHandlersForProgress:progressBlock completed:completedBlock];
+    
+    SDWebImageDownloadToken *token = [SDWebImageDownloadToken new];
+    token.downloadOperation = operation;
+    token.url = url;
+    token.downloadOperationCancelToken = downloadOperationCancelToken;
+
+    return token;
+}
+{% endhighlight %}
+
+前面说到 `SDWebImageDownloadToken`, 用来表示一个下载任务，extension中存储了一个 operation，同时现在我们知道 `downloadOperationCancelToken` 属性其实就是存储的progressBlock 和 completedBlock的字典。
+
+之前说到 `SDWebImageDownloader` 类中提供给外界根据一个图片URL进行图片下载的方法实现其实很简单:
+
+- 内部创建operation，将图片URL和operation存进内部的字典
+- 将operation加入到队列中，operation进行下载
+- 当operation执行结束，移除先前字典中存储的记录
+- 对外界返回 SDWebImageDownloadToken 实例
+
+SDWebImageDownloader 中也实现了 NSURLSessionTaskDelegate 和 NSURLSessionDataDelegate 的方法，不过没有处理，通过task找到对应的operation去处理。
+
+{% highlight objective_c %}
+// SDWebImageDownloader.m
+- (void)cancel:(nullable SDWebImageDownloadToken *)token {
+    NSURL *url = token.url;
+    if (!url) {
+        return;
+    }
+    NSOperation<SDWebImageDownloaderOperationInterface> *operation = [self.URLOperations objectForKey:url];
+    if (operation) {
+        BOOL canceled = [operation cancel:token.downloadOperationCancelToken];
+        if (canceled) {
+            [self.URLOperations removeObjectForKey:url];
+        }
+    }
+}
+{% endhighlight %}
+
+SDWebImageDownloader 中也提供了给定一个 SDWebImageDownloadToken，尝试取消当前下载任务。内部会调用之前说过的Operation的cancel方法。
+
+到这里，下载部分叙述完毕。
 
 ## 缓存
 
