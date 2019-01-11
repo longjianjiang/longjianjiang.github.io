@@ -509,7 +509,6 @@ typedef NSMutableDictionary<NSString *, NSString *> SDHTTPHeadersMutableDictiona
 SDWebImageDownloader 中也实现了 NSURLSessionTaskDelegate 和 NSURLSessionDataDelegate 的方法，不过没有处理，通过task找到对应的operation去处理。
 
 {% highlight objective_c %}
-// SDWebImageDownloader.m
 - (void)cancel:(nullable SDWebImageDownloadToken *)token {
     NSURL *url = token.url;
     if (!url) {
@@ -531,4 +530,178 @@ SDWebImageDownloader 中也提供了给定一个 SDWebImageDownloadToken，尝�
 
 ## 缓存
 
+SDImageCache 包含了内存缓存和磁盘缓存，内存缓存使用了系统的NSCache，磁盘缓存则是直接的文件存储。
+
+### 存
+
+{% highlight objective_c %}
+- (void)storeImage:(nullable UIImage *)image
+         imageData:(nullable NSData *)imageData
+            forKey:(nullable NSString *)key
+            toDisk:(BOOL)toDisk
+        completion:(nullable SDWebImageNoParamsBlock)completionBlock {
+    if (!image || !key) {
+        if (completionBlock) {
+            completionBlock();
+        }
+        return;
+    }
+
+    if (self.config.shouldCacheImagesInMemory) {
+        NSUInteger cost = image.sd_memoryCost;
+        [self.memCache setObject:image forKey:key cost:cost];
+    }
+    
+    if (toDisk) {
+        dispatch_async(self.ioQueue, ^{
+            @autoreleasepool {
+                NSData *data = imageData;
+                // encode part
+                [self _storeImageDataToDisk:data forKey:key];
+            }
+            
+            if (completionBlock) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    completionBlock();
+                });
+            }
+        });
+    } else {
+        if (completionBlock) {
+            completionBlock();
+        }
+    }
+}
+- (void)_storeImageDataToDisk:(nullable NSData *)imageData forKey:(nullable NSString *)key {
+    if (!imageData || !key) {
+        return;
+    }
+    
+    if (![self.fileManager fileExistsAtPath:_diskCachePath]) {
+        [self.fileManager createDirectoryAtPath:_diskCachePath withIntermediateDirectories:YES attributes:nil error:NULL];
+    }
+    
+    NSString *cachePathForKey = [self defaultCachePathForKey:key];
+    NSURL *fileURL = [NSURL fileURLWithPath:cachePathForKey];
+    
+    [imageData writeToURL:fileURL options:self.config.diskCacheWritingOptions error:nil];
+    
+    if (self.config.shouldDisableiCloud) {
+        [fileURL setResourceValue:@YES forKey:NSURLIsExcludedFromBackupKey error:nil];
+    }
+}
+{% endhighlight %}
+
+存储部分还是很直观的，内存存储直接使用 `setObject:forKey:cost`, 磁盘存储则将data写到指定文件中，这里的文件名用MD5处理过。
+
+### 取
+
+取的方法很多提供了很多中，不过笔者这里只介绍一种下面会说到的 `queryCacheOperationForKey:options:done:`。
+
+{% highlight objective_c %}
+- (nullable NSOperation *)queryCacheOperationForKey:(nullable NSString *)key options:(SDImageCacheOptions)options done:(nullable SDCacheQueryCompletedBlock)doneBlock {
+    if (!key) {
+        if (doneBlock) {
+            doneBlock(nil, nil, SDImageCacheTypeNone);
+        }
+        return nil;
+    }
+    
+    UIImage *image = [self imageFromMemoryCacheForKey:key];
+    BOOL shouldQueryMemoryOnly = (image && !(options & SDImageCacheQueryDataWhenInMemory));
+    if (shouldQueryMemoryOnly) {
+        if (doneBlock) {
+            doneBlock(image, nil, SDImageCacheTypeMemory);
+        }
+        return nil;
+    }
+    
+    NSOperation *operation = [NSOperation new];
+    void(^queryDiskBlock)(void) =  ^{
+        if (operation.isCancelled) {
+            return;
+        }
+        
+        @autoreleasepool {
+            NSData *diskData = [self diskImageDataBySearchingAllPathsForKey:key];
+            UIImage *diskImage;
+            SDImageCacheType cacheType = SDImageCacheTypeNone;
+            if (image) {
+                diskImage = image;
+                cacheType = SDImageCacheTypeMemory;
+            } else if (diskData) {
+                cacheType = SDImageCacheTypeDisk;
+                diskImage = [self diskImageForKey:key data:diskData options:options];
+                if (diskImage && self.config.shouldCacheImagesInMemory) {
+                    NSUInteger cost = diskImage.sd_memoryCost;
+                    [self.memCache setObject:diskImage forKey:key cost:cost];
+                }
+            }
+            
+            if (doneBlock) {
+                if (options & SDImageCacheQueryDiskSync) {
+                    doneBlock(diskImage, diskData, cacheType);
+                } else {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        doneBlock(diskImage, diskData, cacheType);
+                    });
+                }
+            }
+        }
+    };
+    
+    if (options & SDImageCacheQueryDiskSync) {
+        queryDiskBlock();
+    } else {
+        dispatch_async(self.ioQueue, queryDiskBlock);
+    }
+    
+    return operation;
+}
+{% endhighlight %}
+
+- 首先从内存中寻找，如果设置了只从内存中寻找，这个时候就结束了
+- 从磁盘中寻找，如果内存中没有，则将imageData解码，同时加入到内存缓存中
+- 最后回调 doneblock
+
+缓存部分笔者这里不展开，只说了下面需要用到的几个方法。
+
 ## 接口实现
+
+在说 `sd_internalSetImageWithURL:placeholderImage:options:operationKey:setImageBlock:progress:completed:context:` 方法实现之前，还需要介绍一个类 - SDWebImageManager。
+
+SDWebImageManager 这个类主要是封装了之前说的下载和缓存类的功能，提供了方法给 UIView 的 webCache 分类使用。内部又定义了一个类，可以理解为下载和缓存的Item，因为内部会尝试去缓存中取，如果取不到，再去下载，方法返回的就是 SDWebImageCombinedOperation 。
+
+{% highlight objective_c %}
+@interface SDWebImageCombinedOperation : NSObject <SDWebImageOperation>
+
+@property (assign, nonatomic, getter = isCancelled) BOOL cancelled;
+@property (strong, nonatomic, nullable) SDWebImageDownloadToken *downloadToken;
+@property (strong, nonatomic, nullable) NSOperation *cacheOperation;
+@property (weak, nonatomic, nullable) SDWebImageManager *manager;
+
+@end
+
+@implementation SDWebImageCombinedOperation
+
+- (void)cancel {
+    @synchronized(self) {
+        self.cancelled = YES;
+        if (self.cacheOperation) {
+            [self.cacheOperation cancel];
+            self.cacheOperation = nil;
+        }
+        if (self.downloadToken) {
+            [self.manager.imageDownloader cancel:self.downloadToken];
+        }
+        [self.manager safelyRemoveOperationFromRunning:self];
+    }
+}
+
+@end
+{% endhighlight %}
+
+SDWebImageCombinedOperation 实现了 SDWebImageOperation 协议，提供了cancel 方法。内部调用了下载的cancel方法。
+
+下面是SD中最长的一个方法，不过最新的5.x版本，已经将这个方法进行了拆分。
+
