@@ -119,10 +119,11 @@ struct objc_class : objc_object {
 };
 {% endhighlight %}
 
-之前笔者在类的结构中还剩最后一个cache没有介绍，这个cache就和今天的方法寻找有关系。其实都能猜到，这个cache就是给寻找IMP使用的，在去类中方法列表寻找之前，首先去cache中寻找，而且每次调用完一个方法后将这次调用缓存起来，方便下次寻找。
+之前笔者在类的结构中还剩最后一个cache没有介绍，这个cache就和方法寻找有关系。其实都能猜到，这个cache就是给寻找IMP使用的，在去类中方法列表寻找之前，首先去cache中寻找，而且每次调用完一个方法后将这次调用缓存起来，方便下次寻找。
 
 {% highlight cpp %}
 using MethodCacheIMP = IMP;
+typedef unsigned long		uintptr_t;
 typedef uintptr_t cache_key_t;
 typedef uint32_t mask_t;
 
@@ -138,6 +139,27 @@ struct cache_t {
     mask_t _mask;
     mask_t _occupied;
 };
+{% endhighlight %}
+
+`bucket_t` 的两个成员其实就是SEL和IMP，SEL存储的时候只是将类型强转成了 `cache_key_t`。
+
+`cache_t` 则是一个顺序存储的结构，内部使用`calloc` 来分配一段连续的内存空间，而且内部会自动扩容一倍，扩容后为了内存使用并没有保留之前的数据，buckets 为存储区域的首地址，mask表示存储的容量，occupied则表示当前使用的空间。
+
+{% highlight objective_c %}
+Person *p = [[Person alloc] init];
+[p say];
+{% endhighlight %}
+
+下面笔者以上面代码来展开寻找IMP这一过程，最初的调用栈如下图所示:
+
+![runtime_source_code_method_1]({{site.url}}/assets/images/blog/runtime_source_code_method_1.png)
+
+`lookUpImpOrForward` 就是一个标准的寻找IMP的过程，下面让我们来看这个方法的实现:
+
+{% highlight cpp %}
+IMP lookUpImpOrForward(Class cls, SEL sel, id inst, 
+                       bool initialize, bool cache, bool resolver) {
+}
 {% endhighlight %}
 
 ## Dynamic Method Resolution
