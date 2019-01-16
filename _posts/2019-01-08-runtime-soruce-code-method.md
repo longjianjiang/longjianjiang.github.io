@@ -154,14 +154,362 @@ Person *p = [[Person alloc] init];
 
 ![runtime_source_code_method_1]({{site.url}}/assets/images/blog/runtime_source_code_method_1.png)
 
+### objc_msgSend
+
+可以看到栈底的方法就是之前我们说过的 objc_msgSend, 不过后面怎么多了 uncached, 我们其实可以猜到是没有在缓存中找到IMP，下面我们就从源代码中寻找答案。
+
+其实类似 objc_msgSend 有多个不同类型，如下所示:
+
+```
+objc_msgSend            ： 返回值为 id
+objc_msgSend_fpret      ： 返回值为 floating-point
+objc_msgSend_fp2ret
+objc_msgSend_stret      ： 返回值为 结构体
+
+objc_msgSendSuper       ： 向父类发送消息，也就是首先从父类中寻找IMP，返回值为 id
+objc_msgSendSuper_stret ： 向父类发送消息，也就是首先从父类中寻找IMP，返回值为 结构体
+objc_msgSendSuper2
+objc_msgSendSuper2_stret
+```
+
+> Runtime 中关于这部分使用汇编来实现的，笔者这里根据注释和一点汇编知识来分析下过程。
+
+下面我们以 objc_msgSend 为例，来看代码：
+
+```
+// objc_msgSend
+	ENTRY _objc_msgSend
+	UNWIND _objc_msgSend, NoFrame
+
+	NilTest	NORMAL
+
+	GetIsaFast NORMAL		// r10 = self->isa
+	CacheLookup NORMAL, CALL	// calls IMP on success
+
+	NilTestReturnZero NORMAL
+
+	GetIsaSupport NORMAL
+
+// cache miss: go search the method lists
+LCacheMiss:
+	// isa still in r10
+	jmp	__objc_msgSend_uncached
+
+    END_ENTRY _objc_msgSend
+```
+
+可以看到代码中有 `CacheLookup`, 注释也写了如果找到直接调用IMP。如果没有缓存中没有找到IMP，那么去执行 `__objc_msgSend_uncached`。
+
+> NilTest 这个宏就是判断发送者是否为nil的。
+
+```
+// __objc_msgSend_uncached
+    STATIC_ENTRY __objc_msgSend_uncached
+	UNWIND __objc_msgSend_uncached, FrameWithNoSaves
+
+	// r10 is already the class to search
+	MethodTableLookup NORMAL	// r11 = IMP
+	jmp	*%r11			// goto *imp
+
+	END_ENTRY __objc_msgSend_uncached
+```
+
+可以看到 `__objc_msgSend_uncached` 中又去调用了 `MethodTableLookup` 去找IMP，找到后放到了 r11 中，然后 jmp 去执行IMP。
+
+```
+// macro MethodTableLookup
+...
+
+call	__class_lookupMethodAndLoadCache3
+
+...
+```
+
+`MethodTableLookup` 省略了一些代码，只看关键的，call `__class_lookupMethodAndLoadCache3` 方法。
+
+{% highlight cpp %}
+IMP _class_lookupMethodAndLoadCache3(id obj, SEL sel, Class cls) {
+    return lookUpImpOrForward(cls, sel, obj, 
+                              YES/*initialize*/, NO/*cache*/, YES/*resolver*/);
+}
+{% endhighlight %}
+
+`_class_lookupMethodAndLoadCache3` 方法在 objc-runtime-new.mm 中，可以看到只是简答的调用了 `lookUpImpOrForward`, 可以看到 cache 传了NO，因为之前在汇编中就已经尝试从缓存中寻找过了，所以这里就没有必要再次寻找了。
+
+### lookUpImpOrForward
+
 `lookUpImpOrForward` 就是一个标准的寻找IMP的过程，下面让我们来看这个方法的实现:
 
 {% highlight cpp %}
 IMP lookUpImpOrForward(Class cls, SEL sel, id inst, 
                        bool initialize, bool cache, bool resolver) {
+    IMP imp = nil;
+    bool triedResolver = NO;
+
+    runtimeLock.assertUnlocked();
+
+    // Optimistic cache lookup
+    if (cache) {
+        imp = cache_getImp(cls, sel);
+        if (imp) return imp;
+    }
+    ...
 }
 {% endhighlight %}
 
+这一步则首先尝试从缓存中寻找IMP，`cache_getImp` 方法是用汇编实现的，同样用到了之前说到的 `CacheLookup`宏。汇编实现笔者这里不展开，具体可以去参看源码，注释写的很详细。
+
+{% highlight cpp %}
+static bool isKnownClass(Class cls) {
+    return (sharedRegionContains(cls) ||
+            NXHashMember(allocatedClasses, cls) ||
+            dataSegmentsContain(cls));
+}
+
+IMP lookUpImpOrForward(Class cls, SEL sel, id inst, 
+                       bool initialize, bool cache, bool resolver) {
+    ...
+    runtimeLock.lock();
+    checkIsKnownClass(cls);
+
+    if (!cls->isRealized()) {
+        realizeClass(cls);
+    }
+
+    if (initialize  &&  !cls->isInitialized()) {
+        runtimeLock.unlock();
+        _class_initialize (_class_getNonMetaClass(cls, inst));
+        runtimeLock.lock();
+        // If sel == initialize, _class_initialize will send +initialize and 
+        // then the messenger will send +initialize again after this 
+        // procedure finishes. Of course, if this is not being called 
+        // from the messenger then it won't happen. 2778172
+    }
+    ...
+}
+{% endhighlight %}
+
+这一步Runtime会检查这个类是否能被找到，下面尝试对类进行初始化：
+
+- 第一次尝试第一次初始化类，realizeClass 方法。
+- 第二次尝试调用类的 `+initialize` 方法。
+
+关于两次初始化，可以参考[类的加载过程](http://www.longjianjiang.com/runtime-source-code-class-load/)。
+
+{% highlight cpp %}
+static method_t *findMethodInSortedMethodList(SEL key, const method_list_t *list) {
+    const method_t * const first = &list->first;
+    const method_t *base = first;
+    const method_t *probe;
+    uintptr_t keyValue = (uintptr_t)key;
+    uint32_t count;
+    
+    for (count = list->count; count != 0; count >>= 1) {
+        probe = base + (count >> 1);
+        
+        uintptr_t probeValue = (uintptr_t)probe->name;
+        
+        if (keyValue == probeValue) {
+            // `probe` is a match.
+            // Rewind looking for the *first* occurrence of this value.
+            // This is required for correct category overrides.
+            while (probe > first && keyValue == (uintptr_t)probe[-1].name) {
+                probe--;
+            }
+            return (method_t *)probe;
+        }
+        
+        if (keyValue > probeValue) {
+            base = probe + 1;
+            count--;
+        }
+    }
+    
+    return nil;
+}
+
+static method_t *search_method_list(const method_list_t *mlist, SEL sel) {
+    int methodListIsFixedUp = mlist->isFixedUp();
+    int methodListHasExpectedSize = mlist->entsize() == sizeof(method_t);
+    
+    if (__builtin_expect(methodListIsFixedUp && methodListHasExpectedSize, 1)) {
+        return findMethodInSortedMethodList(sel, mlist);
+    } else {
+        for (auto& meth : *mlist) {
+            if (meth.name == sel) return &meth;
+        }
+    }
+
+    return nil;
+}
+
+static method_t *getMethodNoSuper_nolock(Class cls, SEL sel) {
+    runtimeLock.assertLocked();
+
+    assert(cls->isRealized());
+
+    for (auto mlists = cls->data()->methods.beginLists(), 
+              end = cls->data()->methods.endLists(); 
+         mlists != end;
+         ++mlists)
+    {
+        method_t *m = search_method_list(*mlists, sel);
+        if (m) return m;
+    }
+
+    return nil;
+}
+
+IMP lookUpImpOrForward(Class cls, SEL sel, id inst, 
+                       bool initialize, bool cache, bool resolver) {
+    ...
+ retry:    
+    runtimeLock.assertLocked();
+
+    imp = cache_getImp(cls, sel);
+    if (imp) goto done;
+
+    {
+        Method meth = getMethodNoSuper_nolock(cls, sel);
+        if (meth) {
+            log_and_fill_cache(cls, meth->imp, sel, inst, cls);
+            imp = meth->imp;
+            goto done;
+        }
+    }
+    ...
+}
+{% endhighlight %}
+
+这一步到了查找阶段，之前已经加锁，注释写了为了让查找和添加缓存成为原子操作，因为可能运行时可能类的分类中会增加新方法。我们看到在查找之前还是尝试了从缓存中取。
+
+遍历类的 `rw` 方法列表(method_array_t)，查找每一个列表(method_list_t), 实际查找的方法实现是在 `search_method_list` 中，首先判断方法列表 `method_list_t` 有没有 fixedUp，这一过程在[类的加载](http://www.longjianjiang.com/runtime-source-code-class-load/)中有叙述, 此时方法列表的元素根据sel的指针地址排序过，所以查找分成了两种情况:
+
+- 方法列表有序，二分查找，实现在 `findMethodInSortedMethodList`
+- 方法列表无序，遍历
+
+得到查找方法返回的 meth，判断非空，下面一步就是将该方法缓存下来，这一步的调用栈如下:
+
+![runtime_source_code_method_2]({{site.url}}/assets/images/blog/runtime_source_code_method_2.png)
+
+可以看到最终的实现是方法 `cache_fill_nolock`:
+
+{% highlight cpp %}
+static void cache_fill_nolock(Class cls, SEL sel, IMP imp, id receiver) {
+    cacheUpdateLock.assertLocked();
+
+    if (!cls->isInitialized()) return;
+
+    if (cache_getImp(cls, sel)) return;
+
+    cache_t *cache = getCache(cls);
+    cache_key_t key = getKey(sel);
+
+    mask_t newOccupied = cache->occupied() + 1;
+    mask_t capacity = cache->capacity();
+    if (cache->isConstantEmptyCache()) {
+        cache->reallocate(capacity, capacity ?: INIT_CACHE_SIZE);
+    }
+    else if (newOccupied <= capacity / 4 * 3) {
+        // Cache is less than 3/4 full. Use it as-is.
+    }
+    else {
+        cache->expand();
+    }
+
+    bucket_t *bucket = cache->find(key, receiver);
+    if (bucket->key() == 0) cache->incrementOccupied();
+    bucket->set(key, imp);
+}
+{% endhighlight %}
+
+首先判断类有没有执行过 `+initialize` 方法，因为多线程的原因，同时判断缓存中有没有存在需要存储的SEL。
+
+存储之前，根据缓存的容量和所用空间，分为三种情况:
+
+- 缓存内容size为0，第一次使用缓存，初始化缓存，默认容量为4
+- 缓存内容size小于容量的3/4,正常插入
+- 缓存内容size大于容量的3/4，将缓存大小扩大1倍，不会保留原有的数据
+
+找到cache列表中未使用的地址，将cache中 `_occupied` 加1，通过 `bucket->set(key, imp)` 将SEL&IMP存储到cache中。
+
+> 笔者这里省略了cache内部的一些方法实现。
+
+{% highlight cpp %}
+IMP lookUpImpOrForward(Class cls, SEL sel, id inst, 
+                       bool initialize, bool cache, bool resolver) {
+    ...
+ retry:    
+     {
+        unsigned attempts = unreasonableClassCount();
+        for (Class curClass = cls->superclass;
+             curClass != nil;
+             curClass = curClass->superclass)
+        {
+            // Halt if there is a cycle in the superclass chain.
+            if (--attempts == 0) {
+                _objc_fatal("Memory corruption in class list.");
+            }
+            
+            // Superclass cache.
+            imp = cache_getImp(curClass, sel);
+            if (imp) {
+                if (imp != (IMP)_objc_msgForward_impcache) {
+                    // Found the method in a superclass. Cache it in this class.
+                    log_and_fill_cache(cls, imp, sel, inst, curClass);
+                    goto done;
+                }
+                else {
+                    // Found a forward:: entry in a superclass.
+                    // Stop searching, but don't cache yet; call method 
+                    // resolver for this class first.
+                    break;
+                }
+            }
+            
+            // Superclass method list.
+            Method meth = getMethodNoSuper_nolock(curClass, sel);
+            if (meth) {
+                log_and_fill_cache(cls, meth->imp, sel, inst, curClass);
+                imp = meth->imp;
+                goto done;
+            }
+        }
+    }
+    ...
+}
+{% endhighlight %}
+
+上一步在类中如果没有找到的话，此时就需要去父类中寻找。依然和之前在本类中一样，两步走：
+
+- 首先从父类缓存中找
+- 然后从父类方法列表中找
+
+每次找到依然将 SEL&IMP 放入缓存。
+
+> 当缓存返回的IMP是 `_objc_msgForward_impcache`, 则终止在父类中的寻找。
+
 ## Dynamic Method Resolution
+
+当类及其父类中都没有找到IMP，此时会进入所谓的方法动态决议。
+
+{% highlight cpp %}
+IMP lookUpImpOrForward(Class cls, SEL sel, id inst, 
+                       bool initialize, bool cache, bool resolver) {
+    ...
+ retry:    
+    if (resolver  &&  !triedResolver) {
+        runtimeLock.unlock();
+        _class_resolveMethod(cls, sel, inst);
+        runtimeLock.lock();
+        // Don't cache the result; we don't hold the lock so it may have 
+        // changed already. Re-do the search from scratch instead.
+        triedResolver = YES;
+        goto retry;
+    }
+    ...
+}
+{% endhighlight %}
+
 
 ## Forwarding

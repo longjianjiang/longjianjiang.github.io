@@ -111,6 +111,10 @@ struct entsize_list_tt {
         return entsizeAndFlags & ~FlagMask;
     }
 
+    uint32_t flags() const {
+        return entsizeAndFlags & FlagMask;
+    }
+
     Element& getOrEnd(uint32_t i) const { 
         assert(i <= count);
         return *(Element *)((uint8_t *)&first + i*entsize()); 
@@ -125,6 +129,8 @@ struct entsize_list_tt {
 {% endhighlight %}
 
 `entsize_list_tt` 定义了一种类似数组的顺序存储的结构，内置了 Random Access Iterator, 提供了根据索引获取存储Element的方法 `get(uint32_t idx)`。
+
+`entsize()` 其实就是Element的size，这里存储在了 `entsizeAndFlags` 中，通过位运算来获得。
 
 `class_ro_t` 的 flags 存储了一些类在编译时期就确定的信息，也是以标记位的形式来存储，这些标记位以 `RO_` 来头，如下所示，这里只取了部分:
 

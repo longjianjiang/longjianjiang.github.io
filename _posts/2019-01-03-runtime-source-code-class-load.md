@@ -271,6 +271,17 @@ static void methodizeClass(Class cls) {
 {% highlight cpp %}
 static NXMapTable *namedSelectors;
 
+struct method_t {
+    struct SortBySELAddress :
+        public std::binary_function<const method_t&,
+                                    const method_t&, bool>
+    {
+        bool operator() (const method_t& lhs,
+                         const method_t& rhs)
+        { return lhs.name < rhs.name; }
+    };
+};
+
 static SEL __sel_registerName(const char *name, bool shouldLock, bool copy) {
     SEL result = 0;
 
@@ -340,7 +351,7 @@ prepareMethodLists(Class cls, method_list_t **addedLists, int addedCount,
 
 > prepareMethodLists 方法中省略了关于 内存管理方法 和 allocWithZone 方法的设置；
 
-不过在添加方法到 rw 中时，多了一个 prepare 的步骤。这个方法主要是调用 `fixupMethodList`, 这个 fixup 方法主要将方法的 SEL 注册到一个全局的 `NXMapTable` 中，完成后标记 `method_list_t` fixup 完成。
+不过在添加方法到 rw 中时，多了一个 prepare 的步骤。这个方法主要是调用 `fixupMethodList`, 这个 fixup 方法主要将方法的 SEL 注册到一个全局的 `NXMapTable` 中，同时将方法按SEL地址进行排序，完成后标记 `method_list_t` fixup 完成。
 
 {% highlight cpp %}
 static Class realizeClass(Class cls) {
