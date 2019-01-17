@@ -636,3 +636,189 @@ IMP lookUpImpOrForward(Class cls, SEL sel, id inst,
 
 最后一个步骤就是所谓的消息转发，默认会返回一个转发的IMP，同时加入 sel&IMP加入缓存，此时 `lookUpImpOrForward` 整个过程结束，拿到IMP后具体执行又到了汇编代码。
 
+```
+// macro MethodTableLookup
+...
+
+call	__class_lookupMethodAndLoadCache3
+
+...
+
+.if $0 == NORMAL
+	cmp	%r11, %r11		// set eq for nonstret forwarding
+.else
+	test %r11, %r11		// set ne for stret forwarding
+.endif
+...
+
+```
+
+```
+// __objc_msgSend_uncached
+    STATIC_ENTRY __objc_msgSend_uncached
+	UNWIND __objc_msgSend_uncached, FrameWithNoSaves
+
+	// r10 is already the class to search
+	MethodTableLookup NORMAL	// r11 = IMP
+	jmp	*%r11			// goto *imp
+
+	END_ENTRY __objc_msgSend_uncached
+```
+
+现在让我们回过头来看之前的汇编，`MethodTableLookup` 有一段是关于转发的，分为有无返回值的转发，回到`__objc_msgSend_uncached`, 当转发时，我们返回的IMP是 `_objc_msgForward_impcache`, 这个IMP是一个函数指针，所以现在需要我们执行这个IMP。
+
+```
+STATIC_ENTRY __objc_msgForward_impcache
+
+jne	__objc_msgForward_stret
+jmp	__objc_msgForward
+
+END_ENTRY __objc_msgForward_impcache
+```
+
+可以看到转发的代码中分了两种情况，有无返回值，符合之前 `MethodTableLookup` 的设置。
+
+```
+ENTRY __objc_msgForward
+
+movq	__objc_forward_handler(%rip), %r11
+jmp	*%r11
+
+END_ENTRY __objc_msgForward
+
+ENTRY __objc_msgForward_stret
+
+movq	__objc_forward_stret_handler(%rip), %r11
+jmp	*%r11
+
+END_ENTRY __objc_msgForward_stret
+```
+
+从代码中可以看到有无返回值的转发，分别将 `__objc_forward_handler` 和 `__objc_forward_stret_handler` 赋值给寄存器 r11，然后去执行 r11 对应的方法。
+
+{% highlight cpp %}
+__attribute__((noreturn)) void 
+objc_defaultForwardHandler(id self, SEL sel)
+{
+    _objc_fatal("%c[%s %s]: unrecognized selector sent to instance %p "
+                "(no message forward handler is installed)", 
+                class_isMetaClass(object_getClass(self)) ? '+' : '-', 
+                object_getClassName(self), sel_getName(sel), self);
+}
+void *_objc_forward_handler = (void*)objc_defaultForwardHandler;
+
+#if SUPPORT_STRET
+struct stret { int i[100]; };
+__attribute__((noreturn)) struct stret 
+objc_defaultForwardStretHandler(id self, SEL sel)
+{
+    objc_defaultForwardHandler(self, sel);
+}
+void *_objc_forward_stret_handler = (void*)objc_defaultForwardStretHandler;
+
+void objc_setForwardHandler(void *fwd, void *fwd_stret) {
+    _objc_forward_handler = fwd;
+#if SUPPORT_STRET
+    _objc_forward_stret_handler = fwd_stret;
+#endif
+}
+{% endhighlight %}
+
+
+Runtime 中有一个赋值 forward_handler 的方法，而且可以看到默认 forward_handler 的实现只是打印日志和crash，并没有转发的流程。
+
+完成对 `objc_setForwardHandler` 的调用是CoreFoundation 的 `__CFInitialize()`(CFRuntime.c) 方法中，不过对于这个方法的调用，苹果开源的代码里并没有，不过经过反编译的汇编代码中可以发现确实调用了，内部将 `__forwarding_prep_0__` 赋值给了 `_objc_forward_handler`, `__forwarding_prep_1__` 赋值给了 `_objc_forward_stret_handler`。
+
+`__forwarding_prep_0__` 和 `__forwarding_prep_1__` 内部又都调用了 `__forwarding__`。转发的逻辑都写在`__forwarding__` 中，因为这部分没有开源，只能通过反编译来看汇编代码，下面笔者给出一个[arigrant](http://www.arigrant.com/blog/2013/12/13/a-selector-left-unhandled) 给出的伪代码，还是比较复杂的一个实现。
+
+{% highlight cpp %}
+void __forwarding__(BOOL isStret, void *frameStackPointer, ...) {
+  id receiver = *(id *)frameStackPointer;
+  SEL sel = *(SEL *)(frameStackPointer + 4);
+
+  Class receiverClass = object_getClass(receiver);
+
+  if (class_respondsToSelector(receiverClass, @selector(forwardingTargetForSelector:))) {
+    id forwardingTarget = [receiver forwardingTargetForSelector:sel];
+    if (forwardingTarget) {
+      return objc_msgSend(forwardingTarget, sel, ...);
+    }
+  }
+
+  const char *className = class_getName(object_getClass(receiver));
+  const char *zombiePrefix = "_NSZombie_";
+  size_t prefixLen = strlen(zombiePrefix);
+  if (strncmp(className, zombiePrefix, prefixLen) == 0) {
+    CFLog(kCFLogLevelError,
+          @"-[%s %s]: message sent to deallocated instance %p",
+          className + prefixLen,
+          sel_getName(sel),
+          receiver);
+    <breakpoint-interrupt>
+  }
+
+  if (class_respondsToSelector(receiverClass, @selector(methodSignatureForSelector:))) {
+    NSMethodSignature *methodSignature = [receiver methodSignatureForSelector:sel];
+    if (methodSignature) {
+      BOOL signatureIsStret = [methodSignature _frameDescriptor]->returnArgInfo.flags.isStruct;
+      if (signatureIsStret != isStret) {
+        CFLog(kCFLogLevelWarning ,
+              @"*** NSForwarding: warning: method signature and compiler disagree on struct-return-edness of '%s'.  Signature thinks it does%s return a struct, and compiler thinks it does%s.",
+              sel_getName(sel),
+              signatureIsStret ? "" : not,
+              isStret ? "" : not);
+      }
+      if (class_respondsToSelector(receiverClass, @selector(forwardInvocation:))) {
+        NSInvocation *invocation = [NSInvocation _invocationWithMethodSignature:methodSignature
+                                                                          frame:frameStackPointer];
+        [receiver forwardInvocation:invocation];
+
+        void *returnValue = NULL;
+        [invocation getReturnValue:&value];
+        return returnValue;
+      } else {
+        CFLog(kCFLogLevelWarning ,
+              @"*** NSForwarding: warning: object %p of class '%s' does not implement forwardInvocation: -- dropping message",
+              receiver,
+              className);
+        return 0;
+      }
+    }
+  }
+
+  const char *selName = sel_getName(sel);
+  SEL *registeredSel = sel_getUid(selName);
+
+  if (sel != registeredSel) {
+    CFLog(kCFLogLevelWarning ,
+          @"*** NSForwarding: warning: selector (%p) for message '%s' does not match selector known to Objective C runtime (%p)-- abort",
+          sel,
+          selName,
+          registeredSel);
+  } else if (class_respondsToSelector(receiverClass, @selector(doesNotRecognizeSelector:))) {
+    [receiver doesNotRecognizeSelector:sel];
+  } else {
+    CFLog(kCFLogLevelWarning ,
+          @"*** NSForwarding: warning: object %p of class '%s' does not implement doesNotRecognizeSelector: -- abort",
+          receiver,
+          className);
+  }
+
+  // The point of no return.
+  kill(getpid(), 9);
+}
+{% endhighlight %}
+
+根据以上代码，转发分为以下几步:
+
+- `forwardingTargetForSelector:` 是否实现，如果实现直接让另一个对象去发送相同的消息，流程还是之前的msgSend的流程
+- 判断是否为僵尸对象，是的话则直接断点中断
+- 走 `methodSignatureForSelector:` 加 `forwardInvocation:` 流程
+- 判断方法是否注册，最后就是走到 `doesNotRecognizeSelector:` 方法
+
+这就是完整的转发流程，具体例子可以参考[消息转发](http://www.longjianjiang.com/runtime/)。
+
+最后看一个调用堆栈，符合之前说的流程。
+
+![runtime_source_code_method_3]({{site.url}}/assets/images/blog/runtime_source_code_method_3.png)
+
