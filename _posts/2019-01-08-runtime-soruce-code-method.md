@@ -79,7 +79,7 @@ struct method_t {
 
 SEL我们可以看到定义，是一个 `objc_selector` 结构体指针，不过在源码中并没有给出该结构体的定义，用来表示运行时方法的名字，通常我们可以通过 `@selector`来快速获取到一个方法的SEL，也可以通过 `NSSelectorFromString` 方法获得方法的SEL。
 
-我们知道OC类中不能存在两个相同名字的方法，参数类型不一样也是不允许的，但是不同类中有相同的名字的方法确是允许的，不过不知道是否想过不同类中的同名方法是不是指向的是同一个SEL呢？
+我们知道OC类中不能存在两个相同名字的方法，参数类型不一样也是不允许的，但是一个类中可以存在同名的实例方法和类方法，不同类中有相同的名字的方法确是允许的，不过不知道是否想过不同类中的同名方法是不是指向的是同一个SEL呢？
 
 如果我之前没看过源码，还真不确定，不过现在可以确定的是不同类的同名方法指向的是同一个SEL，SEL的地址编译期就已经确定了。
 
@@ -491,11 +491,12 @@ IMP lookUpImpOrForward(Class cls, SEL sel, id inst,
 
 ## Dynamic Method Resolution
 
-当类及其父类中都没有找到IMP，此时会进入所谓的方法动态决议。
+当类及其父类中都没有找到IMP，此时会进入所谓的方法动态决议阶段。
 
 {% highlight cpp %}
 IMP lookUpImpOrForward(Class cls, SEL sel, id inst, 
                        bool initialize, bool cache, bool resolver) {
+    bool triedResolver = NO;
     ...
  retry:    
     if (resolver  &&  !triedResolver) {
@@ -511,5 +512,127 @@ IMP lookUpImpOrForward(Class cls, SEL sel, id inst,
 }
 {% endhighlight %}
 
+当resolver为true时，方法动态决议只会执行一次，具体实现在 `_class_resolveMethod`中。
+
+{% highlight cpp %}
+void _class_resolveMethod(Class cls, SEL sel, id inst) {
+    if (! cls->isMetaClass()) {
+        // try [cls resolveInstanceMethod:sel]
+        _class_resolveInstanceMethod(cls, sel, inst);
+    } 
+    else {
+        // try [nonMetaClass resolveClassMethod:sel]
+        // and [cls resolveInstanceMethod:sel]
+        _class_resolveClassMethod(cls, sel, inst);
+        if (!lookUpImpOrNil(cls, sel, inst, 
+                            NO/*initialize*/, YES/*cache*/, NO/*resolver*/)) 
+        {
+            _class_resolveInstanceMethod(cls, sel, inst);
+        }
+    }
+}
+{% endhighlight %}
+
+可以看到首先判断是是否是metaClass，之前说过实例方法存储在类中，而类方法则存储在metaClass中，所以如果sel是实例方法则执行 `_class_resolveInstanceMethod`, 类方法则执行 `_class_resolveClassMethod`。
+
+{% highlight cpp %}
+IMP lookUpImpOrNil(Class cls, SEL sel, id inst, 
+                   bool initialize, bool cache, bool resolver) {
+    IMP imp = lookUpImpOrForward(cls, sel, inst, initialize, cache, resolver);
+    if (imp == _objc_msgForward_impcache) return nil;
+    else return imp;
+}
+
+static void _class_resolveInstanceMethod(Class cls, SEL sel, id inst) {
+    if (! lookUpImpOrNil(cls->ISA(), SEL_resolveInstanceMethod, cls, 
+                         NO/*initialize*/, YES/*cache*/, NO/*resolver*/)) 
+    {
+        return;
+    }
+
+    BOOL (*msg)(Class, SEL, SEL) = (typeof(msg))objc_msgSend;
+    bool resolved = msg(cls, SEL_resolveInstanceMethod, sel);
+
+    IMP imp = lookUpImpOrNil(cls, sel, inst, 
+                             NO/*initialize*/, YES/*cache*/, NO/*resolver*/);
+}
+static void _class_resolveClassMethod(Class cls, SEL sel, id inst)
+{
+    assert(cls->isMetaClass());
+
+    if (! lookUpImpOrNil(cls, SEL_resolveClassMethod, inst, 
+                         NO/*initialize*/, YES/*cache*/, NO/*resolver*/)) 
+    {
+        return;
+    }
+
+    BOOL (*msg)(Class, SEL, SEL) = (typeof(msg))objc_msgSend;
+    bool resolved = msg(_class_getNonMetaClass(cls, inst), 
+                        SEL_resolveClassMethod, sel);
+
+    IMP imp = lookUpImpOrNil(cls, sel, inst, 
+                             NO/*initialize*/, YES/*cache*/, NO/*resolver*/);
+}
+{% endhighlight %}
+
+`_class_resolveClassMethod`首先判断cls为metaClass，然后 `_class_resolveClassMethod` 和 `_class_resolveInstanceMethod` 首先查找对应的类是否实现了 `+resolveClassMethod` 和 `+resolveInstanceMethod` IMP，不过因为NSObject实现了这两个方法，所以都会找到的，NSObject默认实现仅仅返回了NO。
+
+对应的查找方法 `lookUpImpOrNil` 内部还是调用了之前说过的 `lookUpImpOrForward` 返回一个IMP, 只是当IMP是 `_objc_msgForward_impcache` 返回的是nil。
+
+接着 `_class_resolveClassMethod` 和 `_class_resolveInstanceMethod` 会给cls发送一个msg，也就是调用 `+resolveClassMethod` 和 `+resolveInstanceMethod` 方法，也就是动态的给sel增加一个IMP，结束后再次调用了 `lookUpImpOrNil`，将本次方法决议缓存，不论给sel增加IMP是否成功，下次再调用这个sel就不会再走到方法决议了，因为可以从缓存中找到一个IMP，有可能是 `_objc_msgForward_impcache`。
+
+### 疑问
+
+{% highlight objective_c %}
+@interface Person : NSObject {
+    NSString *_nickName;
+}
++ (void)run;
+@end
+
+@implementation Person
+void dynamicMethodIMP(id obj, SEL _cmd) {
+    NSLog(@"Person class method run");
+}
+
++ (BOOL)resolveInstanceMethod:(SEL)sel {
+    if (sel == @selector(run)) {
+        class_addMethod([self class], sel, (IMP)dynamicMethodIMP, "v@:");
+        return YES;
+    }
+    return [super resolveInstanceMethod:sel];
+}
+@end
+
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        [Person run];
+    }
+    return 0;
+}
+{% endhighlight %}
+
+当是类方法的时候，首先调用了 `_class_resolveClassMethod`，然后尝试寻找sel的IMP，看是否通过`resolveClassMethod`为sel添加了IMP，如果没有添加则继续尝试调用 `_class_resolveInstanceMethod`。
+
+不过笔者做了实验，在`_class_resolveInstanceMethod` 中对cls发送 `+resolveInstanceMethod` 消息时，类中实现了 `+resolveInstanceMethod` 方法，但是并没有走到，而是去了NSObject的 `+resolveInstanceMethod`。
+
+所以其实当是类方法时，类没有给对应的sel增加IMP时，尝试调用 `_class_resolveInstanceMethod` 并没有效果。
 
 ## Forwarding
+
+{% highlight cpp %}
+IMP lookUpImpOrForward(Class cls, SEL sel, id inst, 
+                       bool initialize, bool cache, bool resolver) {
+    ...
+ retry:    
+    imp = (IMP)_objc_msgForward_impcache;
+    cache_fill(cls, sel, imp, inst);
+ done:
+    runtimeLock.unlock();
+    return imp;
+    ...
+}
+{% endhighlight %}
+
+最后一个步骤就是所谓的消息转发，默认会返回一个转发的IMP，同时加入 sel&IMP加入缓存，此时 `lookUpImpOrForward` 整个过程结束，拿到IMP后具体执行又到了汇编代码。
+
