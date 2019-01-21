@@ -50,8 +50,9 @@ Runtime的源码就比较多了，而且关于Runtime源码的文章也很多，
 - 类的加载过程
 - 类的propety 和 ivar
 - 类的方法及调用过程
-- 类的load方法 和 initialize方法
+- 类的协议
 - 类的分类
+- 类的load方法 和 initialize方法
 
 ## 最后
 
