@@ -4,7 +4,7 @@ title:  "Hello World 学习笔记"
 date:   2018-10-12
 excerpt:  "本文是笔者对以Hello World 学习汇编，Mach-O格式以及fishhook的笔记"
 tag:
-- Assembly
+- Compiler
 comments: true
 ---
 
