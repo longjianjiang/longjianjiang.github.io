@@ -20,9 +20,7 @@ comments: true
 
 上面所说的编译器和解释器我们称之为 `Language Processors`。
 
-```
 Java的 `Language Processors` 既包含编译器又包含解释器，将 .java -> .bytecode 这一过程是编译器完成的，而JVM执行 .bytecode 则是解释器完成的。正是因为此，Java具有了跨平台的能力。
-```
 
 下面给出一个完整的编译过程：
 
