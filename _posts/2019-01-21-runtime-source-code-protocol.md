@@ -92,5 +92,35 @@ struct protocol_t : objc_object {
     const char **_extendedMethodTypes;
     const char *_demangledName;
     property_list_t *_classProperties;
+
+    // 省略一些方法
 };
 {% endhighlight %}
+
+可以看到 `protocol_t` 也继承自 `objc_object`，所以协议也是一个对象。下面就是协议中包含的属性，很多我们看了也能知道是我们平时写在协议中的哪部分，还有一些则是陌生的，下面笔者来介绍下协议中的属性:
+
+- instanceMethods, classMethods: 协议中的对象方法和类方法列表
+- optionalInstanceMethods, optionalClassMethods: 协议中可选的对象方法和类方法列表
+- instanceProperties, _classProperties: 协议中对象property和类property(class关键字)
+- size: protocol_t 类型的大小
+- flags: 32位标记位，最后2位用来存储是否 `fixedup`
+- protocols: 继承的其他协议
+- _extendedMethodTypes:
+- mangledName, _demangledName: 这两个属性关于命名重整。
+
+> C++有所谓命名重整(name mangling)，主要是为了支持函数重载，编译时会根据函数的参数列表的类型生成一个独一无二的名字，防止同名函数的出现，具体可以参考[name mangling](https://www.ibm.com/support/knowledgecenter/en/ssw_ibm_i_73/rzarg/name_mangling.htm)
+
+![runtime_source_code_protocol_1]({{site.url}}/assets/images/blog/runtime_source_code_protocol_1.png)
+![runtime_source_code_protocol_2]({{site.url}}/assets/images/blog/runtime_source_code_protocol_2.png)
+
+根据上面两张图可以看到协议中的方法在编译期间就已经加入了`ro`的方法列表中，`ro`的协议列表也存储着当前类遵守的协议。
+
+> 我们可以看到`ro`的协议列表并没有包含父类遵守的协议，因为方法寻找会按继承链去寻找，父类的`ro`的方法列表会添加协议中的方法，所以就没有必要在子类中显示父类的协议了。
+
+![runtime_source_code_protocol_3]({{site.url}}/assets/images/blog/runtime_source_code_protocol_3.png)
+
+还有一个有趣的地方是，一旦某个类遵守了协议后，`ro`的属性列表就会多出四个，这四个就是 `NSObject` 协议中定义的四个属性。
+
+## References
+
+[https://www.ibm.com/support/knowledgecenter/en/ssw_ibm_i_73/rzarg/name_mangling.htm](https://www.ibm.com/support/knowledgecenter/en/ssw_ibm_i_73/rzarg/name_mangling.htm)
