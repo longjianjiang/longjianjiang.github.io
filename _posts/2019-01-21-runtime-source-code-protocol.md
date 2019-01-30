@@ -215,6 +215,73 @@ fixupProtocol(protocol_t *proto) {
 可以看到`fixupProtocol`将当前协议及其遵守的其他协议中的四种方法列表进行fixup，也就是调用 `fixupProtocolMethodList` 方法。
 `fixupProtocolMethodList` 首先会调用 `fixupMethodList`，该方法笔者在[类的加载过程](http://www.longjianjiang.com/runtime-source-code-class-load/)有叙述。因为上一步在 `fixupMethodList` 中如果协议的`_extendedMethodTypes` 有值则没有根据方法SEL地址进行排序，所以下面则是对协议中方法列表，根据SEL地址对方法列表进行排序，同时也对协议中`_extendedMethodTypes`方法类型字符串数组排序。
 
+## Protocol Extension
+
+我们都知道Swift可以给协议加extension，而OC中的协议则没有提供添加默认实现的方式，[ProtocolKit](https://github.com/forkingdog/ProtocolKit) 则提供使用Runtime提供这一功能。
+
+使用如下所示:
+
+{% highlight objective_c %}
+@protocol HeightProtocol <NSObject>
+@required
+- (CGFloat)height;
+@end
+
+@defs(RemarkProtocol)
+- (NSUInteger)score {
+    return 100;
+}
+@end
+{% endhighlight %}
+
+defs一个宏，使用defs是因为是一个保留关键字，所以会像`@interface`一样高亮的颜色。
+
+{% highlight cpp %}
+#define defs _pk_extension
+
+#define _pk_extension($protocol) _pk_extension_imp($protocol, _pk_get_container_class($protocol))
+
+#define _pk_extension_imp($protocol, $container_class) \
+    protocol $protocol; \
+    @interface $container_class : NSObject <$protocol> @end \
+    @implementation $container_class \
+    + (void)load { \
+        _pk_extension_load(@protocol($protocol), $container_class.class); \
+    } \
+
+#define _pk_get_container_class($protocol) _pk_get_container_class_imp($protocol, __COUNTER__)
+#define _pk_get_container_class_imp($protocol, $counter) _pk_get_container_class_imp_concat(__PKContainer_, $protocol, $counter)
+#define _pk_get_container_class_imp_concat($a, $b, $c) $a ## $b ## _ ## $c
+{% endhighlight %}
+
+> __COUNTER__自身计数器，用于记录以前编译过程中出现的__COUNTER__的次数，从0开始计数。
+
+而上述关于defs的代码展开后则如下所示:
+
+{% highlight objective_c %}
+@protocol RemarkProtocol;
+@interface __PKContainer_RemarkProtocol_0 : NSObject<RemarkProtocol> @end
+
+@implementation __PKContainer_RemarkProtocol_0
++ (void)load { 
+    _pk_extension_load(@protocol(RemarkProtocol), __PKContainer_RemarkProtocol_0.class); 
+} 
+- (NSUInteger)score {
+    return 100;
+}
+@end
+{% endhighlight %}
+
+可以看到defs宏动态创建了一个类，类名三部分组成，__PKContainer_ 前缀，协议名，计数器，这个类中包含了协议中默认的实现方法。
+
+内部又是如何实现遵守协议类增加一个默认实现方法的呢？分为以下几步:
+
+- 通过 `load` 方法，将协议的默认实现方法存储到内部一个 `PKExtendedProtocol` 结构体数组 `allExtendedProtocols` 中；
+- 使用 `__attribute__` 编译器指令，使内部 `_pk_extension_inject_entry` 方法在 main 函数执行之前执行；
+- `_pk_extension_inject_entry` 内部则通过 `objc_copyClassList` 获取所有类列表 `allClasses`，两层for循环遍历 `allExtendedProtocols` 和 `allClasses`，判断类是否遵守协议，使用 `class_addMethod` 为类动态添加协议方法的默认实现；
+
+笔者这里就不贴代码了，具体可以去看源代码。
+
 ## 最后
 
 本文介绍了类的protocol的结构，有了之前类加载的基础，protocol相关的内容显得比较简单了。
@@ -222,3 +289,5 @@ fixupProtocol(protocol_t *proto) {
 ## References
 
 [https://www.ibm.com/support/knowledgecenter/en/ssw_ibm_i_73/rzarg/name_mangling.htm](https://www.ibm.com/support/knowledgecenter/en/ssw_ibm_i_73/rzarg/name_mangling.htm)
+
+[https://stackoverflow.com/questions/2053029/how-exactly-does-attribute-constructor-work](https://stackoverflow.com/questions/2053029/how-exactly-does-attribute-constructor-work)
