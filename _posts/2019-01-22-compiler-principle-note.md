@@ -44,3 +44,9 @@ relocated machine code
       |                      
  target machine code
 ```
+
+之前已经说了编译器的工作就是把源程序转变为目标机器代码，这个过程主要分为两步：analysis(分析)、synthesis(合成)。分析部分称为编译器的前端，合成部分称为编译器的后端。分析部分主要拆分源程序，构建语法结构，同时检查错误，给出提示，同时生成符号表。合成部分则根据intermediate representation(中间表示)和符号表构造目标机器代码。下面给出具体的一个流程:
+
+![compiler_principle_note_1]({{site.url}}/assets/images/blog/compiler_principle_note_1.png)
+
+> 实际运行中有些步骤可能会组合起来，组合起来的步骤之间生成的中间表示不需要被明确的构造出来。
