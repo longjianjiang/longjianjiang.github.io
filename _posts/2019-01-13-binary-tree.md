@@ -239,3 +239,86 @@ void levelOrderTraverse(TreeNode<int>* rootTree) {
     }
 }
 {% endhighlight %}
+
+## 二叉树的重建
+
+已知中序遍历加上先序遍历，后序遍历，层次遍历中的一种可以重建二叉树，下面笔者给出先序遍历+中序遍历和中序遍历+层次遍历重建二叉树的参考代码。
+
+- 先序遍历+中序遍历
+
+归并的思想，根据先序遍历确定根节点，然后构建左右子数的先序数组和中序数组，递归的用其构建左右子树。
+
+{% highlight cpp %}
+TreeNode<int>* reConstructBinaryTree_1(vector<int> pre,vector<int> in) {
+    if (pre.size() == 0) return NULL;
+    int treeSize = (int)pre.size();
+    vector<int> leftPreorder, leftInorder, rightPreorder, rightInorder;
+
+    TreeNode<int> *head = new TreeNode<int>(pre[0]);
+    int rootNodeIdxAtInorder = 0;
+    for (int i = 0; i < treeSize; i++) {
+        if (in[i] == pre[0]) {
+            rootNodeIdxAtInorder = i;
+            break;
+        }
+    }
+
+    for (int i = 0; i < rootNodeIdxAtInorder; ++i) {
+        leftInorder.push_back(in[i]);
+        leftPreorder.push_back(pre[i+1]);
+    }
+    for (int i = rootNodeIdxAtInorder+1; i < treeSize; ++i) {
+        rightInorder.push_back(in[i]);
+        rightPreorder.push_back(pre[i]);
+    }
+
+    head->left = reConstructBinaryTree_1(leftPreorder, leftInorder);
+    head->right = reConstructBinaryTree_1(rightPreorder, rightInorder);
+
+    return head;
+}
+{% endhighlight %}
+
+- 中序遍历+层次遍历
+
+同样是归并的思路，只是在拆分层次遍历时需要进行过滤，使用新的左右层次遍历进行构造左右子树。
+
+{% highlight cpp %}
+TreeNode<int>* reConstractBinaryTree(vector<int> in, vector<int> level, int left, int right, int n) {
+    if (n <= 0) return NULL;
+
+    TreeNode<int> *rootNode = new TreeNode<int>(level[0]);
+    int idx = -1;
+    for (int i = left; i <= right; i++) {
+        if (in[i] == level[0]) {
+            idx = i;
+            break;
+        }
+    }
+
+    unordered_set<int> s;
+    for (int i = left; i < idx; ++i) {
+        s.insert(in[i]);
+    }
+
+    vector<int> lLevel;
+    vector<int> rLevel;
+
+    for (int i = 1; i < n; ++i) {
+        if (s.find(level[i]) != s.end()) {
+            lLevel.push_back(level[i]);
+        } else {
+            rLevel.push_back(level[i]);
+        }
+    }
+
+    rootNode->left = reConstractBinaryTree(in, lLevel, left, idx-1, idx-left);
+    rootNode->right = reConstractBinaryTree(in, rLevel, idx+1, right, right-idx);
+
+    return rootNode;
+}
+
+TreeNode<int>* reConstructBinaryTree_2(vector<int> in, vector<int> level) {
+    return reConstractBinaryTree(in, level, 0, (int)in.size()-1, (int)in.size());
+}
+{% endhighlight %}
