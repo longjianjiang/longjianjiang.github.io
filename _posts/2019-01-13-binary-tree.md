@@ -46,7 +46,7 @@ struct TreeNode {
 ```
 		 1
 	2		  5
- 3	   4  NULL   6
+ 3	   4    NULL   6
 ```
 
 
@@ -139,8 +139,11 @@ void preorderTraverseNoneRecursive(TreeNode<int>* rootTree) {
 中序遍历依然使用栈来存储节点，步骤如下:
 
 1.指针指向根节点
+
 2.将指针入栈，不断取左节点，重复此步骤
+
 3.当到叶子节点，弹出栈顶节点，将指针指向栈顶节点的右节点
+
 4.重复步骤1
 
 参考代码如下:
@@ -168,9 +171,13 @@ void inorderTraverseNoneRecursive(TreeNode<int>* rootTree) {
 后序遍历相对复杂点，遍历时需要设置标记位，步骤如下:
 
 1.指针指向根节点，入栈，取左节点，直到叶子节点
+
 2.遍历栈，每次设置两个标记位，左子树是否遍历过(leftVisited), 右子树是否遍历过(rightVisited)，初始化为false
+
 2.1判断栈顶节点的左右子节点是否是先前指针节点(叶子节点默认是NULL)，设置标记位为true
+
 2.2取栈顶节点，当左右子节点存在，并且对应标记位为false时，将其入栈
+
 2.3否则弹出栈顶节点
 
 参考代码如下:
@@ -209,6 +216,8 @@ void postorderTraverseNoneRecursive(TreeNode<int>* rootTree) {
 {% endhighlight %}
 
 ### 广度优先遍历
+
+二叉树的层次遍历实现使用队列，将二叉树的左右子树依次入队列，遍历队列即可，参考代码如下:
 
 {% highlight cpp %}
 void levelOrderTraverse(TreeNode<int>* rootTree) {
