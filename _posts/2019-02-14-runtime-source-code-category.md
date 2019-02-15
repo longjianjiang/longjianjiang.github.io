@@ -383,6 +383,25 @@ id _object_get_associative_reference(id object, void *key) {
 
 `objc_removeAssociatedObjects` 并不常用，因为我们通常不会手动去调用这个方法，因为在 对象`dealloc` 时，Runtime会自动调用这个方法。
 
+{% highlight cpp %}
+void *objc_destructInstance(id obj) {
+    if (obj) {
+        // Read all of the flags at once for performance.
+        bool cxx = obj->hasCxxDtor();
+        bool assoc = obj->hasAssociatedObjects();
+
+        // This order is important.
+        if (cxx) object_cxxDestruct(obj);
+        if (assoc) _object_remove_assocations(obj);
+        obj->clearDeallocating();
+    }
+
+    return obj;
+}
+{% endhighlight %}
+
+可以看到如果isa的`has_assoc` 标记位设置为1，则调用了 `_object_remove_assocations` 移除关联对象。
+
 下面让我们来看下移除关联对象的实现:
 
 {% highlight cpp %}
