@@ -186,6 +186,18 @@ NSObject走到该方法多次，Person和NSString走到该方法一次。通过�
 上面就是一个简单的关联对象的例子，重点是Runtime提供的两个方法，笔者下面来看下其实现:
 
 {% highlight cpp %}
+inline disguised_ptr_t DISGUISE(id value) { return ~uintptr_t(value); }
+
+static id acquireValue(id value, uintptr_t policy) {
+    switch (policy & 0xFF) {
+    case OBJC_ASSOCIATION_SETTER_RETAIN:
+        return objc_retain(value);
+    case OBJC_ASSOCIATION_SETTER_COPY:
+        return ((id(*)(id, SEL))objc_msgSend)(value, SEL_copy);
+    }
+    return value;
+}
+
 void _object_set_associative_reference(id object, void *key, id value, uintptr_t policy) {
     // retain the new value (if any) outside the lock.
     ObjcAssociation old_association(0, nil);
@@ -313,7 +325,104 @@ ObjectAssociationMap => void * : ObjcAssociation
 ObjcAssociation     =>  value & OBJC_ASSOCIATION_COPY
 ```
 
+`_object_set_associative_reference` 实现分为以下几步:
 
-使用了关联对象来模拟实例变量，因为类的内存布局在编译期间就确定，运行时不允许添加额外的实例变量。
+1.初始化工作，`old_association` 最后 release 老的关联对象值，`new_value` 根据 policy 对value进行操作(retain或者copy)，
+获得全局的 `AssociationsHashMap` 实例 `associations`，初始化对象伪装指针 `disguised_object`。
+
+2.判断 `new_value` 是否为有值。
+
+2.1 `new_value` 有值，根据`disguised_object`在`associations`获取一个迭代器 `i`。
+
+2.1.1 在`associations`中存在`disguised_object`对应的 `ObjectAssociationMap` 记做 `refs`。
+
+2.1.1.1 根据 `key` 在 `refs` 中获取一个迭代器 `j`。
+
+2.1.1.1.1 在 `refs` 中存在 `key` 对应的 `ObjcAssociation`，将其赋值给 `old_association`, 用 `new_value` 和 `policy` 新建一个`ObjcAssociation`覆盖原先的值。
+
+2.1.1.1.2 在 `refs` 中不存在 `key` 对应的 `ObjcAssociation`，用 `new_value` 和 `policy` 新建一个`ObjcAssociation` 和 `key` 存储到 `refs` 中。
+
+2.1.2  在`associations`中不存在`disguised_object`对应的 `ObjectAssociationMap`，新建一个 `ObjectAssociationMap` 对象记做 `refs`和 `disguised_object` 存储到 `associations` 中。再用 `new_value` 和 `policy` 新建一个`ObjcAssociation` 和 `key` 存储到 `refs` 中。最后将对象的 [isa](http://www.longjianjiang.com/runtime-source-code-class-isa/) `has_assoc` 标记位设置为存在关联对象。
+
+2.2 `new_value` 为空，此时尝试将该对象的关联对象从`ObjectAssociationMap`中移除。
+
+3.最后则尝试release关联对象的旧值。
+
+以上就是设置关联对象的实现过程，其实了解了之前的四个类的结构，理解起来就十分简单了，下面让我们来看 `_object_get_associative_reference` 的实现。
+
+{% highlight cpp %}
+id _object_get_associative_reference(id object, void *key) {
+    id value = nil;
+    uintptr_t policy = OBJC_ASSOCIATION_ASSIGN;
+    {
+        AssociationsManager manager;
+        AssociationsHashMap &associations(manager.associations());
+        disguised_ptr_t disguised_object = DISGUISE(object);
+        AssociationsHashMap::iterator i = associations.find(disguised_object);
+        if (i != associations.end()) {
+            ObjectAssociationMap *refs = i->second;
+            ObjectAssociationMap::iterator j = refs->find(key);
+            if (j != refs->end()) {
+                ObjcAssociation &entry = j->second;
+                value = entry.value();
+                policy = entry.policy();
+                if (policy & OBJC_ASSOCIATION_GETTER_RETAIN) {
+                    objc_retain(value);
+                }
+            }
+        }
+    }
+    if (value && (policy & OBJC_ASSOCIATION_GETTER_AUTORELEASE)) {
+        objc_autorelease(value);
+    }
+    return value;
+}
+{% endhighlight %}
+
+获取关联对象的实现就更加简单了，找到`key` 对应的 `ObjcAssociation` 后，根据 `policy` 调用对应的方法，最后返回value即可。
+
+`objc_removeAssociatedObjects` 并不常用，因为我们通常不会手动去调用这个方法，因为在 对象`dealloc` 时，Runtime会自动调用这个方法。
+
+下面让我们来看下移除关联对象的实现:
+
+{% highlight cpp %}
+void _object_remove_assocations(id object) {
+    vector< ObjcAssociation,ObjcAllocator<ObjcAssociation> > elements;
+    {
+        AssociationsManager manager;
+        AssociationsHashMap &associations(manager.associations());
+        if (associations.size() == 0) return;
+        disguised_ptr_t disguised_object = DISGUISE(object);
+        AssociationsHashMap::iterator i = associations.find(disguised_object);
+        if (i != associations.end()) {
+            // copy all of the associations that need to be removed.
+            ObjectAssociationMap *refs = i->second;
+            for (ObjectAssociationMap::iterator j = refs->begin(), end = refs->end(); j != end; ++j) {
+                elements.push_back(j->second);
+            }
+            // remove the secondary table.
+            delete refs;
+            associations.erase(i);
+        }
+    }
+    // the calls to releaseValue() happen outside of the lock.
+    for_each(elements.begin(), elements.end(), ReleaseValue());
+}
+
+void objc_removeAssociatedObjects(id object) {
+    if (object && object->hasAssociatedObjects()) {
+        _object_remove_assocations(object);
+    }
+}
+{% endhighlight %}
+
+`objc_removeAssociatedObjects` 首先判断对象的isa的`has_assoc` 标记位，如果存在关联对象则调用 `_object_remove_assocations` 移除关联对象。
+
+`_object_remove_assocations` 实现也很简单，将所有`ObjcAssociation` 存放到一个 vector中，最后将vector中所有元素进行release。
+
+# 最后
+
+本文笔者介绍了分类的结构及其加载过程，关联对象的实现，之前笔者也看过关于分类的文章，这次有了之前内容的铺垫，理解的更加深刻了。
+
 
 
