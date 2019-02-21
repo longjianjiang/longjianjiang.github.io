@@ -152,4 +152,89 @@ AVL树是一种经过插入和删除节点后可以自适应的平衡二叉搜�
 
 有了这种自适应，当输入数据为有序的时候，此二叉搜索树并不会退化为链表。
 
+怎么做到当自适应呢，需要通过旋转节点达到平衡的效果，存在下列四种情况:
+
+> 为了防止递归回溯，笔者为Node增加 `parent` 节点。
+
+- LL
+
+{% highlight cpp %}
+template <class T>
+void AVLTree<T>::LLR(Node<T> *parent, Node<T> *node, Node<T> *child) {
+    Node<T> *grandParent = parent->parent;
+    node->parent = grandParent;
+    Node<T> *nodeRight = node->right;
+    if (nodeRight != nullptr) { nodeRight->parent = parent; }
+    node->right = parent;
+    parent->parent = node;
+    parent->left = nodeRight;
+    if (grandParent == nullptr) {
+        root = node;
+    } else if (grandParent->left == parent) {
+        grandParent->left = node;
+    } else {
+        grandParent->right = node;
+    }
+}
+{% endhighlight %}
+
+- RR
+
+{% highlight cpp %}
+template <class T>
+void AVLTree<T>::RRR(Node<T> *parent, Node<T> *node, Node<T> *child) {
+    Node<T> *grandParent = parent->parent;
+    node->parent = grandParent;
+    Node<T> *nodeLeft = node->left;
+    if (nodeLeft != nullptr) { nodeLeft->parent = parent; }
+    node->left = parent;
+    parent->parent = node;
+    parent->right = nodeLeft;
+    if (grandParent == nullptr) {
+        root = node;
+    } else if (grandParent->left == parent) {
+        grandParent->left = node;
+    } else {
+        grandParent->right = node;
+    }
+}
+{% endhighlight %}
+
+- LR
+
+{% highlight cpp %}
+template <class T>
+void AVLTree<T>::LRR(Node<T> *parent, Node<T> *node, Node<T> *child) {
+    RRR(node, child, child->right);
+    LLR(parent, child, node);
+}
+{% endhighlight %}
+
+- RL
+
+{% highlight cpp %}
+template <class T>
+void AVLTree<T>::RLR(Node<T> *parent, Node<T> *node, Node<T> *child) {
+    LLR(node, child, child->left);
+    RRR(parent, child, node);
+}
+{% endhighlight %}
+
+
 ## Red-Black Tree
+
+红黑树同样是一种平衡二叉搜索树，和AVL树不同的是，红黑树并不是通过约束左右两边子树高度来实现平衡的，而是使用来了下面的性质来约束树的平衡的。
+
+- 节点不是黑色就是红色
+- 根节点是黑色
+- 红色节点的两个孩子必须是黑色
+- 从任一节点到其叶子节点的路径都包含相同数量的黑色节点
+- 每一个叶子节点都是黑色的(这里叶子节点是NIL)
+
+> 最后一个性质不影响实现，知道有这条就好。
+
+下面给出一个红黑树:
+
+![binary_search_tree_2]({{site.url}}/assets/images/blog/binary_search_tree_2.png)
+
+所以在红黑树进行插入和删除的时候，因为要保证上述的性质，从而需要进行颜色修改和旋转节点操作。
