@@ -4,7 +4,7 @@ title:  "发布自己的开源框架到Cocoapods"
 date:   2016-07-4
 excerpt: "自己写了个app内置浏览器，之前一直在Cocoapods上用别人的，今天试着把自己的上传，让其他人也可以用。"
 tag:
-- iOS
+- Tutorial
 
 comments: true
 ---
