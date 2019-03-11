@@ -102,18 +102,54 @@ int main(int argc, const char * argv[]) {
 
 上述例子证明了，多线程下存在安全问题，所以下面笔者会介绍应对方案。
 
+## 阻塞型同步
+
+- mutex
+
+mutex（mutual exclusion）的基本逻辑是，当某个线程获取到某个资源的控制权时，这个时候其他线程只能等待另一线程释放控制权后才能进行访问。
+
+C++标准库中提供了 `std::mutex` 来操作 mutex，但实际我们并不会直接操作mutex，因为`unlock`操作无法覆盖到所有执行路径，比如当异常发生时。这个时候其他线程永远无法获取到mutex，则会处于永远的阻塞状态。
+
+所以我们依然会使用之前说的 RAII 将其包装起来，C++标准库中也提供了这个包装类 `std::lock_guard`。
+
+### deadlock
+
+什么情况下会发生死锁？比如现在有两个线程需要同时获取两个资源，每个资源有一个mutex，此时线程1获取到了资源1的mutex，开始尝试获取资源2的mutex，但是此时资源2的mutex被线程2所获取，而且线程2也在尝试获取资源1的mutex，此时两个线程互相等待，也就是所谓的死锁。
+
+为了解决死锁，C++标准库中提供了 `std::lock()` 函数用来同时锁住多个mutex。
+
+但是导致死锁并不是只要对mutex的互相等待这一种情况，比如两个线程相互join也会导致死锁。所以避免死锁的关键在于防止两个线程互相等待的发生，下面给出几种有效的方式：
+
+1.避免锁的嵌套，当已经获取到一个锁时，不要尝试在获取第二把锁，如果真的需要则使用 `std::lock`。
+
+2.当获取到某个资源的锁时，避免调用不可控的外界函数，防止对共享数据做一些未定义的行为。
+
+3.按顺序上锁解锁，保证有序性。
+
+- std::unique_lock
+
+之前我们使用`std::lock_guard`，必须等到该实例销毁时，才会unlock对应的mutex，这样会存在一些问题。比如在函数执行完之前需要做一些其他操作，这部分操作的存在破坏了锁的粒度，同时也会降低了并发的效率，导致了其他线程等待时间的增加。所以此时需要一个更加灵活的包装类，C++标准库中提供了 `std::unique_lock`。
+
+`std::unique_lock` 有和mutex一样的 `lock()`, `try_lock`, `unlock` 方法。这样我们可以提前unlock，保持锁的最小粒度。
+
+`std::unique_lock` 的实现其实也不复杂，和`std::lock_guard`一样，内部持有了一个mutex，但是额外增加了一个bool变量标记是否持有mutex，在析构时bool变量为true才执行mutex的 unlock 方法。
+
+- std::shared_mutex & std::shared_lock
+
+当一个操作读操作频率远大于写操作时，此时使用通常的mutex会影响性能，因为多线程下多个线程同时进行读操作是没有问题的，所以在读操作时我们可以不阻塞，当进行写操作时，此时不论读还是写操作都是不安全的，此时阻塞，这样可以提高性能。
+
+C++17标准库为我们提供了这种读写锁 `std::shared_mutex`，额外增加了 `lock_shared`, `try_lock_shared`, `unlock_shared`。所以我们在读操作时使用 `lock_shared` 这样就不会阻塞其他进行读操作的线程，写操作时使用 `lock` 阻塞其他线程保证线程安全。
+
+C++14标准库中提供了 `std::shared_lock`, 和之前的`std::unique_lock`类似，只是`lock`和`unlock`操作被替换为 `lock_shared` 和 `unlock_shared`。
+
+- conditoin_variable
+
 ## 非阻塞型同步
 
 - atomic
 
 - spin lock
 
-## 阻塞型同步
 
-- mutex
-
-- lock
-
-- conditoin_variable
 
 ## iOS中的多线程
