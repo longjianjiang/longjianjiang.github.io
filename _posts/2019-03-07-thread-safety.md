@@ -142,7 +142,63 @@ C++17标准库为我们提供了这种读写锁 `std::shared_mutex`，额外增�
 
 C++14标准库中提供了 `std::shared_lock`, 和之前的`std::unique_lock`类似，只是`lock`和`unlock`操作被替换为 `lock_shared` 和 `unlock_shared`。
 
+- std::recursive_mutex
+
+上述提到的mutex，如果在一个线程中被连续的lock多次，会产生死锁，而且会出现未定义行为。如果实际情况中真的需要对同一个mutex进行多次lock操作，C++提供了 `std::recursive_mutex`, 所谓的递归锁。递归锁释放时，需要调用相同数量的unlock，才能释放mutex。
+
+- std::once_flag & std::call_once
+
+C++11提供了 `std::once_flag`,  `std::call_once` 来进行单例初始化。如下例子所示：
+
+{% highlight cpp %}
+volatile T* pInst = nullptr;
+std::once_flag flag_T;                          
+
+void ConstructInstance() {                     
+    pInst = new T;
+}
+
+T* GetInstance() {
+    std::call_once(flag_T, ConstructInstance);  
+    return pInst;
+}
+{% endhighlight %}
+
 - conditoin_variable
+
+条件变量通过消息机制来处理多线程同步问题，可以阻塞一个或多个线程直到收到唤醒通知或者超时从而继续执行。
+
+C++11提供了 `std::conditoin_variable` 必须和 `std::unique_lock` 搭配使用，`std::conditoin_variable_any` 可以搭配任意类型的锁使用。
+
+下面给出一个条件变量的时序图:
+
+![thread_safety_1.png]({{site.url}}/assets/images/blog/thread_safety_1.png)
+
+{% highlight cpp %}
+template <class _Predicate>
+void
+condition_variable::wait(unique_lock<mutex>& __lk, _Predicate __pred)
+{
+    while (!__pred())
+        wait(__lk);
+}
+{% endhighlight %}
+
+根据上述代码和上图我们可以思考下两个问题：
+
+1.能不能把while换成if？
+
+2.为什么wait方法有一个mutex的参数？
+
+问题1:     
+因为存在虚假唤醒的存在，所以需要使用while循环来保证被唤醒后条件是否真的满足。wait在linux中使用 `futex` 的系统调用。当进程被信号中断后，之前的所有阻塞系统调用都会被中止，直接返回。所以此时如果没有while循环去检查条件是否满足，则会出错。
+
+问题2:     
+可以看到wait有两个步骤，首先检查条件是否满足，然后决定是否调用wait，可以看到有两步。如果在这两步之间有一个线程将条件改成true，正常情况应该就不需要wait了或者应该被唤醒了，但是实际确是处于一直等待状态。
+
+因为wait有两步的原因，导致了两步之间的空隙可能其他线程会进行操作，所以mutex的参数就是为了来防止这种情况的发生。
+
+这个时候就如上图所示，到调用wait时，首先wait内部会将mutex unlock，进入等待。当被唤醒时进行lock，如此只要其他线程修改条件正确加锁了，那么就不会出现之前的情况。
 
 ## 非阻塞型同步
 
@@ -153,3 +209,9 @@ C++14标准库中提供了 `std::shared_lock`, 和之前的`std::unique_lock`类
 
 
 ## iOS中的多线程
+
+## References
+
+[https://stackoverflow.com/questions/46088363/why-does-stdcondition-variablewait-need-mutex](https://stackoverflow.com/questions/46088363/why-does-stdcondition-variablewait-need-mutex)
+
+[http://blog.vladimirprus.com/2005/07/spurious-wakeups.html](http://blog.vladimirprus.com/2005/07/spurious-wakeups.html)
