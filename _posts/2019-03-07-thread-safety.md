@@ -200,9 +200,35 @@ condition_variable::wait(unique_lock<mutex>& __lk, _Predicate __pred)
 
 这个时候就如上图所示，到调用wait时，首先wait内部会将mutex unlock，进入等待。当被唤醒时进行lock，如此只要其他线程修改条件正确加锁了，那么就不会出现之前的情况。
 
+- semaphores
+
+C++20中引入了 `semaphores`，也就是所谓的信号量，现在还未加入标准库。
+
+所谓信号量其实就是大家公用一个counter，当counter为0时就阻塞。而且存在两个操作，counter+1，counter-1。这样多个线程操作同一个信号量，达到线程同步的效果。
+
 ## 非阻塞型同步
 
 - atomic
+
+在阻塞型同步我们说了不同中的mutex，这种类似的锁我们称为悲观锁。可以看到的是这种锁每次都假定会有其他线程会来争夺资源，所以首先会进行lock拿到锁，才进行操作。
+
+对应的就有乐观锁，所谓乐观锁假定不会有其他线程来争夺资源，所以可以直接操作资源。或者运气不佳正好遇到了其他在操作的线程，也没关系，进行重试就好，直到成功。
+
+现在就存在一个问题，没有锁，那如何知道一次操作是否和其他线程冲突呢？这个时候就需要原子操作，也就是在执行这种操作时不会被打断。而原子操作一般通过CAS操作实现。如下所示是C++中提供的一个CAS方法：
+
+{% highlight cpp %}
+template <class _Tp>
+inline _LIBCPP_INLINE_VISIBILITY
+bool
+atomic_compare_exchange_weak(volatile atomic<_Tp>* __o, _Tp* __e, _Tp __d) _NOEXCEPT
+{
+    return __o->compare_exchange_weak(*__e, __d);
+}
+{% endhighlight %}
+
+上述方法会首先会比较对象包含的值和expected指向的值是否相等:
+1.如果相等，则替换对象的值为desired；
+2.如果不想等，则替换对象的值为expecte指向的值；
 
 - spin lock
 
