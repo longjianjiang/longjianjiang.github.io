@@ -104,7 +104,7 @@ int main(int argc, const char * argv[]) {
 
 ## 阻塞型同步
 
-- mutex
+### mutex
 
 mutex（mutual exclusion）的基本逻辑是，当某个线程获取到某个资源的控制权时，这个时候其他线程只能等待另一线程释放控制权后才能进行访问。
 
@@ -126,7 +126,7 @@ C++标准库中提供了 `std::mutex` 来操作 mutex，但实际我们并不会
 
 3.按顺序上锁解锁，保证有序性。
 
-- std::unique_lock
+### std::unique_lock
 
 之前我们使用`std::lock_guard`，必须等到该实例销毁时，才会unlock对应的mutex，这样会存在一些问题。比如在函数执行完之前需要做一些其他操作，这部分操作的存在破坏了锁的粒度，同时也会降低了并发的效率，导致了其他线程等待时间的增加。所以此时需要一个更加灵活的包装类，C++标准库中提供了 `std::unique_lock`。
 
@@ -134,7 +134,7 @@ C++标准库中提供了 `std::mutex` 来操作 mutex，但实际我们并不会
 
 `std::unique_lock` 的实现其实也不复杂，和`std::lock_guard`一样，内部持有了一个mutex，但是额外增加了一个bool变量标记是否持有mutex，在析构时bool变量为true才执行mutex的 unlock 方法。
 
-- std::shared_mutex & std::shared_lock
+### std::shared_mutex & std::shared_lock
 
 当一个操作读操作频率远大于写操作时，此时使用通常的mutex会影响性能，因为多线程下多个线程同时进行读操作是没有问题的，所以在读操作时我们可以不阻塞，当进行写操作时，此时不论读还是写操作都是不安全的，此时阻塞，这样可以提高性能。
 
@@ -142,11 +142,11 @@ C++17标准库为我们提供了这种读写锁 `std::shared_mutex`，额外增�
 
 C++14标准库中提供了 `std::shared_lock`, 和之前的`std::unique_lock`类似，只是`lock`和`unlock`操作被替换为 `lock_shared` 和 `unlock_shared`。
 
-- std::recursive_mutex
+### std::recursive_mutex
 
 上述提到的mutex，如果在一个线程中被连续的lock多次，会产生死锁，而且会出现未定义行为。如果实际情况中真的需要对同一个mutex进行多次lock操作，C++提供了 `std::recursive_mutex`, 所谓的递归锁。递归锁释放时，需要调用相同数量的unlock，才能释放mutex。
 
-- std::once_flag & std::call_once
+### std::once_flag & std::call_once
 
 C++11提供了 `std::once_flag`,  `std::call_once` 来进行单例初始化。如下例子所示：
 
@@ -164,7 +164,7 @@ T* GetInstance() {
 }
 {% endhighlight %}
 
-- conditoin_variable
+### conditoin_variable
 
 条件变量通过消息机制来处理多线程同步问题，可以阻塞一个或多个线程直到收到唤醒通知或者超时从而继续执行。
 
@@ -200,7 +200,7 @@ condition_variable::wait(unique_lock<mutex>& __lk, _Predicate __pred)
 
 这个时候就如上图所示，到调用wait时，首先wait内部会将mutex unlock，进入等待。当被唤醒时进行lock，如此只要其他线程修改条件正确加锁了，那么就不会出现之前的情况。
 
-- semaphores
+### semaphores
 
 C++20中引入了 `semaphores`，也就是所谓的信号量，现在还未加入标准库。
 
@@ -208,29 +208,118 @@ C++20中引入了 `semaphores`，也就是所谓的信号量，现在还未加�
 
 ## 非阻塞型同步
 
-- atomic
+### atomic
 
 在阻塞型同步我们说了不同中的mutex，这种类似的锁我们称为悲观锁。可以看到的是这种锁每次都假定会有其他线程会来争夺资源，所以首先会进行lock拿到锁，才进行操作。
 
 对应的就有乐观锁，所谓乐观锁假定不会有其他线程来争夺资源，所以可以直接操作资源。或者运气不佳正好遇到了其他在操作的线程，也没关系，进行重试就好，直到成功。
 
-现在就存在一个问题，没有锁，那如何知道一次操作是否和其他线程冲突呢？这个时候就需要原子操作，也就是在执行这种操作时不会被打断。而原子操作一般通过CAS操作实现。如下所示是C++中提供的一个CAS方法：
+现在就存在一个问题，没有锁，那如何知道一次操作是否和其他线程冲突呢？这个时候就需要原子操作，也就是在执行这种操作时不会被打断。而原子操作一般通过CAS操作实现。如下所示是C++中提供的CAS方法(执行过程是不可分割，也就是以原子的方式进行)：
 
 {% highlight cpp %}
 template <class _Tp>
-inline _LIBCPP_INLINE_VISIBILITY
-bool
-atomic_compare_exchange_weak(volatile atomic<_Tp>* __o, _Tp* __e, _Tp __d) _NOEXCEPT
-{
-    return __o->compare_exchange_weak(*__e, __d);
+inline bool
+atomic_compare_exchange_weak(atomic<_Tp>* __o, _Tp* __e, _Tp __d) _NOEXCEPT;
+
+template <class _Tp>
+inline bool
+atomic_compare_exchange_strong(atomic<_Tp>* __o, _Tp* __e, _Tp __d) _NOEXCEPT;
+{% endhighlight %}
+
+上述方法会首先会比较对象包含的值和expected指向的值是否相等:         
+1.如果相等，则替换对象的值为desired，返回true，这个操作称之为Read-Modify-Write；     
+2.如果不想等，则替换expected指向的值为对象的值，返回false；     
+
+上述weak和strong的版本区别在于，weak版本允许spurious failures（伪失败），所谓伪失败指的是对象包含的值和expected指向的值是否相等也可能返回false，这种情况不会进行替换。在一些平台上面，CAS操作是用一个指令序列来实现的，不同与x86上的一个指令。在这些平台上，切换上下文，另外一个线程加载了同一个内存地址，种种情况都会导致一开始的CAS操作失败。称它是假的，此时CAS失败并不是因为存储的值与期望的值不相等，而是时间调度的问题。CAS的strong版本的行为不同，它把这个问题包裹在其中，并防止了这种伪失败的发生。
+
+一般的建议是在循环中使用weak版本的，此时性能会比较高，其他情况则使用strong版本的。
+
+### ABA问题
+
+下面我们来看一个实际的例子，往链表头部插入新节点，代码如下所示:
+
+{% highlight cpp %}
+struct list {
+    std::atomic<node*> head;
+};
+ 
+void append(list* s, node* n) {
+    node* head;
+    do {
+        head = s->head;
+        n->next = head;
+    } while (!std::atomic_compare_exchange_weak(&(s->head), &head, n));
 }
 {% endhighlight %}
 
-上述方法会首先会比较对象包含的值和expected指向的值是否相等:
-1.如果相等，则替换对象的值为desired；
-2.如果不想等，则替换对象的值为expecte指向的值；
+假设目前链表为 `b->c->nil`，我们使用上面的append方法在b之前插入a节点。线程1在执行CAS之前，线程2先将b移除，插入d，然后再将b插入，此时链表变成了 `b->d->c->nil`，这个时候线程1执行CAS的时候，是无法察觉的，虽然head没变，但是链表的结构已经变了，这种问题就是所谓的ABA问题。这里问题的关键在于，虽然比较的时候b是一样的，但是并不意味着没有发生变化，
 
-- spin lock
+### memory order
+
+之前说到的CAS的方法，内部是调用C++中 `std::atomic` 对象的CAS方法，以strong为例，共有4个重载声明:
+
+{% highlight cpp %}
+bool compare_exchange_strong(_Tp& __e, _Tp __d,
+                                 memory_order __s, memory_order __f) volatile
+bool compare_exchange_strong(_Tp& __e, _Tp __d,
+                                 memory_order __s, memory_order __f) 
+bool compare_exchange_strong(_Tp& __e, _Tp __d,
+                                 memory_order __m = memory_order_seq_cst) volatile 
+bool compare_exchange_strong(_Tp& __e, _Tp __d,
+                                 memory_order __m = memory_order_seq_cst)
+{% endhighlight %}
+
+可以看到多了叫 `memory_order` 的参数，这个参数是用来指定内存序。我们实际编写的代码经过编译器的编译后，编译器会做一些优化，从而更加高效的利用CPU，所以可能造成的一个现象就是所谓的乱序执行，即实际运行的顺序并不一定按照书写的顺序。此时如果是单线程没有问题，但是在多线程的环境下就可能出现问题。
+
+```
+std::atomic<int> ai = 0;
+std::atomic<int> aj = 0;
+
+Thread1:        Thread2:
+ai = 100;       while(aj != 200)
+                    ;
+aj = 200;       std::cout << ai;
+```
+
+如上代码所示，如果线程1执行顺序按照书写顺序，那么线程2会输出100；但是实际情况是可能线程1的执行会乱序，也就是 `aj = 200` 会提前执行，所以这个时候线程2的输出就有为0了。而且就算没有乱序执行，CPU 缓存的原因，线程2可能不能立即看到ai被修改的新值，此时线程2仍然有可能输出0。
+
+memory order 就是用来指定原子操作周围的非原子操作的内存访问如何被排序和同步。可以看到默认使用的是 `std::memory_order_seq_cst` ，这是最严格的memory order，对性能一定损耗。下面分别介绍6种不同的内存序。
+
+`std::memory_order_acquire` 使用在load操作，也就是读操作。使用它可以保证load之后的读写操作不允许移动到load前面。
+
+`std::memory_order_release` 使用在store操作，也就是写操作。使用它可以保证store之前的读写操作不允许移动到store后面。
+
+`std::memory_order_consume` 和acquire类似，同样用于load操作。使用它可以保证load之后的和当前load变量有依赖的读写操作不允许移动到load前面。
+
+下面看一个例子:
+
+{% highlight cpp %}
+std::atomic<int> ai = ATOMIC_VAR_INIT(5);
+int flag = 0;
+
+void thread_1() {
+    flag = 1;
+    ai.store(1, std::memory_order_release);
+}
+
+void thread_2() {
+    while (ai.load(std::memory_order_acquire) == 0)
+        ;
+    assert(flag = 1);
+}
+{% endhighlight %}
+
+可以看到在线程2，我们断言了flag一定为1，这是为什么呢？当线程1 store的值被线程2 load到，此时线程2可以看到线程store之前对内存所有的读写，所以线程2可以断言flag一定为1。
+
+`std::memory_order_relaxed` 使用它只保证load和store是原子操作，其他的不做保证。
+
+`std::memory_order_acq_rel` 相等于 release 和 acquire 的结合体。读操作遵守 acquire，写操作遵守 release。
+
+`std::memory_order_seq_cst` 提供了顺序一致性（sequential consistency）。
+
+> 顺序一致性保证了所有线程的执行顺序和代码中书写的保持一致。
+
+### spin lock
 
 
 
@@ -241,3 +330,9 @@ atomic_compare_exchange_weak(volatile atomic<_Tp>* __o, _Tp* __e, _Tp __d) _NOEX
 [https://stackoverflow.com/questions/46088363/why-does-stdcondition-variablewait-need-mutex](https://stackoverflow.com/questions/46088363/why-does-stdcondition-variablewait-need-mutex)
 
 [http://blog.vladimirprus.com/2005/07/spurious-wakeups.html](http://blog.vladimirprus.com/2005/07/spurious-wakeups.html)
+
+[https://www.codeproject.com/Articles/808305/Understand-std-atomic-](https://www.codeproject.com/Articles/808305/Understand-std-atomic-)
+
+[https://bartoszmilewski.com/2008/12/01/c-atomics-and-memory-ordering/](https://bartoszmilewski.com/2008/12/01/c-atomics-and-memory-ordering/)
+
+[http://www.cplusplus.com/reference/atomic/memory_order/](http://www.cplusplus.com/reference/atomic/memory_order/)
