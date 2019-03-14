@@ -321,6 +321,26 @@ void thread_2() {
 
 ### spin lock
 
+自旋锁与之前所说的mutex有所区别，不像之前mutex直接阻塞等待，自旋锁则处于忙等状态尝试获取锁，直到成功。当对持有锁时间比较短的时候，使用自旋锁可以提高性能，因为此时忙等的时间肯定是小于线程阻塞唤醒及切换的时间，自然而然的，当持有锁时间比较长时使用自旋锁，此时因为处于忙等，反而会浪费CPU时间。
+
+根据上面的描述，其实我们知道只需要一个bool就可以表示自旋锁的两个状态，可用和不可用，此时我们可以使用之前所说的CAS操作来不断尝试获取。下面给定一个参考实现:
+
+{% highlight cpp %}
+class spin {
+  std::atomic_flag flag = ATOMIC_FLAG_INIT;
+public:
+  spin() = default;
+  spin(const spin&) = delete;
+  spin& operator= (const spin&) = delete;
+  void lock() {
+    while(flag.test_and_set(std::memory_order_acquire))
+      ;
+  }
+  void unlock() {
+    flag.clear(std::memory_order_release);
+  }
+};
+{% endhighlight %}
 
 
 ## iOS中的多线程
