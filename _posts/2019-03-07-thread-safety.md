@@ -46,6 +46,8 @@ int main(int argc, const char * argv[]) {
 
 还有另一个选择是 `detach()`，此时 `worker_thread` 创建后立即和 `launch_thread` 分离，此时两条线程各自独立执行。此时需要注意的是，当 `launch_thread` 结束并伴随着资源的销毁，`worker_thread` 可能仍在运行，此时需要保证 `worker_thread` 没有引用到这些资源。
 
+需要注意的是使用`join()`后，创建线程分配的资源，必须等到join方法返回的时候才能被回收，而相反使用 `detach()` 当线程入口函数执行完毕后会立即释放系统资源。
+
 如果没有没有指定 td 在销毁之前如何处理线程的结束状态，线程会在析构函数中调用 `std::terminate` 造成系统崩溃。
 
 也就是对于我们创建的线程，我们必须调用 `join()` 或者 `detach()`，我们可以创建一个类来处理线程的结束状态，如下所示:
@@ -344,6 +346,38 @@ public:
 
 
 ## iOS中的多线程
+
+### NSThread & Runloop
+
+iOS 中我们可以使用Foundation 中的 NSThread 来创建一个线程，不过此时创建出来的线程默认是detach形式的，同时不支持创建join形式的线程。主要是因为detach形式的线程执行完毕后会立即释放系统资源。如果需要join形式的线程只能通过 `POSIX` 接口去创建。
+
+之前说过创建的线程当我们指定的线程入口函数执行完毕后，该线程也就结束了。为了让线程一直处于可服务的状态，我们可以指定线程的runloop，每个线程都会有一个runloop，当在新建线程第一次调用 `getCurrent` 方法时会创建线程对应的runloop对象。此时只需指定一个port，就可以让runloop不退出。从而一直处于一个循环状态，等待任务的到来，有任务到来被唤醒去执行，没有任务则处于休眠状态，避免频繁创建线程带来的性能消耗。下面给出YYWebImageOperation中的一段示例代码:
+
+{% highlight objective_c %}
++ (void)_networkThreadMain:(id)object {
+    @autoreleasepool {
+        [[NSThread currentThread] setName:@"com.ibireme.webimage.request"];
+        NSRunLoop *runLoop = [NSRunLoop currentRunLoop];
+        [runLoop addPort:[NSMachPort port] forMode:NSDefaultRunLoopMode];
+        [runLoop run];
+    }
+}
+
++ (NSThread *)_networkThread {
+    static NSThread *thread = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        thread = [[NSThread alloc] initWithTarget:self selector:@selector(_networkThreadMain:) object:nil];
+        if ([thread respondsToSelector:@selector(setQualityOfService:)]) {
+            thread.qualityOfService = NSQualityOfServiceBackground;
+        }
+        [thread start];
+    });
+    return thread;
+}
+{% endhighlight %}
+
+这里可以看到NSThread必须调用 start 方法才会去执行线程的入口函数。
 
 ## References
 
