@@ -347,7 +347,7 @@ public:
 
 ## iOS中的多线程
 
-### NSThread & Runloop
+### NSThread
 
 iOS 中我们可以使用Foundation 中的 NSThread 来创建一个线程，不过此时创建出来的线程默认是detach形式的，同时不支持创建join形式的线程。主要是因为detach形式的线程执行完毕后会立即释放系统资源。如果需要join形式的线程只能通过 `POSIX` 接口去创建。
 
@@ -377,7 +377,13 @@ iOS 中我们可以使用Foundation 中的 NSThread 来创建一个线程，不�
 }
 {% endhighlight %}
 
-这里可以看到NSThread必须调用 start 方法才会去执行线程的入口函数。
+这里可以看到 `NSThread` 必须调用 start 方法才会去执行线程的入口函数。同时 `NSThread` 也允许我们指定线程的栈大小，而C++中的`std::thread` 则不能指定。
+
+### Thread Local Storage
+
+TLS就是可以理解为线程内部的全局变量，C++11中提供了 `thread_local` 关键字，用该关键字修饰的变量生命周期保持一致。有了TLS可以避免使用全局变量，避免了多线程同步的问题。
+
+类似的 `NSThread` 中则提供了 `threadDictionary` 来存储线程中的全局变量。
 
 ## References
 
@@ -390,3 +396,5 @@ iOS 中我们可以使用Foundation 中的 NSThread 来创建一个线程，不�
 [https://bartoszmilewski.com/2008/12/01/c-atomics-and-memory-ordering/](https://bartoszmilewski.com/2008/12/01/c-atomics-and-memory-ordering/)
 
 [http://www.cplusplus.com/reference/atomic/memory_order/](http://www.cplusplus.com/reference/atomic/memory_order/)
+
+[http://trickness.github.io/morden%20c++/2015/09/26/C++11&14-thread_local/](http://trickness.github.io/morden%20c++/2015/09/26/C++11&14-thread_local/)
