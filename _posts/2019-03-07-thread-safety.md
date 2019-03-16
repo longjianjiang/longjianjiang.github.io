@@ -202,6 +202,8 @@ condition_variable::wait(unique_lock<mutex>& __lk, _Predicate __pred)
 
 这个时候就如上图所示，到调用wait时，首先wait内部会将mutex unlock，进入等待。当被唤醒时进行lock，如此只要其他线程修改条件正确加锁了，那么就不会出现之前的情况。
 
+最后一个补充问题，为什么需要条件变量？ 其实和互斥锁相比条件变量的一个优势在于可以控制线程之间的执行顺序，这个顺序关系类似接力赛跑，如果单纯的使用互斥去实现这种次序关系就很蛋疼。
+
 ### semaphores
 
 C++20中引入了 `semaphores`，也就是所谓的信号量，现在还未加入标准库。
@@ -273,6 +275,8 @@ bool compare_exchange_strong(_Tp& __e, _Tp __d,
 
 可以看到多了叫 `memory_order` 的参数，这个参数是用来指定内存序。我们实际编写的代码经过编译器的编译后，编译器会做一些优化，从而更加高效的利用CPU，所以可能造成的一个现象就是所谓的乱序执行，即实际运行的顺序并不一定按照书写的顺序。此时如果是单线程没有问题，但是在多线程的环境下就可能出现问题。
 
+> 之前说的锁的机制，内部也是使用了内存序的。
+
 ```
 std::atomic<int> ai = 0;
 std::atomic<int> aj = 0;
@@ -320,6 +324,12 @@ void thread_2() {
 `std::memory_order_seq_cst` 提供了顺序一致性（sequential consistency）。
 
 > 顺序一致性保证了所有线程的执行顺序和代码中书写的保持一致。
+
+### volatile
+
+`volatile` 关键字其实是对变量加了一个约束，编译器默认的会对代码做一些优化，比如不是每次都从地址中读数据而是可能从缓存中读数据，加了这个关键字后，可以保证每次都从内存的读取。
+
+虽然看上去使用该关键字可以实现多线程共享资源的同步，但是实际上并不可靠，因为该关键字只是作用与编译器上，但是实际的运行是CPU执行的。同时使用该关键字也会影响优化，所以我们进行多线程同步的时候，还是需要使用之前所说的方法。
 
 ### spin lock
 
@@ -375,15 +385,98 @@ iOS 中我们可以使用Foundation 中的 NSThread 来创建一个线程，不�
     });
     return thread;
 }
+
+[self performSelector:@selector(_didReceiveImageFromDiskCache:) onThread:[self.class _networkThread] withObject:image waitUntilDone:NO];
 {% endhighlight %}
 
 这里可以看到 `NSThread` 必须调用 start 方法才会去执行线程的入口函数。同时 `NSThread` 也允许我们指定线程的栈大小，而C++中的`std::thread` 则不能指定。
+
+同时我们可以看到在线程的入口函数中，我们创建了一个自动释放池，OC中要求每条线程至少需要一个自动释放池。
+
+最后使用 `performSelector` 方法向指定线程发送执行对应 selector，指定线程的runloop会挨个执行。
 
 ### Thread Local Storage
 
 TLS就是可以理解为线程内部的全局变量，C++11中提供了 `thread_local` 关键字，用该关键字修饰的变量生命周期保持一致。有了TLS可以避免使用全局变量，避免了多线程同步的问题。
 
 类似的 `NSThread` 中则提供了 `threadDictionary` 来存储线程中的全局变量。
+
+### Terminate Thread
+
+iOS中建议我们不要直接调用提供的exit方法，这样可能会导致为线程分配的资源没有及时释放，建议等到线程入口函数执行完毕后自动退出。如果真的需要提前退出，则建议建立一个runloop，接收需要退出的通知，然后将相关资源释放后才退出线程。
+
+### atomic
+
+iOS中为我们提供了一些原子操作的方法，使用需要包含 `#import <libkern/OSAtomic.h>`，这些分两类，是否加Barrier后缀。
+比如 `OSAtomicAdd32`, `OSAtomicAdd32Barrier`，其实他们的差别就是之前说的内存序，没有Barrier后缀使用的是 `std::memory_order_relaxed`，加Barrier后缀使用的是 `std::memory_order_seq_cst`。
+
+{% highlight cpp %}
+OSATOMIC_INLINE
+int32_t
+OSAtomicAdd32(int32_t __theAmount, volatile int32_t *__theValue)
+{
+	return (OSATOMIC_STD(atomic_fetch_add_explicit)(
+			(volatile _OSAtomic_int32_t*) __theValue, __theAmount,
+			OSATOMIC_STD(memory_order_relaxed)) + __theAmount);
+}
+
+OSATOMIC_INLINE
+int32_t
+OSAtomicAdd32Barrier(int32_t __theAmount, volatile int32_t *__theValue)
+{
+	return (OSATOMIC_STD(atomic_fetch_add_explicit)(
+			(volatile _OSAtomic_int32_t*) __theValue, __theAmount,
+			OSATOMIC_STD(memory_order_seq_cst)) + __theAmount);
+}
+{% endhighlight %}
+
+可以看到iOS中提供的原子操作，实现也都是使用了C++中 atomic 提供的原子操作的接口。
+
+### lock
+
+iOS中为我们也提供了一些锁供我们使用，最基本的互斥锁可以使用POSIX中的 `pthread_mutex_t`，实现起来也很简单，如下所示:
+
+{% highlight cpp %}
+pthread_mutex_t mutex;
+void MyInitFunction() {
+    pthread_mutex_init(&mutex, NULL);
+}
+
+void MyLockingFunction() {
+    pthread_mutex_lock(&mutex);
+    // Do work.
+    pthread_mutex_unlock(&mutex);
+}
+{% endhighlight %}
+
+也可以使用OC中的 `NSLock`，同样是互斥锁，也是基于 `pthread_mutex_t` 实现。或者最简单的是使用 `@synchronized` 来实现互斥锁的功能，将一个OC对象作为token，当传入的对象一致时，多线程时就会阻塞后面的线程。
+
+### condition
+
+OC中提供了 `NSCondition` 来完成条件变量的功能，是对POSIX中的 `pthread_cond_t` 的封装。
+
+OC中还额外提供了一个 `NSConditionLock`，内部持有一个 `NSCondition` 和 `_condition_value`，在 `initWithCondition:` 中进行初始化。通过条件变量来实现了 `lockWhenCondition:`(消费者) 和 `unlockWithCondition:`(生产者) 方法，所以其实该锁是用在生产者消费者模型问题上的。
+
+{% highlight objective_c %}
+- (void) lockWhenCondition: (NSInteger)value {
+  [_condition lock];
+  while (value != _condition_value)
+    {
+      [_condition wait];
+    }
+}
+
+- (void) unlockWithCondition: (NSInteger)value {
+  _condition_value = value;
+  [_condition broadcast];
+  [_condition unlock];
+}
+{% endhighlight %}
+
+### GCD & NSOperation
+
+苹果在文档中说过让我们最好不要直接使用线程相关的API，而推荐使用GCD和NSOperationAPI进行异步任务的开发，把线程管理的工作交给系统。
+
 
 ## References
 
@@ -398,3 +491,9 @@ TLS就是可以理解为线程内部的全局变量，C++11中提供了 `thread_
 [http://www.cplusplus.com/reference/atomic/memory_order/](http://www.cplusplus.com/reference/atomic/memory_order/)
 
 [http://trickness.github.io/morden%20c++/2015/09/26/C++11&14-thread_local/](http://trickness.github.io/morden%20c++/2015/09/26/C++11&14-thread_local/)
+
+[https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/Multithreading/Introduction/Introduction.html#//apple_ref/doc/uid/10000057i-CH1-SW1](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/Multithreading/Introduction/Introduction.html#//apple_ref/doc/uid/10000057i-CH1-SW1)
+
+[https://github.com/apple/darwin-libplatform/blob/master/include/libkern/OSAtomicDeprecated.h](https://github.com/apple/darwin-libplatform/blob/master/include/libkern/OSAtomicDeprecated.h)
+
+[https://github.com/gnustep/libs-base/blob/master/Source/NSLock.m](https://github.com/gnustep/libs-base/blob/master/Source/NSLock.m)
