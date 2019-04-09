@@ -92,7 +92,7 @@ pushq	%rbp
 movq	%rsp, %rbp
 
 ## 将栈顶前移32个字节，也就是函数调用的位置
-subq	$32, %rsp
+subq	$32, %rs
 
 ## 将字符串的地址放入 `rax` 寄存器； `leaq` 是地址操作
 leaq	L_.str(%rip), %rax
@@ -125,6 +125,42 @@ popq	%rbp
 ## 函数执行return
 retq
 ```
+
+下面笔者介绍**stack frame**，也就是所谓的栈帧，函数调用就是通过栈帧来实现的，结构如下所示:
+
+```
+high address
+                                 +---------------+
+                                 |               |
+                                 |      Old      |
+                                 |     Stack     |
+                                 |     Frame     |
+                                 |               |
+                --------------   +---------------+
+                      ^     ^    |   Parameters  |
+                      |   caller +---------------+
+                      |     v    |  Return addr  |
+                           ---   +---------------+
+                Stack Frame ^    |    Old  ebp   |   <------- ebp  Frame Pointer
+                            |    +---------------+
+                      |  callee  |   Registers   |
+                      |     |    +---------------+
+                      v     v    |   Local vars  |
+                --------------   +---------------+   <------- esp  Stack Pointer
+
+low address  
+```
+
+> 根据上图可以看到一个函数调用对应一个栈帧。
+
+当产生函数调用时，首先caller将其参数列表从右往左进行入栈，紧接着将返回地址入栈，完成后跳转到callee进行执行被调用函数。
+
+此时callee将caller的帧地址入栈，这个帧地址就是之前某个方法调用caller所构成的一个函数调用。使用当前栈顶指针更新帧寄存器，然后执行callee，保存某些寄存器中的值，为callee内部的局部变量分配内存。
+
+当callee执行结束后，一个函数调用也就结束了，此时整个栈帧的数据都会被弹出。
+
+最后继续执行caller的下一条指令。
+
 ### 寄存器
 
 上述汇编代码中用到了一些寄存器，下面介绍常见的寄存器：
@@ -334,3 +370,4 @@ String Table（strtab）: 字符串表存放了符号表中可读的字符串，
 [https://www.mikeash.com/pyblog/friday-qa-2012-11-09-dyld-dynamic-linking-on-os-x.html](https://www.mikeash.com/pyblog/friday-qa-2012-11-09-dyld-dynamic-linking-on-os-x.html)
 [https://www.mikeash.com/pyblog/friday-qa-2012-11-30-lets-build-a-mach-o-executable.html](https://www.mikeash.com/pyblog/friday-qa-2012-11-30-lets-build-a-mach-o-executable.html)
 [https://www.objc.io/issues/6-build-tools/mach-o-executables/](https://www.objc.io/issues/6-build-tools/mach-o-executables/)
+[http://wsfdl.com/linux/2015/05/16/%E7%90%86%E8%A7%A3stack-func.html](http://wsfdl.com/linux/2015/05/16/%E7%90%86%E8%A7%A3stack-func.html)
