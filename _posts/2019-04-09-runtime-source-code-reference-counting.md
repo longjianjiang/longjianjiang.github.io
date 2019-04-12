@@ -24,7 +24,7 @@ comments: true
 
 首先我们先看`retain` 方法，既然是增加引用计数的方法，那么就一定会去取引用计数，所以也就知道了引用计数是如何进行存储的。
 
-![runtime_source_code_rc_1]({{site.url}}/assets/images/blog/runtime_source_code_rc_1.jpg)
+![runtime_source_code_rc_1]({{site.url}}/assets/images/blog/runtime_source_code_rc_1.png)
 
 上面就是retain的一个调用栈，涉及的函数如下:
 
@@ -99,8 +99,11 @@ id objc_object::rootRetain(bool tryRetain, bool handleOverflow) {
 这个版本实现很直观，做了下面4步:
 
 0.判断是否为`taggedPointer`；
+
 1.获取isa的值，赋值给newisa；
+
 2.更新newisa，将引用计数加1，因为isa结构中`extra_rc`存储在57位起始的8位，`RC_ONE`就是57位为1，这样bits和`RC_ONE`相加等于就是给引用计数加1了；
+
 3.CAS原子操作使用newisa的bits更新isa，赋值没成功就重试，直到成功；
 
 ### 溢出
@@ -198,3 +201,220 @@ bool objc_object::sidetable_addExtraRC_nolock(size_t delta_rc) {
 ## 引用计数的存储
 
 根据retain方法的实现，我们也就得到了引用计数在OC中是如何进行存储的。通过retain方法我们知道了OC中引用计数(nonpointer为1)是存储在isa中8位，如果溢出则每次将一半也就是128额外存储在散列表中。同时当对象创建时引用计数为1，`extra_rc`为0，从名字也可以看出来，保存的其实是额外的引用计数。
+
+## release
+
+![runtime_source_code_rc_2]({{site.url}}/assets/images/blog/runtime_source_code_rc_2.png)
+
+依然来看release的调用栈，涉及的函数如下:
+
+{% highlight cpp %}
+void objc_release(id obj) {
+    if (!obj) return;
+    if (obj->isTaggedPointer()) return;
+    return obj->release();
+}
+
+void objc_object::release() {
+    assert(!isTaggedPointer());
+
+    if (fastpath(!ISA()->hasCustomRR())) {
+        rootRelease();
+        return;
+    }
+
+    ((void(*)(objc_object *, SEL))objc_msgSend)(this, SEL_release);
+}
+
+bool objc_object::rootRelease() {
+    return rootRelease(true, false);
+}
+
+bool objc_object::rootRelease(bool performDealloc, bool handleUnderflow) {
+}
+{% endhighlight %}
+
+可以看到调用结构和retain类似，具体将引用计数减1的在方法`rootRelease(bool, bool)`。同样的我们分情况来看该方法的实现:
+
+### 未溢出
+
+{% highlight cpp %}
+bool objc_object::rootRelease(bool performDealloc, bool handleUnderflow) {
+    if (isTaggedPointer()) return false;
+
+    isa_t oldisa;
+    isa_t newisa;
+
+    do {
+        oldisa = LoadExclusive(&isa.bits);
+        newisa = oldisa;
+
+        uintptr_t carry;
+        newisa.bits = subc(newisa.bits, RC_ONE, 0, &carry);  // extra_rc--
+    } while (slowpath(!StoreReleaseExclusive(&isa.bits, 
+                                             oldisa.bits, newisa.bits)));
+    return false;
+}
+{% endhighlight %}
+
+release未溢出实现和retain类似，做了下面4步:
+
+0.判断是否为`taggedPointer`；
+
+1.获取isa的值，赋值给newisa；
+
+2.更新newisa，将引用计数减1，因为isa结构中`extra_rc`存储在57位起始的8位，`RC_ONE`就是57位为1，这样bits和`RC_ONE`相减等于就是给引用计数减1了；
+
+3.CAS原子操作使用newisa的bits更新isa，赋值没成功就重试，直到成功；
+
+因为release还有一个额外的操作，当引用计数为0时，需要释放内存，OC中需要调用dealloc方法。因为isa中`extra_rc`存储的是额外的引用计数，当`extra_rc`为0进行一次release后，如果没有额外的引用计数存储在散列表中，此时需要释放内存，否则则需要去散列表中去额外的引用计数，下面分别来看这两种情况。
+
+### 释放内存
+
+{% highlight cpp %}
+bool objc_object::rootRelease(bool performDealloc, bool handleUnderflow) {
+    if (isTaggedPointer()) return false;
+
+    isa_t oldisa;
+    isa_t newisa;
+retry:
+    do {
+        oldisa = LoadExclusive(&isa.bits);
+        newisa = oldisa;
+
+        uintptr_t carry;
+        newisa.bits = subc(newisa.bits, RC_ONE, 0, &carry);  // extra_rc--
+
+         if (slowpath(carry)) {
+            goto underflow;
+        }
+    } while (slowpath(!StoreReleaseExclusive(&isa.bits, 
+                                             oldisa.bits, newisa.bits)));
+    return false;
+
+underflow:
+    newisa = oldisa;
+
+    if (slowpath(newisa.deallocating)) {
+        ClearExclusive(&isa.bits);
+        return overrelease_error();
+    }
+    newisa.deallocating = true;
+    if (!StoreExclusive(&isa.bits, oldisa.bits, newisa.bits)) goto retry;
+
+    __sync_synchronize();
+    if (performDealloc) {
+        ((void(*)(objc_object *, SEL))objc_msgSend)(this, SEL_dealloc);
+    }
+    return true;
+}
+{% endhighlight %}
+
+当引用计数为0，release会产生下溢出，此时转移到`underflow`，没有额外的引用计数存储散列表。此时会标记isa的`deallocating`为1，这样保证了dealloc方法只会被执行一次。最后调用对象的dealloc方法，释放内存。
+
+### 溢出
+
+当引用计数为0，进行release会产生下溢出，但是有额外的引用计数存储在散列表中，下面是从散列表中获取额外引用计数的过程：
+
+{% highlight cpp %}
+bool objc_object::rootRelease_underflow(bool performDealloc) {
+    return rootRelease(performDealloc, true);
+}
+
+size_t objc_object::sidetable_subExtraRC_nolock(size_t delta_rc) {
+    assert(isa.nonpointer);
+    SideTable& table = SideTables()[this];
+
+    RefcountMap::iterator it = table.refcnts.find(this);
+    if (it == table.refcnts.end()  ||  it->second == 0) {
+        return 0;
+    }
+    size_t oldRefcnt = it->second;
+
+    assert((oldRefcnt & SIDE_TABLE_DEALLOCATING) == 0);
+    assert((oldRefcnt & SIDE_TABLE_WEAKLY_REFERENCED) == 0);
+
+    size_t newRefcnt = oldRefcnt - (delta_rc << SIDE_TABLE_RC_SHIFT);
+    assert(oldRefcnt > newRefcnt);  // shouldn't underflow
+    it->second = newRefcnt;
+    return delta_rc;
+}
+
+bool objc_object::rootRelease(bool performDealloc, bool handleUnderflow) {
+    if (isTaggedPointer()) return false;
+
+    isa_t oldisa;
+    isa_t newisa;
+retry:
+    do {
+        oldisa = LoadExclusive(&isa.bits);
+        newisa = oldisa;
+
+        uintptr_t carry;
+        newisa.bits = subc(newisa.bits, RC_ONE, 0, &carry);  // extra_rc--
+
+         if (slowpath(carry)) {
+            goto underflow;
+        }
+    } while (slowpath(!StoreReleaseExclusive(&isa.bits, 
+                                             oldisa.bits, newisa.bits)));
+    return false;
+
+underflow:
+    newisa = oldisa;
+
+   if (slowpath(newisa.has_sidetable_rc)) {
+        if (!handleUnderflow) {
+            ClearExclusive(&isa.bits);
+            return rootRelease_underflow(performDealloc);
+        }
+
+        size_t borrowed = sidetable_subExtraRC_nolock(RC_HALF);
+        if (borrowed > 0) {
+            newisa.extra_rc = borrowed - 1;  // redo the original decrement too
+            bool stored = StoreReleaseExclusive(&isa.bits, 
+                                                oldisa.bits, newisa.bits);
+            if (!stored) {
+                isa_t oldisa2 = LoadExclusive(&isa.bits);
+                isa_t newisa2 = oldisa2;
+                if (newisa2.nonpointer) {
+                    uintptr_t overflow;
+                    newisa2.bits = 
+                        addc(newisa2.bits, RC_ONE * (borrowed-1), 0, &overflow);
+                    if (!overflow) {
+                        stored = StoreReleaseExclusive(&isa.bits, oldisa2.bits, 
+                                                       newisa2.bits);
+                    }
+                }
+            }
+
+            if (!stored) {
+                sidetable_addExtraRC_nolock(borrowed);
+                goto retry;
+            }
+
+            sidetable_unlock();
+            return false;
+        }
+        else {
+            // Side table is empty after all. Fall-through to the dealloc path.
+        }
+   }
+}
+{% endhighlight %}
+
+和之前retain一样，处理散列表中额外引用计数时依然绕了一个弯子，通过`rootRelease_underflow`方法第二次调用`rootRelease(bool,bool)`方法。
+
+通过`sidetable_subExtraRC_nolock`方法去散列表中验证是否可以拿出额外的128引用计数用来更新isa的`extra_rc`，如果不够则返回0，否则更新散列表中存储的额外引用计数。
+
+判断borrowed是否大于0，如果等于0则直接走到之前到释放内存流程。否则使用borrowed-1的值更新isa的`extra_rc`，因为之前的`extra_rc`为0，还没有减1，所以这里需要进行减1操作。使用newisa的bits更新isa，如果没成功，则会进行两步重试。
+
+这里其实有一个问题，在之前retain出现溢出的时候，我们设置了isa的`has_sidetable_rc`为1，但是在`sidetable_subExtraRC_nolock`更新额外引用计数时，当取完时并没有进行更新`has_sidetable_rc`为0。根据Apple在源码中的注释知道，这里主要为了多线程的竞争，所以一直保持为1。
+
+## 获取引用计数
+
+说完了引用计数的存储，操作引用计数，最后也是最简单的就是获取引用计数了，其实现方法在`objc_object`的`rootRetainCount()` 方法中，其实获取方法就是`1+extra_rc+side_table_rc`，笔者这里就不贴代码了。
+
+## 总结
+
+本文主要根据runtime源码，了解了OC中引用计数的基本实现。
