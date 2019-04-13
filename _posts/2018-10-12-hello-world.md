@@ -85,10 +85,10 @@ L_.str:                                 ## @.str
 main函数中调用`printf` 过程如下所示：
 
 ```
-## 首先main函数开头将 `rbp` 寄存器入栈，因为main函数中可能会调用其他函数，这样当调用函数返回时我们可以知道main函数的执行地址。
+## 因为main函数并不是第一个被执行的函数，所以将调用main函数的函数的栈帧底地址入栈。
 pushq	%rbp  
 
-## 然后将 `rbp` 指向 栈顶
+## 然后将 `rbp` 指向 栈顶，建立新的栈帧，也就是main函数的栈帧
 movq	%rsp, %rbp
 
 ## 将栈顶前移32个字节，也就是函数调用的位置
@@ -119,7 +119,7 @@ movl	%ecx, %eax
 ## 收回之前栈前移的32字节
 addq	$32, %rsp
 
-## 恢复之前存入栈的 `rbp` 寄存器中的值
+## 将`rbp`指向之前入栈的 `rbp` 寄存器中的值，也就是调用main函数的函数的栈帧
 popq	%rbp
 
 ## 函数执行return
@@ -153,22 +153,61 @@ low address
 
 > 根据上图可以看到一个函数调用对应一个栈帧。
 
+callee的汇编代码如下：
+
+```
+push %ebp
+mov %esp, %ebp
+...
+mov %ebp, %esp
+pop %ebp
+ret
+```
+
 当产生函数调用时，首先caller将其参数列表从右往左进行入栈，紧接着将返回地址入栈，完成后跳转到callee进行执行被调用函数。
 
-此时callee将caller的帧地址入栈，这个帧地址就是之前某个方法调用caller所构成的一个函数调用。使用当前栈顶指针更新帧寄存器，然后执行callee，保存某些寄存器中的值，为callee内部的局部变量分配内存。
+- push %ebp
 
-当callee执行结束后，一个函数调用也就结束了，此时整个栈帧的数据都会被弹出。
+callee首先会将当前bp寄存器存储的栈帧入栈，相等于存储起来，这个栈帧是之前某个方法调用caller所构成的一个函数调用。
 
-最后继续执行caller的下一条指令。
+- movl %esp, %ebp
+
+这个操作就是将bp寄存器指向栈顶，所以现在sp寄存器和bp寄存器都指向了之前caller的栈帧底地址。
+
+完成了👆两步操作后，就是具体执行callee中的代码，保存某些寄存器中的值，为callee内部的局部变量分配内存等工作。完成执行后进入收尾工作。
+
+- mov %ebp, %esp
+
+将sp寄存器指向bp寄存器，此时sp寄存器和bp寄存器都指向了之前caller的栈帧底地址。和`movl %esp, %ebp`执行完的效果一致。
+
+- pop %ebp
+
+将之前caller的栈帧底地址赋值给bp寄存器。
+
+- ret
+
+call指令是用来函数调用的，这个指令做了两件事：
+
+1.将caller的下一条指令地址入栈，这样当callee返回后，caller可以接着往下执行；
+2.修改ip寄存器，进行指令转移，也就是去执行callee；
+
+所以经过前一步`pop %ebp`，现在sp指向的应该是caller的下一条指令的地址。
+
+ret指令则执行了`pop ip`，也就是将caller的下一条指令地址赋值给ip，从而caller可以继续往下执行。
+
+此时一个函数调用就结束了。
+
+**理解这个过程需要注意的是，ip指向的是指令区，而sp指向的是栈区，是两个不同区域。**
 
 ### 寄存器
 
 上述汇编代码中用到了一些寄存器，下面介绍常见的寄存器：
 
 ```
-sp：栈寄存器，指向栈顶
-bp：帧寄存器，指向当前的帧
-eax: 一般存储函数返回值
+sp:栈寄存器，指向栈顶
+bp:帧寄存器，指向当前的帧
+ip:指令指针寄存器，一般指向当前执行指令的下一条指令
+ax:一般存储函数返回值
 ```
 
 ### 地址偏移
@@ -371,3 +410,4 @@ String Table（strtab）: 字符串表存放了符号表中可读的字符串，
 [https://www.mikeash.com/pyblog/friday-qa-2012-11-30-lets-build-a-mach-o-executable.html](https://www.mikeash.com/pyblog/friday-qa-2012-11-30-lets-build-a-mach-o-executable.html)
 [https://www.objc.io/issues/6-build-tools/mach-o-executables/](https://www.objc.io/issues/6-build-tools/mach-o-executables/)
 [http://wsfdl.com/linux/2015/05/16/%E7%90%86%E8%A7%A3stack-func.html](http://wsfdl.com/linux/2015/05/16/%E7%90%86%E8%A7%A3stack-func.html)
+[https://segmentfault.com/a/1190000007977460](https://segmentfault.com/a/1190000007977460)
