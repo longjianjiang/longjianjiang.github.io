@@ -90,7 +90,7 @@ comments: true
 
 ## iOS中的内存管理
 
-iOS之前是MRC也就是之前说的引用计数，后面到了ARC其实还是引用计数，只是我们不需要再去写操作引用计数的方法，由编译器帮我们处理了。
+iOS之前是MRC也就是之前说的引用计数，后面到了ARC其实还是引用计数，只是我们不需要再去写操作引用计数的方法，由编译器帮我们处理了。OC中的引用计数的实现参考[这里](http://www.longjianjiang.com/runtime-source-code-reference-counting/)。
 
 ### MRC
 

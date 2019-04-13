@@ -55,6 +55,8 @@ Runtime的源码就比较多了，而且关于Runtime源码的文章也很多，
 - 类的load方法 和 initialize方法
 
 - 引用计数
+- weak
+- autorelease
 
 ## 最后
 
