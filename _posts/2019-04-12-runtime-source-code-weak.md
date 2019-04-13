@@ -92,7 +92,7 @@ struct weak_entry_t {
 
 上述更新entry的方法在 `objc_weak.mm` 的 `append_referrer` 方法中。
 
-## 调用
+## weak_register_no_lock
 
 当给一个弱引用进行赋值的时候，调用栈如下所示:
 
@@ -121,8 +121,96 @@ hasNew表示弱引用是否有新值，正常情况下为true，对应的newObj�
 
 crashIfDeallocating表示，当注册的时候如果newObj正在销毁，则产生crash；
 
+下面来看添加一个对象的弱引用关系到weak_table中，实现在`weak_register_no_lock`方法中，步骤如下:
 
-## 移除
+{% highlight cpp %}
+id weak_register_no_lock(weak_table_t *weak_table, id referent_id, 
+                      id *referrer_id, bool crashIfDeallocating) {
+    objc_object *referent = (objc_object *)referent_id;
+    objc_object **referrer = (objc_object **)referrer_id;
+
+    if (!referent  ||  referent->isTaggedPointer()) return referent_id;
+
+    bool deallocating;
+    if (!referent->ISA()->hasCustomRR()) {
+        deallocating = referent->rootIsDeallocating();
+    }
+
+    if (deallocating) {
+        if (crashIfDeallocating) {
+            _objc_fatal("Cannot form weak reference to instance (%p) of "
+                        "class %s. It is possible that this object was "
+                        "over-released, or is in the process of deallocation.",
+                        (void*)referent, object_getClassName((id)referent));
+        } else {
+            return nil;
+        }
+    }
+
+    // now remember it and where it is being stored
+    weak_entry_t *entry;
+    if ((entry = weak_entry_for_referent(weak_table, referent))) {
+        append_referrer(entry, referrer);
+    } 
+    else {
+        weak_entry_t new_entry(referent, referrer);
+        weak_grow_maybe(weak_table);
+        weak_entry_insert(weak_table, &new_entry);
+    }
+
+    return referent_id;
+}
+{% endhighlight %}
+
+
+1.判断newObj非空同时不是taggedPointer；
+2.判断newObj没有在释放内存；
+3.如果当前右值对象第一次赋值给一个弱引用，此时会初始化weak_table，默认weak_table中`weak_entries`大小为64，根据弱引用赋值表达式的两个参数初始化一个new_entry,将其插入到weak_table。具体插入方式和之前`weak_entry_t`使用地址hash进行获取索引进行插入一样。
+4.如果当前右值对象存在一个弱引用，那么通过`weak_entry_for_referent`就可以从weak_table中查到这个entry，直接调用之前所说的更新entry的`append_referrer`方法即可。
+
+目前为止，直接的所说的数据结构关系如下图所示:
+
+
+## weak_unregister_no_lock
+
+当一个弱引用指向一个新的对象时，需要从weak_table中移除一个对象的弱引用关系。实现在`weak_unregister_no_lock`方法中，步骤如下:
+
+{% highlight cpp %}
+void weak_unregister_no_lock(weak_table_t *weak_table, id referent_id, 
+                        id *referrer_id) {
+    objc_object *referent = (objc_object *)referent_id;
+    objc_object **referrer = (objc_object **)referrer_id;
+
+    weak_entry_t *entry;
+
+    if (!referent) return;
+
+    if ((entry = weak_entry_for_referent(weak_table, referent))) {
+        remove_referrer(entry, referrer);
+        bool empty = true;
+        if (entry->out_of_line()  &&  entry->num_refs != 0) {
+            empty = false;
+        }
+        else {
+            for (size_t i = 0; i < WEAK_INLINE_COUNT; i++) {
+                if (entry->inline_referrers[i]) {
+                    empty = false; 
+                    break;
+                }
+            }
+        }
+
+        if (empty) {
+            weak_entry_remove(weak_table, entry);
+        }
+    }
+}
+{% endhighlight %}
+
+1.首先判断右值对象是否为空；
+2.通过`weak_entry_for_referent`就可以从weak_table中查到这个entry，从存储旧对象左值地址的数组中移除当前赋值表达式左值的地址；
+3.判断旧对象的弱引用关系entry中存储左值地址的数组是否为空，如果为空，则调用`weak_entry_remove`从weak_table中移除旧对象的弱引用关系。
+
 
 ## References
 
