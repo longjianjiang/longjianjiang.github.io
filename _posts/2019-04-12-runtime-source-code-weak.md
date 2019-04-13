@@ -36,7 +36,99 @@ id __weak wobj = obj;
 
 下面来看runtime中如何来记录弱引用关系的，以及如何实现当对象销毁时，对应的弱引用被置为`nil`的。
 
-## 
+## 原理
+
+我们都知道使用`__weak`的一个效果就是，右值对象释放时，左值指向该对象的指针会被置为`nil`。其实想一下实现这个机制并不困难，首先每次对弱引用赋值的时候，将右值对象作为key，而对应的value是一个数组，存储的是左值对象地址，因为可能多个弱引用指向同一个右值对象。当对象销毁时，根据对象找到对应的数组，将数组中的指针指向的值置为`nil`即可。
+
+## 数据结构
+
+再看具体实现之前，先看具体使用到的一些数据结构。
+
+{% highlight cpp %}
+struct SideTable {
+    spinlock_t slock;
+    RefcountMap refcnts;
+    weak_table_t weak_table;
+};
+{% endhighlight %}
+
+首先是散列表，存储着对象的弱引用和[额外引用计数](http://www.longjianjiang.com/runtime-source-code-reference-counting/)。
+
+{% highlight cpp %}
+#if __LP64__
+#define PTR_MINUS_2 62
+#else
+#define PTR_MINUS_2 30
+#endif
+
+#define WEAK_INLINE_COUNT 4
+struct weak_table_t {
+    weak_entry_t *weak_entries;
+    size_t    num_entries;
+    uintptr_t mask;
+    uintptr_t max_hash_displacement;
+};
+struct weak_entry_t {
+    DisguisedPtr<objc_object> referent;
+    union {
+        struct {
+            weak_referrer_t *referrers;
+            uintptr_t        out_of_line_ness : 2;
+            uintptr_t        num_refs : PTR_MINUS_2;
+            uintptr_t        mask;
+            uintptr_t        max_hash_displacement;
+        };
+        struct {
+            // out_of_line_ness field is low bits of inline_referrers[1]
+            weak_referrer_t  inline_referrers[WEAK_INLINE_COUNT];
+        };
+    };
+};
+{% endhighlight %}
+
+`weak_table_t` 存储了所有对象的弱引用关系，而一个对象的弱引用关系则由`weak_entry_t`来存储。`weak_entry_t`中存储左值对象地址的是联合中结构体成员`inline_referrers` 或者 `referrers`。默认先存储在`inline_referrers`的数组中，个数为4，当存满了后，则会存储在`referrers`，并会将原先的4个复制。
+
+使用`referrers`存储时并不是按顺序去将左值对象地址存储到数组中，而是使用hash计算出一个随机索引进行乱序存储的。同时每次存储时判断如果大于容量的`3/4`，则会进行2倍扩容。
+
+上述更新entry的方法在 `objc_weak.mm` 的 `append_referrer` 方法中。
+
+## 调用
+
+当给一个弱引用进行赋值的时候，调用栈如下所示:
+
+![runtime_source_code_weak_1]({{site.url}}/assets/images/blog/runtime_source_code_weak_1.png)
+
+实现存储的就是`storeWeak`方法，这个方法是一个模版方法，提供了三个模版参数:
+
+{% highlight cpp %}
+// Template parameters.
+enum HaveOld { DontHaveOld = false, DoHaveOld = true };
+enum HaveNew { DontHaveNew = false, DoHaveNew = true };
+enum CrashIfDeallocating {
+    DontCrashIfDeallocating = false, DoCrashIfDeallocating = true
+};
+
+template <HaveOld haveOld, HaveNew haveNew,
+          CrashIfDeallocating crashIfDeallocating>
+static id storeWeak(id *location, objc_object *newObj) {
+    return (id)newObj;
+}
+{% endhighlight %}
+
+hasOld表示该弱引用之前有没有旧值，如果有则需要进行清除旧值；
+
+hasNew表示弱引用是否有新值，正常情况下为true，对应的newObj参数有值；如果为false，则newObj为nil;
+
+crashIfDeallocating表示，当注册的时候如果newObj正在销毁，则产生crash；
+
+
+## 移除
+
+## References
+
+[https://triplecc.github.io/2019/03/20/objective-c-weak-implement/](https://triplecc.github.io/2019/03/20/objective-c-weak-implement/)
+
+
 
 
 
