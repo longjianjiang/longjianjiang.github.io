@@ -37,10 +37,92 @@ comments: true
 - 结构数据类型对齐
 结构体内的各个数据对齐。在结构体中的第一个成员的首地址等于整个结构体的变量的首地址，而后的成员的地址随着它声明的顺序和实际占用的字节数递增。为了总的结构体大小对齐，会在结构体中插入一些没有实际意思的字符来填充（padding）结构体。下面给出规则：
 > 1、对于结构的各个成员，第一个成员位于偏移为0的位置，以后每个数据成员的偏移量必须是`min(#pragma pack())指定的数，这个数据成员的自身长度)` 的倍数。
- 2、在数据成员完成各自对齐之后，结构(或联合)本身也要进行对齐，对齐将按照`min(#pragma pack指定的数值,结构(或联合)最大数据成员长度)`进行对齐。
+~~ 2、在数据成员完成各自对齐之后，结构(或联合)本身也要进行对齐，对齐将按照`min(#pragma pack指定的数值,结构(或联合)最大数据成员长度)`进行对齐。~~
 
-**#pragma pack()的预处理指令可以修改系统默认的对齐数**
+**#pragma pack()的预处理指令可以修改系统默认的对齐数，取值为1，2，4，8，16**
 
 ## 总结
 **PS:联合的大小是联合中所占字节最多的成员**
 了解完规则之后，前面的例子加阿里的题目也就迎刃而解了。
+
+
+# alignas & alignof 更新于2019-04-15
+
+C++11中提供了 `alignas` 来设置对齐。一个常用的例子如下:
+
+{% highlight cpp %}
+alignas(double) unsigned char buf[sizeof(double)];
+{% endhighlight %}
+
+上面我们声明了一个buf数组，大小是`sizeof(double)`，通过`alignas(double)`设置了和double一样的对齐大小，此时buf数组可以存储一个double型数据。
+
+之前讲到`#pragma pack()`使用这个预处理也能修改对齐的大小，那么和使用alignas有什么区别呢？
+
+1.`#pragma pack()`设置的全局的对齐方式，而alignas则是只作用于某个变量或者结构；
+
+2.`#pragma pack()`有最大上限，为类型的默认对齐大小，而alignas有最小下限，也就是最少需要设置为默认类型的对齐大小，同时需要是2的幂。
+
+下面来看几个例子：
+
+> 默认结构体的对齐大小为4字节，实际根据成员的不同，最终的对齐大小和占最多字节成员的对齐大小一致。
+
+{% highlight cpp %}
+struct alignas(8) MyStruct
+{
+    /*alignas(8)*/ char member;
+    /*alignas(8)*/ int a;
+
+}mystruct;
+
+void main() {
+    cout << sizeof(mystruct) << ", " << alignof(mystruct) << endl; // 8, 8
+    cout << offsetof(MyStruct, member) << ", " << offsetof(MyStruct, a) << endl; // 0, 4
+}
+{% endhighlight %}
+
+用alignas指定了结构的对齐，所以并不是4而是8；
+
+{% highlight cpp %}
+struct MyStruct
+{
+    alignas(8) char member;
+    alignas(8) int a;
+
+}mystruct;
+
+void main() {
+    cout << sizeof(mystruct) << ", " << alignof(mystruct) << endl; // 16, 8
+    cout << offsetof(MyStruct, member) << ", " << offsetof(MyStruct, a) << endl; // 0, 8
+}
+{% endhighlight %}
+
+用alignas指定结构成员的对齐，所以结构的大小变成了16；
+
+{% highlight cpp %}
+struct alignas(16) MyStruct
+{
+    /*alignas(8)*/ char member;
+    /*alignas(8)*/ int a;
+
+}mystruct;
+
+void main() {
+    cout << sizeof(mystruct) << ", " << alignof(mystruct) << endl; // 16, 16
+    cout << offsetof(MyStruct, member) << ", " << offsetof(MyStruct, a) << endl; // 0, 4
+}
+{% endhighlight %}
+
+用alignas修改结构的对齐，此时也影响了结构的大小。
+
+> 结构的大小是结构对齐大小的整数倍。
+
+{% highlight cpp %}
+alignas(8) unsigned char buf[2000];
+cout << sizeof(buf) << ", " << alignof(buf) << endl; // 2000, 8
+{% endhighlight %}
+
+虽然buf设置对齐是8，说明数组的地址能被8整除，但是这并不会改变数组的大小。
+
+## References
+
+[https://www.cnblogs.com/ye-ming/p/9295460.html](https://www.cnblogs.com/ye-ming/p/9295460.html)

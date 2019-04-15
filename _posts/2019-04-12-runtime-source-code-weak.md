@@ -45,6 +45,41 @@ id __weak wobj = obj;
 再看具体实现之前，先看具体使用到的一些数据结构。
 
 {% highlight cpp %}
+alignas(StripedMap<SideTable>) static uint8_t 
+    SideTableBuf[sizeof(StripedMap<SideTable>)];
+
+static StripedMap<SideTable>& SideTables() {
+    return *reinterpret_cast<StripedMap<SideTable>*>(SideTableBuf);
+}
+
+template<typename T>
+class StripedMap {
+	enum { StripeCount = 64 };
+
+	static unsigned int indexForPointer(const void *p) {
+        uintptr_t addr = reinterpret_cast<uintptr_t>(p);
+
+        // 哈希操作
+        return ((addr >> 4) ^ (addr >> 9)) % StripeCount;
+	}
+
+public:
+    T& operator[] (const void *p) {
+        return array[indexForPointer(p)].value;
+    }
+    const T& operator[] (const void *p) const {
+        return const_cast<StripedMap<T>>(this)[p];
+    }
+}
+{% endhighlight %}
+
+SideTables是一个StripedMap<SideTable>，其实际是通过SideTableBuf进行类型强制转换得到的，而SideTableBuf则是一个数组，虽然整形数组，但是有修改对齐大小同时数组大小也等于StripedMap<SideTable>大小，所以该数组就可以存储一个StripedMap<SideTable>。
+
+StripedMap 则是一个类似map的结构，重载了`[]`，提供一个地址，返回一个定义时传递的类型，这里就是SideTable。
+
+所以`storeWeak`方法中使用`SideTable *oldTable = &SideTables()[oldObj];`来获取一个散列表。
+
+{% highlight cpp %}
 struct SideTable {
     spinlock_t slock;
     RefcountMap refcnts;
@@ -233,6 +268,7 @@ void weak_unregister_no_lock(weak_table_t *weak_table, id referent_id,
 
 ## 总结
 
+笔者认为，理解存储结构就能知道weak的实现机制了。
 
 ## References
 
