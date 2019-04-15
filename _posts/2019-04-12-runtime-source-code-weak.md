@@ -88,7 +88,7 @@ struct weak_entry_t {
 
 `weak_table_t` 存储了所有对象的弱引用关系，而一个对象的弱引用关系则由`weak_entry_t`来存储。`weak_entry_t`中存储左值对象地址的是联合中结构体成员`inline_referrers` 或者 `referrers`。默认先存储在`inline_referrers`的数组中，个数为4，当存满了后，则会存储在`referrers`，并会将原先的4个复制。
 
-使用`referrers`存储时并不是按顺序去将左值对象地址存储到数组中，而是使用hash计算出一个随机索引进行乱序存储的。同时每次存储时判断如果大于容量的`3/4`，则会进行2倍扩容。
+使用`referrers`存储时并不是按顺序去将左值对象地址存储到数组中，而是使用hash计算出一个索引进行存储的。同时每次存储时判断如果大于容量的`3/4`，则会进行2倍扩容。
 
 上述更新entry的方法在 `objc_weak.mm` 的 `append_referrer` 方法中。
 
@@ -162,7 +162,6 @@ id weak_register_no_lock(weak_table_t *weak_table, id referent_id,
 }
 {% endhighlight %}
 
-
 1.判断newObj非空同时不是taggedPointer；
 2.判断newObj没有在释放内存；
 3.如果当前右值对象第一次赋值给一个弱引用，此时会初始化weak_table，默认weak_table中`weak_entries`大小为64，根据弱引用赋值表达式的两个参数初始化一个new_entry,将其插入到weak_table。具体插入方式和之前`weak_entry_t`使用地址hash进行获取索引进行插入一样。
@@ -170,6 +169,19 @@ id weak_register_no_lock(weak_table_t *weak_table, id referent_id,
 
 目前为止，直接的所说的数据结构关系如下图所示:
 
+```
+SideTables => StripedMap<SideTable> => array[StripeCount]
+
+|  // sidetable = &SideTables()[obj]
+v
+
+SideTable => weak_table_t =>  weak_entry_t *weak_entries
+
+|
+v
+
+weak_entry_t => inline_referrers[WEAK_INLINE_COUNT] / weak_referrer_t *referrers
+```
 
 ## weak_unregister_no_lock
 
@@ -210,6 +222,16 @@ void weak_unregister_no_lock(weak_table_t *weak_table, id referent_id,
 1.首先判断右值对象是否为空；
 2.通过`weak_entry_for_referent`就可以从weak_table中查到这个entry，从存储旧对象左值地址的数组中移除当前赋值表达式左值的地址；
 3.判断旧对象的弱引用关系entry中存储左值地址的数组是否为空，如果为空，则调用`weak_entry_remove`从weak_table中移除旧对象的弱引用关系。
+
+至此关于对象的弱引用关系的存储和移除结束。
+
+## 清除
+
+最后一步就是，当弱引用指向的对象销毁后，对应的弱引用需要被置为nil，完成这个操作的方法是`weak_clear_no_lock`。
+
+实现也很简单，根据entry获取到左值地址的数组和数量，判断指向的是不是被销毁的对象，如果是则置为nil，最后从weak_table中移除这个entry。
+
+## 总结
 
 
 ## References
