@@ -202,7 +202,7 @@ id weak_register_no_lock(weak_table_t *weak_table, id referent_id,
 3.如果当前右值对象第一次赋值给一个弱引用，此时会初始化weak_table，默认weak_table中`weak_entries`大小为64，根据弱引用赋值表达式的两个参数初始化一个new_entry,将其插入到weak_table。具体插入方式和之前`weak_entry_t`使用地址hash进行获取索引进行插入一样。
 4.如果当前右值对象存在一个弱引用，那么通过`weak_entry_for_referent`就可以从weak_table中查到这个entry，直接调用之前所说的更新entry的`append_referrer`方法即可。
 
-目前为止，直接的所说的数据结构关系如下图所示:
+目前为止，之前所说的数据结构关系如下图所示:
 
 ```
 SideTables => StripedMap<SideTable> => array[StripeCount]
