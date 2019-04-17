@@ -252,6 +252,46 @@ static inline id autorelease(id obj) {
 
 可以看到很简单，就是调用了之前所说的`autoreleaseFast`，该方法再调用`add`将obj插入到page中即可。
 
+## 函数返回值
+
+之前笔者在[内存管理](http://www.longjianjiang.com/memory-management/)中说到：
+
+```
+作为函数返回值的对象，经笔者实验，会将该对象加入池中，直到池释放，该对象才会被释放。
+```
+
+同时函数是除allow/new/copy/mutableCopy以外的函数，因为谁创建谁释放的，所以函数返回的对象，需要调用autorelease，而进行赋值的时候，需要额外的一次retain，这样才能保持引用计数的平衡。
+
+下面给出两个相关的方法:
+
+{% highlight cpp %}
+id objc_autoreleaseReturnValue(id obj) {
+    if (prepareOptimizedReturn(ReturnAtPlus1)) return obj;
+
+    return objc_autorelease(obj);
+}
+
+id objc_retainAutoreleasedReturnValue(id obj) {
+    if (acceptOptimizedReturn() == ReturnAtPlus1) return obj;
+
+    return objc_retain(obj);
+}
+{% endhighlight %}
+
+可以看到有一个优化，就是避免将其加入pool，这样赋值的时候也不需要一次额外的retain操作了。
+
+优化的操作如下：
+
+1.`prepareOptimizedReturn`方法内部，用`__builtin_return_address(0)`获得了当前函数的返回地址，用该地址作为参数去调用了`callerAcceptsOptimizedReturn`，这个方法内部就是去看接下来会不会去调用`objc_retainAutoreleasedReturnValue`，如果调用就返回true；
+
+2.`callerAcceptsOptimizedReturn`返回后，如果是true，则使用`setReturnDisposition`在TLS中设置 `RETURN_DISPOSITION_KEY` 对应的值位true，同时`prepareOptimizedReturn`函数返回true，此时`objc_autoreleaseReturnValue`中就不需要调用autorelease了；
+
+3.对应的`acceptOptimizedReturn`根据`RETURN_DISPOSITION_KEY`去TLS去取，取完重置位false，将结果返回，如果是true，那么`objc_retainAutoreleasedReturnValue`也不需要去调用retain了。
+
 ## 总结
 
 本文介绍了autorelease的实现，其实依然是一个数据结构，理解了这个数据结构就能知道其实现原理。
+
+## References
+
+[http://blog.sunnyxx.com/2014/10/15/behind-autorelease/](http://blog.sunnyxx.com/2014/10/15/behind-autorelease/)

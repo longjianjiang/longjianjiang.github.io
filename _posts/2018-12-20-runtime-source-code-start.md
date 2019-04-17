@@ -45,18 +45,18 @@ Runtime的源码就比较多了，而且关于Runtime源码的文章也很多，
 
 笔者记录过程如下:
 
-- 类的结构(isa)
-- 类的结构(class_data_bits_t)
-- 类的加载过程
-- 类的propety 和 ivar
-- 类的方法及调用过程
-- 类的协议
-- 类的分类
-- 类的load方法 和 initialize方法
+- [类的结构(isa)](http://www.longjianjiang.com/runtime-source-code-class-isa/)
+- [类的结构(class_data_bits_t)](http://www.longjianjiang.com/runtime-source-code-class-data-bits/)
+- [类的加载过程](http://www.longjianjiang.com/runtime-source-code-class-load/)
+- [类的propety 和 ivar](http://www.longjianjiang.com/runtime-source-code-property-and-ivar/)
+- [类的方法及调用过程](http://www.longjianjiang.com/runtime-soruce-code-method/)
+- [类的协议](http://www.longjianjiang.com/runtime-source-code-protocol/)
+- [类的分类](http://www.longjianjiang.com/runtime-source-code-category/)
+- [类的load方法 和 initialize方法]
 
-- 引用计数
-- weak
-- autorelease
+- [引用计数](http://www.longjianjiang.com/runtime-source-code-reference-counting/)
+- [weak](http://www.longjianjiang.com/runtime-source-code-weak/)
+- [autorelease](http://www.longjianjiang.com/runtime-source-code-autorelease/)
 
 ## 最后
 

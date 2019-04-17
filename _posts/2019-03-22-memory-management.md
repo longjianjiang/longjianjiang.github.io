@@ -98,7 +98,7 @@ iOS使用引用计数的方式来进行内存管理，提供了 `retain` 增加�
 
 Apple实现引用计数的方式使用来散列表，key是对象的地址，value则是对象的引用计数。用这样一个结构来管理引用计数的一个好处在于可以方便的根据散列表追踪到对象的内存区域。
 
-除此之外还提供了`autorelease` 的功能，当一个对象调用了该方法，会将该对象加入到池中，当包含该对象的池释放时，会将池中包含的对象释放。关于 `autorelease` 的更多内容可以看[这里](http://blog.sunnyxx.com/2014/10/15/behind-autorelease/)。
+除此之外还提供了`autorelease` 的功能，当一个对象调用了该方法，会将该对象加入到池中，当包含该对象的池释放时，会将池中包含的对象释放。关于 `autorelease` 的更多内容可以看[这里](http://www.longjianjiang.com/runtime-source-code-autorelease/)。
 
 ### ARC
 
