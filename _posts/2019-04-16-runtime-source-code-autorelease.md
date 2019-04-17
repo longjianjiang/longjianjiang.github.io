@@ -67,8 +67,6 @@ void objc_autoreleasePoolPop(void *ctxt) {
 {% highlight cpp %}
 class AutoreleasePoolPage {
 #   define EMPTY_POOL_PLACEHOLDER ((id*)1)
-
-#   define POOL_BOUNDARY nil
     magic_t const magic;
     id *next;
     pthread_t const thread;
@@ -114,6 +112,7 @@ class AutoreleasePoolPage {
 首先来看`AutoreleasePoolPage`中Push的实现:
 
 {% highlight cpp %}
+#   define POOL_BOUNDARY nil
 static inline id *autoreleaseFast(id obj) {
     AutoreleasePoolPage *page = hotPage();
     if (page && !page->full()) {
@@ -132,41 +131,78 @@ static inline void *push() {
 }
 {% endhighlight %}
 
+Pool的`push`方法可以看到就是去调用了`autoreleaseFast`方法，同时传了一个`POOL_BOUNDARY`的参数，这个参数就是nil。
+
+而`autoreleaseFast`方法又分了三种情况，不过除了之前说过的`EMPTY_POOL_PLACEHOLDER`之外，其他的都调用了Pool的add方法将obj也就是一个nil加入到Pool中，同时也返回了nil。
+
+1.取hotPage，这个方法就是从TLS中根据key取到当前一个还没满的页，每当创建一个新的页的时候，会使用`setHotPage`进行更新；
+
+2.1.hotPage不为空，此时直接调用add方法；
+
+2.2.hotPage不为空，但满了，此时调用`autoreleaseFullPage`创建一个新的页，使用`setHotPage`进行更新，并在新的页中插入obj；
+
+2.3.hotPage为空，第一次初始化一个页，调用`autoreleaseNoPage`，创建一个新的页，使用`setHotPage`进行更新，并在新的页中插入obj；这里插入obj之前，会判断是否存在`EMPTY_POOL_PLACEHOLDER`，如果存在的话，会额外插入一个nil到页中。
+
+到这里，其实我们可以发现`push`方法的主要作用就是往hotPage中插入一个nil，因为`@autoreleasepool{}`可以嵌套，所以每进行一次push插入一个nil，就是为了区分当前是在那个嵌套中，这样删除的时候就有标记了。
+
+下面继续来看pop的实现：
+
+{% highlight cpp %}
+void releaseUntil(id *stop) {
+    while (this->next != stop) {
+        AutoreleasePoolPage *page = hotPage();
+
+        while (page->empty()) {
+            page = page->parent;
+            setHotPage(page);
+        }
+
+        page->unprotect();
+        id obj = *--page->next;
+        memset((void*)page->next, SCRIBBLE, sizeof(*page->next));
+        page->protect();
+
+        if (obj != POOL_BOUNDARY) {
+            objc_release(obj);
+        }
+    }
+
+    setHotPage(this);
+}
 
 static inline void pop(void *token) {
     AutoreleasePoolPage *page;
     id *stop;
 
+    if (token == (void*)EMPTY_POOL_PLACEHOLDER) {
+        if (hotPage()) {
+            pop(coldPage()->begin());
+        } else {
+            setHotPage(nil);
+        }
+        return;
+    }
+
     page = pageForPointer(token);
     stop = (id *)token;
     if (*stop != POOL_BOUNDARY) {
         if (stop == page->begin()  &&  !page->parent) {
-            // Start of coldest page may correctly not be POOL_BOUNDARY:
-            // 1. top-level pool is popped, leaving the cold page in place
-            // 2. an object is autoreleased with no pool
         } else {
-            // Error. For bincompat purposes this is not 
-            // fatal in executables built with old SDKs.
             return badPop(token);
         }
     }
 
     page->releaseUntil(stop);
 
-    // memory: delete empty children
     if (DebugPoolAllocation  &&  page->empty()) {
-        // special case: delete everything during page-per-pool debugging
         AutoreleasePoolPage *parent = page->parent;
         page->kill();
         setHotPage(parent);
     } else if (DebugMissingPools  &&  page->empty()  &&  !page->parent) {
-        // special case: delete everything for pop(top) 
-        // when debugging missing autorelease pools
         page->kill();
         setHotPage(nil);
     } 
     else if (page->child) {
-        // hysteresis: keep one empty child if page is more than half full
         if (page->lessThanHalfFull()) {
             page->child->kill();
         }
@@ -176,8 +212,37 @@ static inline void pop(void *token) {
     }
 }
 {% endhighlight %}
-## add
 
-## release
+pop的参数其实就是push的返回值，而且只要两种可能，要么是nil要么是`EMPTY_POOL_PLACEHOLDER`。
+
+1.首先判断token是否为`EMPTY_POOL_PLACEHOLDER`，此时如果发生了嵌套，hotPage就不为空，所以需要pop，此时pop的是`EMPTY_POOL_PLACEHOLDER`嵌套里的所有对象。否则将hotPage置为nil；
+
+2.根据token，获得token所在的页，同时验证token一定是nil；
+
+3.调用page的`releaseUntil`方法，该方法其实就是不断将next指针往下移动，取到对象调用`objc_release`，如果当前页空了，则根据parent指针去前一页继续操作，直到next指向了nil，也就是到了一个嵌套的开始，此时结束一个Pool的移除操作。
+
+4.最后则尝试使用`kill`移除空的页；
+
+PoolPage和线程是对应的，在PoolPage初始化的时候，设置了tls的一个销毁回调`tls_dealloc`，这个回调会定位到链表的首节点的页，然后调用pop，相当于移除最外层Pool。
+
+到了这里，基本了解了PoolPage的工作原理。其实很简单，就是一个双链表存储了所有autorelease对象，同时每一个嵌套开始插入一个nil，这样清除的时候，清除到nil为止，一个嵌套清除结束。
+
+## autorelease
+
+autorelease的实际实现同样也在PoolPage中，如下所示：
+
+{% highlight cpp %}
+static inline id autorelease(id obj) {
+    assert(obj);
+    assert(!obj->isTaggedPointer());
+    id *dest __unused = autoreleaseFast(obj);
+    assert(!dest  ||  dest == EMPTY_POOL_PLACEHOLDER  ||  *dest == obj);
+    return obj;
+}
+{% endhighlight %}
+
+可以看到很简单，就是调用了之前所说的`autoreleaseFast`，该方法再调用`add`将obj插入到page中即可。
 
 ## 总结
+
+本文介绍了autorelease的实现，其实依然是一个数据结构，理解了这个数据结构就能知道其实现原理。
