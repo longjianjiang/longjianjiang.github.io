@@ -45,12 +45,21 @@ ARC中只有将对象赋值给一个`__autoreleasing`修饰的左值，才会将
 前面main函数中的`@autoreleasepool{}`，实际会被编译器转成如下代码:
 
 {% highlight cpp %}
-void *context = objc_autoreleasePoolPush();
-// {}中的代码
-objc_autoreleasePoolPop(context);
+struct __AtAutoreleasePool {
+    __AtAutoreleasePool() {
+        atautoreleasepoolobj = objc_autoreleasePoolPush();
+    }
+    ~__AtAutoreleasePool() {
+        objc_autoreleasePoolPop(atautoreleasepoolobj);
+    }
+    void * atautoreleasepoolobj;
+};
+/* @autoreleasepool */ { __AtAutoreleasePool __autoreleasepool;
+    ...
+}
 {% endhighlight %}
 
-继续看下这两个方法的实现：
+`__AtAutoreleasePool`初始化时，调用了`objc_autoreleasePoolPush`，当`__AtAutoreleasePool`超出作用域，调用析构函数，从而调用`objc_autoreleasePoolPop`，继续看下这两个方法的实现：
 
 {% highlight cpp %}
 void *objc_autoreleasePoolPush(void) {
