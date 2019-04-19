@@ -87,6 +87,77 @@ int main() {
 
 ### 捕获变量
 
+所谓捕获，就是匿名函数中使用了外部定义的变量。所以根据变量的定义位置以及类型有多种可能，下面一一介绍：
+
+### 静态区变量
+
+静态区变量包括静态局部变量，静态变量，全局变量。
+
+{% highlight cpp %}
+int num;
+void main() {
+    ^{ num= 7; };
+}
+{% endhighlight %}
+
+block中使用静态区变量就很简单，不会往block结构体中增加成员，同样也可以修改。
+
+### 局部变量
+
+- 非对象类型
+
+{% highlight cpp %}
+struct __main_block_impl_0 {
+  ...
+  int num;
+};
+
+static void __main_block_func_0(struct __main_block_impl_0 *__cself) {
+  int num = __cself->num; // bound by copy
+  num; 
+}
+
+void main() {
+    int num;
+    ^{ num; };
+}
+{% endhighlight %}
+
+当block中使用了一个局部变量时，此时生成的block结构体中就会加入这个局部变量作为一个新的成员，并且在block初始化的时候将外部的局部变量作为参数传递。
+
+此时如果在block内部对局部变量进行修改是不允许的，其实道理很简单，block结构体里仅仅存了一个整形的数据，就算内部改了并不会更新外部，所以如果进行修改则直接报错。
+
+不知道大家之前有没有注意到block根据代码块生成的一个函数，默认有一个参数`__cself`，一个指向block结构体的指针。它的作用就是为了在生成的函数中根据它来从block结构体中取到捕获的对象，如`__main_block_func_0`所示。
+
+- 对象
+
+{% highlight cpp %}
+struct __main_block_impl_0 {
+  ...
+  __strong id obj;
+  }
+};
+
+static void __main_block_copy_0(struct __main_block_impl_0*dst, struct __main_block_impl_0*src) {_Block_object_assign((void*)&dst->obj, (void*)src->obj, 3/*BLOCK_FIELD_IS_OBJECT*/);}
+
+static void __main_block_dispose_0(struct __main_block_impl_0*src) {_Block_object_dispose((void*)src->obj, 3/*BLOCK_FIELD_IS_OBJECT*/);}
+
+static struct __main_block_desc_0 {
+  ...
+  void (*copy)(struct __main_block_impl_0*, struct __main_block_impl_0*);
+  void (*dispose)(struct __main_block_impl_0*);
+};
+
+void main() {
+  id obj = [NSMutableArray new];
+	^{ [obj addObject:@1]; };
+}
+{% endhighlight %}
+
+当block中使用一个对象时，block结构体同样添加了该对象，同时附上了该对象的内存修饰符`__strong`。同时描述blcok结构体的desc结构体中拥有增加了两个成员，两个函数指针，现在暂且记下，稍后笔者会解释。
+
+跟之前的整型一样，blcok中不能修改对象，但是可以使用对象的方法，比如往数组中添加一个元素。
+
 ### 内存管理
 
 ### 小结
