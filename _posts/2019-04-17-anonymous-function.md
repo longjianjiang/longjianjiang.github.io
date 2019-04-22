@@ -529,7 +529,63 @@ _Block_assign简单的将栈上block捕获的对象，通过指针赋值到堆�
 
 3.__block类型
 
-__block类型处理起来有点复杂，还记得之前我们看到__block修饰对象的时候，生成的byref结构体中依然有copy&dispose函数指针。
+__block类型处理起来多了一些步骤，还记得之前我们看到__block修饰对象的时候，生成的byref结构体中依然有copy&dispose函数指针。
+
+因为byref结构体默认还是在栈上，所以当block移动到堆上时还需要将byref移动过到堆上，操作类似block的copy，同样的也需要对byref结构体中的对象进行内存管理，使用的就是byref结构体中copy&dispose函数指针。
+
+下面来看`_Block_byref_assign_copy`的实现:
+
+{% highlight cpp %}
+static void _Block_byref_assign_copy(void *dest, const void *arg, const int flags) {
+    struct Block_byref **destp = (struct Block_byref **)dest;
+    struct Block_byref *src = (struct Block_byref *)arg;
+        
+    if (src->forwarding->flags & BLOCK_BYREF_IS_GC) {
+        ;   // don't need to do any more work
+    }
+    else if ((src->forwarding->flags & BLOCK_REFCOUNT_MASK) == 0) {
+        // src points to stack
+        bool isWeak = ((flags & (BLOCK_FIELD_IS_BYREF|BLOCK_FIELD_IS_WEAK)) == (BLOCK_FIELD_IS_BYREF|BLOCK_FIELD_IS_WEAK));
+        // if its weak ask for an object (only matters under GC)
+        struct Block_byref *copy = (struct Block_byref *)_Block_allocator(src->size, false, isWeak);
+        copy->flags = src->flags | _Byref_flag_initial_value; // non-GC one for caller, one for stack
+        copy->forwarding = copy; // patch heap copy to point to itself (skip write-barrier)
+        src->forwarding = copy;  // patch stack to point to heap copy
+        copy->size = src->size;
+        if (isWeak) {
+            copy->isa = &_NSConcreteWeakBlockVariable;  // mark isa field so it gets weak scanning
+        }
+        if (src->flags & BLOCK_BYREF_HAS_COPY_DISPOSE) {
+            // Trust copy helper to copy everything of interest
+            // If more than one field shows up in a byref block this is wrong XXX
+            struct Block_byref_2 *src2 = (struct Block_byref_2 *)(src+1);
+            struct Block_byref_2 *copy2 = (struct Block_byref_2 *)(copy+1);
+            copy2->byref_keep = src2->byref_keep;
+            copy2->byref_destroy = src2->byref_destroy;
+
+            if (src->flags & BLOCK_BYREF_LAYOUT_EXTENDED) {
+                struct Block_byref_3 *src3 = (struct Block_byref_3 *)(src2+1);
+                struct Block_byref_3 *copy3 = (struct Block_byref_3*)(copy2+1);
+                copy3->layout = src3->layout;
+            }
+
+            (*src2->byref_keep)(copy, src);
+        }
+        else {
+            // just bits.  Blast 'em using _Block_memmove in case they're __strong
+            // This copy includes Block_byref_3, if any.
+            _Block_memmove(copy+1, src+1,
+                           src->size - sizeof(struct Block_byref));
+        }
+    }
+    // already copied to heap
+    else if ((src->forwarding->flags & BLOCK_BYREF_NEEDS_FREE) == BLOCK_BYREF_NEEDS_FREE) {
+        latching_incr_int(&src->forwarding->flags);
+    }
+    // assign byref data block pointer into new Block
+    _Block_assign(src->forwarding, (void **)destp);
+}
+{% endhighlight %}
 
 
 # lambda
