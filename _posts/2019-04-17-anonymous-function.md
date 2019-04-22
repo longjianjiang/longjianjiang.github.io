@@ -414,9 +414,31 @@ void _Block_release(const void *arg) {
 
 这也就解释了为什么说block中持有捕获的对象，会延长该对象的生命周期，正因为是这样所以才导致了block使用不当会造成循环引用导致内存泄露。
 
-- copy
+先给出`_Block_call_copy_helper`的实现:
 
-先看copy，desc结构体中的函数指针中函数的实现其实都是调用了`_Block_object_assign`方法，实现如下:
+{% highlight cpp %}
+struct Block_descriptor_2 {
+    // requires BLOCK_HAS_COPY_DISPOSE
+    void (*copy)(void *dst, const void *src);
+    void (*dispose)(const void *);
+};
+static void _Block_call_copy_helper(void *result, struct Block_layout *aBlock) {
+    struct Block_descriptor_2 *desc = _Block_descriptor_2(aBlock);
+    if (!desc) return;
+
+    (*desc->copy)(result, aBlock); // do fixup
+}
+{% endhighlight %}
+
+将block结构体尝试移动改变为`Block_descriptor_2`类型，调用其中的copy函数指针，也就是类似如下的一个方法:
+
+{% highlight cpp %}
+static void __main_block_copy_0(struct __main_block_impl_0*dst, struct __main_block_impl_0*src) {
+  _Block_object_assign((void*)&dst->obj, (void*)src->obj, 3/*BLOCK_FIELD_IS_OBJECT*/);
+}
+{% endhighlight %}
+
+`__main_block_copy_0`中会对block中捕获的所有对象进行调用`_Block_object_assign`方法。下面继续看`_Block_object_assign`的实现：
 
 {% highlight cpp %}
 enum {
@@ -495,9 +517,20 @@ void _Block_object_assign(void *destAddr, const void *object, const int flags) {
 
 1.对象类型
 
+对对象调用了`_Block_retain_object`，其实就是`retain`方法，也就是说这里就是完成了所谓的block持有外部变量。
+
+_Block_assign简单的将栈上block捕获的对象，通过指针赋值到堆上新生成block中的捕获对象。
+
 2.block类型
 
+首先将block中捕获的栈上的block调用`_Block_copy_internal`移动到堆上，依然使用_Block_assign简单的将栈上block捕获的对象，通过指针赋值到堆上新生成block中的捕获对象。
+
+也就是所有的block都会被移动到堆上。
+
 3.__block类型
+
+__block类型处理起来有点复杂，还记得之前我们看到__block修饰对象的时候，生成的byref结构体中依然有copy&dispose函数指针。
+
 
 # lambda
 
@@ -505,7 +538,13 @@ void _Block_object_assign(void *destAddr, const void *object, const int flags) {
 
 # References
 
+{% highlight cpp %}
+{% endhighlight %}
+
 [iOS与OS X多线程和内存管理](https://book.douban.com/subject/24720270/)
+
 [https://www.mikeash.com/pyblog/friday-qa-2011-06-03-objective-c-blocks-vs-c0x-lambdas-fight.html](https://www.mikeash.com/pyblog/friday-qa-2011-06-03-objective-c-blocks-vs-c0x-lambdas-fight.html)
+
 [http://www.galloway.me.uk/2013/05/a-look-inside-blocks-episode-3-block-copy/](http://www.galloway.me.uk/2013/05/a-look-inside-blocks-episode-3-block-copy/)
+
 [https://github.com/apple/swift-corelibs-foundation](https://github.com/apple/swift-corelibs-foundation)
