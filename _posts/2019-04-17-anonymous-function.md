@@ -753,10 +753,19 @@ static void __Block_byref_id_object_dispose_131(void *src) {
 
 2.为什么有时候需要加注释1这段代码？
 
+因为weakSelf指向的对象可能会在执行block时候已经销毁了。
+
+注释1这段代码会调用`objc_loadWeakRetained`，会将弱引用指向的对象的引用计数加1，也就是为了防止弱引用指向的对象释放。
 
 3.注释1这段代码中strongSelf为什么明确的使用`__strong`，不是默认使用的就是`__strong`吗？
 
+因为`typeof(weakSelf)`的修饰符不是`__strong`，所以需要明确指定。
 
+下面笔者来说下这个例子:
+
+上面很重要的一点是strongSelf是一个局部变量，也就是说strongSelf虽然让控制器引用计数加1，但是当strongSelf过了block的作用域，就会调用`objc_storeStrong`对控制器引用计数减1。
+
+但是dispatch_after的参数又是一个block，block中使用到了strongSelf，所以会对strongSelf进行一次retain，等于对控制器引用计数又加了1。当strongSelf超过block作用域会进行一次release，此时控制器引用计数减1不为0，所以还没有释放，等3s后dispatch_afterblock执行完，也就销毁了该block，此时会strongSelf进行一次release，此时控制器减1为0，完成释放。
 
 # lambda
 
@@ -774,3 +783,5 @@ static void __Block_byref_id_object_dispose_131(void *src) {
 [http://www.galloway.me.uk/2013/05/a-look-inside-blocks-episode-3-block-copy/](http://www.galloway.me.uk/2013/05/a-look-inside-blocks-episode-3-block-copy/)
 
 [https://github.com/apple/swift-corelibs-foundation](https://github.com/apple/swift-corelibs-foundation)
+
+[https://ziecho.com/post/ios/2015-09-02](https://ziecho.com/post/ios/2015-09-02)
