@@ -616,8 +616,9 @@ static void _Block_byref_assign_copy(void *dest, const void *arg, const int flag
 
 2.4如果byref中结构体中捕获成员是对象类型，则将copy&dispose指针信息进行复制；
 
-2.5执行函数指针指向的函数，其实还是调用了`_Block_object_assign`方法，只是参数和flags不同了，也就是类似如下的一个方法:    
-可以看到就是移动指针到byref结构体中捕获成员的位置，同时flags中按位于了`BLOCK_BYREF_CALLER`。
+2.5执行函数指针指向的函数，其实还是调用了`_Block_object_assign`方法，只是参数和flags不同了，也就是类似如下的一个方法:   
+
+> 可以看到就是移动指针到byref结构体中捕获成员的位置，同时flags中按位于了`BLOCK_BYREF_CALLER`。
 
 {% highlight cpp %}
 static void __Block_byref_id_object_copy_131(void *dst, void *src) {
@@ -631,7 +632,7 @@ static void __Block_byref_id_object_copy_131(void *dst, void *src) {
 
 4._Block_assign将堆上新生成的byref结构体通过指针赋值到堆上新生成block中的捕获的byref结构体。
 
-- __block 中 对象类型 || __block 中 __weak 对象类型
+- __block 中 对象类型/__block 中 __weak 对象类型
 
 将obj通过指针赋值到desc指向的对象。
 
@@ -712,11 +713,49 @@ static void __Block_byref_id_object_dispose_131(void *src) {
 
 将对象进行一次release；
 
-4.__block 中 对象类型 || __block 中 __weak 对象类型
+4.__block 中 对象类型/__block 中 __weak 对象类型
 
 什么也不干，因为assign的时候，只是简单的赋值。
 
-### 小结
+### 循环引用
+
+这里来说下block和循环引用，看一个例子:
+
+{% highlight objc %}
+- (void)foo {
+    __weak typeof(self) weakSelf = self;
+    self.block = ^{
+        // 注释1
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+
+        /* 注释2
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            NSLog(@"%@",strongSelf);
+        });
+        */
+    };
+    self.block();
+    [self.navigationController popViewControllerAnimated:YES];
+}
+{% endhighlight %}
+
+笔者先提几个问题：
+
+1.block中使用弱引用的self，为什么不会导致循环引用？
+
+`_Block_object_assign`中当捕获的对象是对象类型，那么会进行一次retain操作。如果在一个持有block中使用了对象本身，那么便会形成循环引用。
+
+解决办法其实也很简单将对象的弱引用放到block中使用。所以可以肯定的是当是弱引用的时候，`_Block_retain_object(object);`并没有增加弱引用指向对象的引用计数，否则依然还会出现循环引用。
+
+不过笔者做过实验，对一个弱引用进行retain操作，会调用到`objc_loadWeakRetained`，会增加弱引用指向对象的引用计数。
+
+所以这里笔者并不清楚`_Block_retain_object`内部是如何进行判断弱引用的情况的。
+
+2.为什么有时候需要加注释1这段代码？
+
+
+3.注释1这段代码中strongSelf为什么明确的使用`__strong`，不是默认使用的就是`__strong`吗？
+
 
 
 # lambda
