@@ -515,19 +515,19 @@ void _Block_object_assign(void *destAddr, const void *object, const int flags) {
 
 根据flags枚举的不同取值组合，分为如下几类：
 
-1.对象类型
+- 对象类型
 
 对对象调用了`_Block_retain_object`，其实就是`retain`方法，也就是说这里就是完成了所谓的block持有外部变量。
 
 _Block_assign简单的将栈上block捕获的对象，通过指针赋值到堆上新生成block中的捕获对象。
 
-2.block类型
+- block类型
 
 首先将block中捕获的栈上的block调用`_Block_copy_internal`移动到堆上，依然使用_Block_assign简单的将栈上block捕获的对象，通过指针赋值到堆上新生成block中的捕获对象。
 
 也就是所有的block都会被移动到堆上。
 
-3.__block类型
+- __block类型
 
 __block类型处理起来多了一些步骤，还记得之前我们看到__block修饰对象的时候，生成的byref结构体中依然有copy&dispose函数指针。
 
@@ -536,6 +536,19 @@ __block类型处理起来多了一些步骤，还记得之前我们看到__block
 下面来看`_Block_byref_assign_copy`的实现:
 
 {% highlight cpp %}
+struct Block_byref {
+    void *isa;
+    struct Block_byref *forwarding;
+    volatile int32_t flags; // contains ref count
+    uint32_t size;
+};
+
+struct Block_byref_2 {
+    // requires BLOCK_BYREF_HAS_COPY_DISPOSE
+    void (*byref_keep)(struct Block_byref *dst, struct Block_byref *src);
+    void (*byref_destroy)(struct Block_byref *);
+};
+
 static void _Block_byref_assign_copy(void *dest, const void *arg, const int flags) {
     struct Block_byref **destp = (struct Block_byref **)dest;
     struct Block_byref *src = (struct Block_byref *)arg;
@@ -586,6 +599,124 @@ static void _Block_byref_assign_copy(void *dest, const void *arg, const int flag
     _Block_assign(src->forwarding, (void **)destp);
 }
 {% endhighlight %}
+
+这里就可以解释为什么byref结构体中有一个`forwarding`指针指向自身了，因为当byref移动到堆时，原来栈上byref结构体的`forwarding`指向了堆上byref结构体。这样不论byref在栈上还是在堆上都可以通过`obj->__forwarding->obj`在block中访问到byref结构体变量。
+
+下面来看这个方法的工作流程:
+
+1.参数类型转换，转成了`Block_byref`结构体类型；
+
+2.byref结构体flags中存储捕获对象引用计数的位为0，此时byref结构体在栈上，进行移动到堆上；
+
+2.1堆上分配内存创建一个byref结构体，将栈上byref结构体中的信息拷贝到堆上生成的byref结构体；
+
+2.2将堆上byref结构体flags`BLOCK_BYREF_NEEDS_FREE`设置为1，`BLOCK_REFCOUNT_MASK`设置为2；
+
+2.3将栈上byref结构体的`forwarding`指向了堆上byref结构体；
+
+2.4如果byref中结构体中捕获成员是对象类型，则将copy&dispose指针信息进行复制；
+
+2.5执行函数指针指向的函数，其实还是调用了`_Block_object_assign`方法，只是参数和flags不同了，也就是类似如下的一个方法:    
+可以看到就是移动指针到byref结构体中捕获成员的位置，同时flags中按位于了`BLOCK_BYREF_CALLER`。
+
+{% highlight cpp %}
+static void __Block_byref_id_object_copy_131(void *dst, void *src) {
+ _Block_object_assign((char*)dst + 40, *(void * *) ((char*)src + 40), 131);
+}
+{% endhighlight %}
+
+2.6如果byref中结构体中捕获成员不是对象类型，则简单的使用`memmove`将byref结构体中其他信息按位复制到堆上的byref结构体；
+
+3.byref结构体已经在堆上，增加引用计数；
+
+4._Block_assign将堆上新生成的byref结构体通过指针赋值到堆上新生成block中的捕获的byref结构体。
+
+- __block 中 对象类型 || __block 中 __weak 对象类型
+
+将obj通过指针赋值到desc指向的对象。
+
+至此`_Block_object_assign`结束。下面继续看`_Block_object_dispose`，当block对象销毁时，会调用`Block_descriptor_2`中的dispose函数指针，也就是类似如下的方法:
+
+{% highlight cpp %}
+static void __main_block_dispose_0(struct __main_block_impl_0*src) {
+  _Block_object_dispose((void*)src->obj, 8/*BLOCK_FIELD_IS_BYREF*/);
+}
+{% endhighlight %}
+
+下面给出`_Block_object_dispose`的实现：
+
+{% highlight cpp %}
+static void _Block_byref_release(const void *arg) {
+    struct Block_byref *byref = (struct Block_byref *)arg;
+    int32_t refcount;
+
+    byref = byref->forwarding;
+    
+    if ((byref->flags & BLOCK_BYREF_NEEDS_FREE) == 0) {
+        return; // stack or GC or global
+    }
+    refcount = byref->flags & BLOCK_REFCOUNT_MASK;
+  os_assert(refcount);
+    if (latching_decr_int_should_deallocate(&byref->flags)) {
+        if (byref->flags & BLOCK_BYREF_HAS_COPY_DISPOSE) {
+            struct Block_byref_2 *byref2 = (struct Block_byref_2 *)(byref+1);
+            (*byref2->byref_destroy)(byref);
+        }
+        _Block_deallocator((struct Block_layout *)byref);
+    }
+}
+
+void _Block_object_dispose(const void *object, const int flags) {
+    switch (os_assumes(flags & BLOCK_ALL_COPY_DISPOSE_FLAGS)) {
+      case BLOCK_FIELD_IS_BYREF | BLOCK_FIELD_IS_WEAK:
+      case BLOCK_FIELD_IS_BYREF:
+        // get rid of the __block data structure held in a Block
+        _Block_byref_release(object);
+        break;
+      case BLOCK_FIELD_IS_BLOCK:
+        _Block_destroy(object);
+        break;
+      case BLOCK_FIELD_IS_OBJECT:
+        _Block_release_object(object);
+        break;
+      case BLOCK_BYREF_CALLER | BLOCK_FIELD_IS_OBJECT:
+      case BLOCK_BYREF_CALLER | BLOCK_FIELD_IS_BLOCK:
+      case BLOCK_BYREF_CALLER | BLOCK_FIELD_IS_OBJECT | BLOCK_FIELD_IS_WEAK:
+      case BLOCK_BYREF_CALLER | BLOCK_FIELD_IS_BLOCK  | BLOCK_FIELD_IS_WEAK:
+        break;
+      default:
+        break;
+    }
+}
+{% endhighlight %}
+
+可以看到相比assign，dispose简单不少。依然分为以下几种情况：
+
+1.__block类型
+
+调用了`_Block_byref_release`方法，该方法和block的dispose实现类似，同时会尝试调用byref结构体中的dispose函数指针，类似下面一个方法:
+
+{% highlight cpp %}
+static void __Block_byref_id_object_dispose_131(void *src) {
+ _Block_object_dispose(*(void * *) ((char*)src + 40), 131);
+}
+{% endhighlight %}
+
+此时就到了第4种类型；
+
+2.block类型
+
+销毁block对象，`_Block_destroy` 方法内部会调用`_Block_release`，也就是要重新走一遍dispose的流程；
+
+3.对象类型
+
+将对象进行一次release；
+
+4.__block 中 对象类型 || __block 中 __weak 对象类型
+
+什么也不干，因为assign的时候，只是简单的赋值。
+
+### 小结
 
 
 # lambda
