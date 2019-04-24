@@ -767,7 +767,81 @@ static void __Block_byref_id_object_dispose_131(void *src) {
 
 但是dispatch_after的参数又是一个block，block中使用到了strongSelf，所以会对strongSelf进行一次retain，等于对控制器引用计数又加了1。当strongSelf超过block作用域会进行一次release，此时控制器引用计数减1不为0，所以还没有释放，等3s后dispatch_afterblock执行完，也就销毁了该block，此时会strongSelf进行一次release，此时控制器减1为0，完成释放。
 
+每次都写这两段重复代码，而且block中使用了strongSelf，所以RAC中提供了宏来帮我们自动生成，具体查看[这里](https://ziecho.com/post/ios/2016-08-04)
+
+### 引用计数
+
+最后笔者想说下block变量的引用计数，根据之前的分析，我们知道block的引用计数存储在了结构体中flags中。所以通过`_objc_rootRetainCount`来查看block变量的引用计数返回的都是1。下面看一个例子:
+
+{% highlight cpp %}
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        id sark = [Sark new];
+        blk_t blk = ^{ sark; };
+        blk_t ref = blk;
+
+        [blk copy];
+
+        struct Block_layout *aBlock;
+        aBlock = (__bridge struct Block_layout *)blk;
+        int refCount = aBlock->flags & 0xfffe;
+        int count = _objc_rootRetainCount(blk);
+
+        NSLog(@"count = %d, refCount = %d", count, refCount);
+    }
+    return 0;
+}
+
+// count = 1, refCount = 4
+// sark dealloc
+{% endhighlight %}
+
+可以看到refCount是4，因为每次`_Block_copy_internal`内部增加引用计数每次增加2，所以实际引用计数为2，因为blk和ref都指向block结构体，所以是没问题的。
+
+不过我们发现调用`[blk copy];`并没有效果，并没有增加block的引用计数。
+
+当作用域结束，blk和ref销毁，指向的block结构体也被销毁，所以block内部捕获的sark也释放，从而调用了dealloc方法。
+
+继续看另一种情况：
+
+{% highlight cpp %}
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        id sark = [Sark new];
+        blk_t blk = ^{ sark; };
+        blk_t ref = blk;
+
+        _Block_copy((__bridge const void *)(blk));
+        _Block_copy((__bridge const void *)(blk));
+
+        struct Block_layout *aBlock;
+        aBlock = (__bridge struct Block_layout *)blk;
+        int refCount = aBlock->flags & 0xfffe;
+        int count = _objc_rootRetainCount(blk);
+
+        NSLog(@"count = %d, refCount = %d", count, refCount);
+
+        _Block_release((__bridge const void *)(blk));
+        refCount = aBlock->flags & 0xfffe;
+        NSLog(@"count = %d, refCount = %d", count, refCount);
+    }
+    return 0;
+}
+
+// count = 1, refCount = 8
+// count = 1, refCount = 6
+{% endhighlight %}
+
+这次我们调用了两次`_Block_copy`方法，可以修改block的引用计数，之后调用了一次`_Block_release`，block的引用计数确实减1了。
+
+当作用域结束，block引用计数不为0，所以block没有释放，导致了捕获的sark也没有释放。
+
+通过这两个例子可以发现，当我们对一个block对象进行copy方法时，如果此时block已经在堆上，那么此时啥也没干，除非直接调用`_Block_copy`才会增加引用计数。猜测这样做应该是为了防止意外copy导致内存泄露。
+
 # lambda
+
+上面花了很长的篇幅来介绍block的实现，现在让我们看下C++11中的lambda表达式。
+
 
 # 总结
 
