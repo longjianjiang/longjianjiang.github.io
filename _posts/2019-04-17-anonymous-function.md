@@ -749,7 +749,7 @@ static void __Block_byref_id_object_dispose_131(void *src) {
 
 不过笔者做过实验，对一个弱引用进行retain操作，会调用到`objc_loadWeakRetained`，会增加弱引用指向对象的引用计数。
 
-所以这里笔者并不清楚`_Block_retain_object`内部是如何进行判断弱引用的情况的。
+所以笔者猜测`_Block_retain_object`内部判断捕获对象如果是`__strong`则增加引用计数，如果是`__weak`则不增加引用计数。
 
 2.为什么有时候需要加注释1这段代码？
 
@@ -840,10 +840,92 @@ int main(int argc, const char * argv[]) {
 
 # lambda
 
-上面花了很长的篇幅来介绍block的实现，现在让我们看下C++11中的lambda表达式。
+上面花了很长的篇幅来介绍block的实现，现在让我们简单看下C++11中的lambda表达式。
 
+{% highlight cpp %}
+int x = 5, y = 7;
+
+auto lamdba = [](int x, int y) -> int {
+    return x + y;
+};
+
+cout << "sum = " << lamdba(x, y) << endl;
+{% endhighlight %}
+
+上面就是一个lambda表达式，大致结构和block类似，最前面的`[]`是用来指定捕获变量及捕获方式，具体规则见下表:
+
+```
+[]：默认不捕获任何变量；
+[=]：默认以值捕获所有变量；
+[&]：默认以引用捕获所有变量；
+[x]：仅以值捕获x，其它变量不捕获；
+[&x]：仅以引用捕获x，其它变量不捕获；
+[=, &x]：默认以值捕获所有变量，但是x是例外，通过引用捕获；
+[&, x]：默认以引用捕获所有变量，但是x是例外，通过值捕获；
+[this]：通过引用捕获当前对象（其实是复制指针）；
+[*this]：通过传值方式捕获当前对象；
+```
+
+即使一个局部变量以值的方式进行捕获，我们想在lambda中修改该值，只需要加上`mutable`关键字即可修改，如下例子所示:
+
+{% highlight cpp %}
+int x = 5, y = 7;
+
+auto lamdba = [](int x, int y) mutable -> int {
+    x++; y++;
+    return x + y;
+};
+
+cout << "x = " << x << ", y = " << y << endl; // x = 5, y = 7
+cout << "sum = " << lamdba(x, y) << endl; // sum = 14
+{% endhighlight %}
+
+其实lambda的实现是一个匿名类，重载了`()`运算符，如果捕获了对象，那么这些对象会作为这个匿名类的成员。
+
+lambda同样会在适当的时候进行移动到堆上，因为如果不移动过了作用域，接下来执行的时候肯定就出错了，下面看一个例子:
+
+{% highlight cpp %}
+struct Inner {
+    int v;
+} in{100};
+
+struct Outer {
+    int v;
+    Inner *t;
+};
+
+function<void()> getLambda() {
+    Outer out{0, &in};
+    return [out]() mutable {
+        cout << out.v++ << "\t" << out.t->v++ << endl;
+    };
+}
+
+int main() {
+    auto lambda = getLambda();
+    auto copy_lambda = lambda;
+    lambda();
+    lambda();
+    copy_lambda();
+    copy_lambda();
+
+    return 0;
+}
+
+// output
+0 100
+1 101
+0 102
+1 103
+{% endhighlight %}
+
+可以发现当函数返回的时候，lambda被移动到了堆上，同时所捕获的对象也跟着移动到了堆。
+
+当lamdba进行复制的时候，会拷贝匿名类中的成员，当成员是指针类型，进行的是浅拷贝，并没有重复分配内存空间，所以打印结构体`in`的值时依然是叠加的。
 
 # 总结
+
+本文主要分析了block的实现结构，block变量以及其捕获局部变量内存管理的实现，最后简单介绍了C++11中的lambda。
 
 # References
 
@@ -859,3 +941,5 @@ int main(int argc, const char * argv[]) {
 [https://github.com/apple/swift-corelibs-foundation](https://github.com/apple/swift-corelibs-foundation)
 
 [https://ziecho.com/post/ios/2015-09-02](https://ziecho.com/post/ios/2015-09-02)
+
+[https://blog.yiz96.com/cpp-closure/](https://blog.yiz96.com/cpp-closure/)
