@@ -923,14 +923,13 @@ int main() {
 
 当lamdba进行复制的时候，会拷贝匿名类中的成员，当成员是指针类型，进行的是浅拷贝，并没有重复分配内存空间，所以打印结构体`in`的值时依然是叠加的。
 
+lambda的更多内容可以参考[这里](https://www.jianshu.com/p/d686ad9de817)
+
 # 总结
 
 本文主要分析了block的实现结构，block变量以及其捕获局部变量内存管理的实现，最后简单介绍了C++11中的lambda。
 
 # References
-
-{% highlight cpp %}
-{% endhighlight %}
 
 [iOS与OS X多线程和内存管理](https://book.douban.com/subject/24720270/)
 
