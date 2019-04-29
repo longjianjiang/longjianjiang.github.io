@@ -86,12 +86,59 @@ self.timer = [NSTimer weak_scheduleTimerWithTimeInterval:1 repeats:YES block:^{
 
 KVO的实现其实也是使用到isa-swizzling，对象被某个观察者观察的时候，这个时候同样会动态创建一个该对象类的子类，重写property的set方法，在set方法里面调用`- willChangeValueForKey:`,`- didChangeValueForKey:`。这个时候将该对象的isa指向动态创建的这个类，这样property改变的时候可以通知到观察者。
 
-更多可以参考[这里](http://www.pluto-y.com/isa-swizzling-and-runtime/)和[这里](http://blog.sunnyxx.com/2014/03/09/objc_kvo_secret/)。
+那么当property改变的时候是如何通知到观察者的呢？
+
+通过发通知(notification)，这个通知是直接发送到观察者这里，而不是类似`NSNotificationCenter`这种中心中转模式。被观察者在某个propety改变后也就是当`didChangeValueForKey`触发后会发送通知，所以观察者需要实现`observeValueForKeyPath:ofObject:change:context:`，当收到通知，该方法会执行同时附带数据信息，如果没有实现则会走到NSObject的该方法，此时会抛出异常。
+
+下面笔者提几个之前没有注意的点：
+
+### NSKeyValueObservingOptionPrior
+
+这是一个option，当`addObserver:forKeyPath:options:context:`时候可以传入，这个option的作用在于，当被观察者的property改变之前会调用一次通知，此时change字典中有`key:NSKeyValueChangeNotificationIsPriorKey, value:@YES`。所以这个时候观察者会收到两次通知。
+
+当观察者自己的一个被观察的属性需要执行 `willChangeValueForKey`，而且观察者的属性依赖被观察者的属性，所以需要增加这个option，否则等到收到第二个通知再执行`willChangeValueForKey`就太迟了。
+
+### 手动通知
+
+有的时候想手动控制发送通知给观察者，需要重载NSObject的`automaticallyNotifiesObserversForKey：`方法，将需要手动控制的key返回NO。
+
+当需要发送通知给观察者的时候，将proepty的改变放在`- willChangeValueForKey:`,`- didChangeValueForKey:`中间即可。
+
+### dependent keys
+
+可以设定某个propety依赖其他若干属性，当这些若干属性改变的时候，property的对象就会发送通知给观察者。
+
+- To-One 
+
+比如fullName依赖，firstName和lastName。这样通过重载`keyPathsForValuesAffectingValueForKey:` 可以指定这种依赖关系。
+
+{% highlight objc %}
++ (NSSet *)keyPathsForValuesAffectingValueForKey:(NSString *)key {
+ 
+    NSSet *keyPaths = [super keyPathsForValuesAffectingValueForKey:key];
+ 
+    if ([key isEqualToString:@"fullName"]) {
+        NSArray *affectingKeys = @[@"lastName", @"firstName"];
+        keyPaths = [keyPaths setByAddingObjectsFromArray:affectingKeys];
+    }
+    return keyPaths;
+}
+{% endhighlight %}
+
+- To-Many
+
+比如班级的平均身高，依赖班级每个学生的高度属性，此时不能通过`keyPathsForValuesAffectingValueForKey:` 指定`stu.height`。
+
+只能将班级作为每个学生的观察者，来进行统计平均身高，当新的学生加入班级或者学生离开班级，都有做对应的addObserver和removeObserver操作来保证平均身高的准确性。
 
 ## 总结
 
-本文主要介绍了isa-swizzling的相关内容。
+本文主要介绍了isa-swizzling和KVO的相关内容。
 
 ## References
 
 [https://mikeash.com/pyblog/friday-qa-2010-07-16-zeroing-weak-references-in-objective-c.html](https://mikeash.com/pyblog/friday-qa-2010-07-16-zeroing-weak-references-in-objective-c.html)
+
+[http://www.pluto-y.com/isa-swizzling-and-runtime/](http://www.pluto-y.com/isa-swizzling-and-runtime/)
+
+[KVO](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/KeyValueObserving/Articles/KVOImplementation.html#//apple_ref/doc/uid/20002307-BAJEAIEE)
