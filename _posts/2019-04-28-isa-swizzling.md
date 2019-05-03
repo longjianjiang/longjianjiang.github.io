@@ -88,7 +88,11 @@ KVO的实现其实也是使用到isa-swizzling，对象被某个观察者观察�
 
 那么当property改变的时候是如何通知到观察者的呢？
 
-通过发通知(notification)，这个通知是直接发送到观察者这里，而不是类似`NSNotificationCenter`这种中心中转模式。被观察者在某个propety改变后也就是当`didChangeValueForKey`触发后会发送通知，所以观察者需要实现`observeValueForKeyPath:ofObject:change:context:`，当收到通知，该方法会执行同时附带数据信息，如果没有实现则会走到NSObject的该方法，此时会抛出异常。
+首先在addObserver方法中，肯定需要将observer进行存起来，一种可能将某个对象的所有observer存储在一个全局的table中，也有可能将某个对象的所有observer存储在动态生成类中，`objc_allocateClassPair`中指定`extraBytes`，这样table就可以存储在类中。
+
+存储了所有的observer后，接下来要做的事情就是通知到observer，一个最简单的方法就是调用observer的`observeValueForKeyPath:ofObject:change:context:`方法，这样observer就会收到通知。所以如果observer的类没有实现该方法，则会走到NSObject的该方法，此时会抛出异常。
+
+最后在observer释放内存之前，需要将其移出，否则对一个释放内存的对象发送消息会出错。
 
 下面笔者提几个之前没有注意的点：
 
