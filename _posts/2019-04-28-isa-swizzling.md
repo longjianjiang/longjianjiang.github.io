@@ -94,6 +94,12 @@ KVO的实现其实也是使用到isa-swizzling，对象被某个观察者观察�
 
 最后在observer释放内存之前，需要将其移出，否则对一个释放内存的对象发送消息会出错。
 
+因为KVO接口设计的不够好用，所以有了[MAKVONotificationCenter](https://github.com/mikeash/MAKVONotificationCenter),[KVOController](https://github.com/facebook/KVOController)对原有KVO接口进行封装。
+
+KVOController是以observer为receiver进行封装，通过`observe:keypath:`系列方法以监听者的身份来监听某个对象。和KVO通过`addObserver:forKeypath:`，对象添加监听者正好相反。内部创建了一个私有类专门用来作为监听者，这样当监听者收到KVO通知，通过context拿到本次监听的数据进行转发，block的方式，action的方式，或者`observeValueForKeyPath:ofObject:`的方式。
+
+MAKVONotificationCenter的实现依然是内部创建了一个私有类作为监听者，当收到KVO通知时使用action或block的方式进行转发给外界。
+
 下面笔者提几个之前没有注意的点：
 
 ### NSKeyValueObservingOptionPrior
@@ -142,6 +148,8 @@ KVO的实现其实也是使用到isa-swizzling，对象被某个观察者观察�
 ## References
 
 [https://mikeash.com/pyblog/friday-qa-2010-07-16-zeroing-weak-references-in-objective-c.html](https://mikeash.com/pyblog/friday-qa-2010-07-16-zeroing-weak-references-in-objective-c.html)
+
+[https://www.mikeash.com/pyblog/friday-qa-2009-01-23.html](https://www.mikeash.com/pyblog/friday-qa-2009-01-23.html)
 
 [http://www.pluto-y.com/isa-swizzling-and-runtime/](http://www.pluto-y.com/isa-swizzling-and-runtime/)
 
