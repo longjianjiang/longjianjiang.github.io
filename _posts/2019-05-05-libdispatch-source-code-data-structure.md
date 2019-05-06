@@ -10,13 +10,32 @@ comments: true
 
 > 下面所说的数据结构很多有两种，一种是`_s`结尾表示是结构体，一种是`_t`结尾表示是`_s`的指针形式。
 
-## dispatch_function_t
+## 简单类型
+
+- dispatch_qos_t & dispatch_priority_t
+
+{% highlight cpp %}
+typedef uint32_t dispatch_qos_t;
+typedef uint32_t dispatch_priority_t;
+{% endhighlight %}
+
+这两个就是整形的别名。
+
+- dispatch_function_t
 
 {% highlight cpp %}
 typedef void (*dispatch_function_t)(void *_Nullable);
 {% endhighlight %}
 
-`dispatch_function_t` 这个类型就是一个函数指针。
+这个类型就是一个函数指针。
+
+- dispatch_block_t
+
+{% highlight cpp %}
+typedef void (^dispatch_block_t)(void);
+{% endhighlight %}
+
+这个类型就是一个空参数列表无返回值的block类型。
 
 ## dispatch_continuation_t
 
@@ -49,7 +68,32 @@ typedef struct dispatch_continuation_s {
 
 `dc_func`成员就是队列中需要执行任务的函数，而`dc_ctxt`则是作为函数的参数。
 
-## dispatch_queue_t
+## queue
+
+GCD实现了一个队列的类簇，如下所示：
+
+```
+ dispatch_queue_t
+  +--> dispatch_workloop_t
+  +--> dispatch_queue_serial_t --> dispatch_queue_main_t
+  +--> dispatch_queue_concurrent_t
+  '--> dispatch_queue_global_t
+```
+
+上面的类型都是指针类型，对应的具体的结构体类型，种类就更多更细了，如下所示：
+
+```
+  dispatch_queue_class_t / struct dispatch_queue_s
+   +--> struct dispatch_workloop_s
+   '--> dispatch_lane_class_t
+         +--> struct dispatch_lane_s
+         |     +--> struct dispatch_source_s
+         |     '--> struct dispatch_mach_s
+         +--> struct dispatch_queue_static_s
+         '--> struct dispatch_queue_global_s
+               +--> struct dispatch_queue_pthread_root_s
+```
+
 
 这个队列类型是我们所能接触到的，下面来看其组成：
 
@@ -144,7 +188,9 @@ union {
 	do_xref_cnt)
 {% endhighlight %}
 
-最后一个宏里看到了熟悉的isa和引用计数相关的成员，至此队列结构体完毕，可以看到还是十分复杂的一个结构。
+`_OS_OBJECT_HEADER`定一个了一个对象的结构体，因为看到了熟悉的isa，以及引用计数。
+
+至此队列结构体完毕，可以看到还是十分复杂的一个结构。
 
 ## References
 

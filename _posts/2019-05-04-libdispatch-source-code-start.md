@@ -19,6 +19,7 @@ comments: true
 笔者记录过程如下:
 
 - [数据结构](http://www.longjianjiang.com/libdispatch-source-code-data-structure/)
+- [async & sync](http://www.longjianjiang.com/libdispatch-source-code-async-and-sync/)
 
 ## 最后
 
