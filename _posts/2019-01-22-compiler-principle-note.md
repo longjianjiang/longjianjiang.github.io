@@ -10,7 +10,7 @@ comments: true
 
 > 笔者大学期间没有学过编译原理这门课，笔者认为作为一个合格的程序员，有必要了解底层的知识，所以本文就是笔者学习编译原理的笔记。
 
-# 介绍
+## 介绍
 
 我们都知道一个hello world需要经过编译链接成可执行文件，才能运行打印出hello world，而做编译链接事情的就是编译器。
 
@@ -50,3 +50,30 @@ relocated machine code
 ![compiler_principle_note_1]({{site.url}}/assets/images/blog/compiler_principle_note_1.png)
 
 > 实际运行中有些步骤可能会组合起来，组合起来的步骤之间生成的中间表示不需要被明确的构造出来。
+
+
+### 补充
+
+最近笔者再看autoconf和automake的时候了解到其实在预编译之前还有其他的步骤，将其补充到这里：
+
+因为所写的代码是需要跨平台的关系，所以编译器在最开始需要进行所谓的config，这个步骤需要做的工作就是生成一份宏定义(config.h)，方便针对不同平台写条件编译的代码。
+
+同时config步骤还会生成一个Makefile文件，这个文件的说明了源文件之间的依赖关系，假设A文件依赖B文件，那么编译的时候得先编译B然后才编译A，同时当B改变的时候，A需要重新编译。此时也就知道了该程序使用到了那些系统库。此外Makefile中会保存着编译器和连接器的参数选项。
+
+生成config.h 以及 Makefile这一工作的是configure脚步，因为手工写这个脚步比较复杂，所以有了autoconf这个工具。configure脚步会根据`Makefile.in` 模版文件来生成Makefile，为了不让手工写这个模块文件，automake用来自动生成这个模版文件。
+
+所以有了autoconf和automake，我们只需要编写`configure.ac`，一组宏定义，autoconf根据这个文件去生成configure脚步；`Makefile.am` 这个文件里描述文件的依赖关系，automake根据这个文件去生成Makefile.in文件，从而继续生成Makefile。automake不单独使用，需要和autoconf一起使用。
+
+下面是两个工具的具体工作流程图：
+
+![compiler_principle_note_2]({{site.url}}/assets/images/blog/compiler_principle_note_2.png)
+
+我们也可以简单的使用`autoreconf --install`来代替图中的一系列的命令。
+
+## References
+
+[https://book.douban.com/subject/1872069/](https://book.douban.com/subject/1872069/)
+
+[http://darktea.github.io/notes/2012/06/24/autotools.html](http://darktea.github.io/notes/2012/06/24/autotools.html)
+
+[https://geesun.github.io/posts/2015/02/autotool.html](https://geesun.github.io/posts/2015/02/autotool.html)
