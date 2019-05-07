@@ -288,6 +288,38 @@ bool compare_exchange_strong(_Tp& __e, _Tp __d,
 
 > 之前说的锁的机制，内部也是使用了内存序的。
 
+# 2019-05-07补充 开始
+
+mutex进行lock的时候，首先锁定mutex，锁定完成后会发布一个内存序，这个内存序保证了在mutex锁定期间进行的所有内存操作不会在其他线程看到mutex被锁定之前完成;
+
+```
+thread1
+ -------------------------
+  lock | operation
+ -------------------------
+```
+
+也就是说当thread1锁定完成之前，其他线程是看不到后面的operation内存操作的。
+
+对应的mutex进行unlock的时候，首先发布一个内存序，然后才解锁mutex，这个内存序则保证了mutex锁定期间的所有内存操作不会晚于在其他线程看到mutex被释放之前完成。
+
+```
+thread1
+ -------------------------
+  operation | unlock
+ -------------------------
+```
+
+也就是说thread1解锁完成前，其他线程已经可以看到之前的operation内存操作了。
+
+下面给一个例子，如图所示：
+
+![thread_safety_2.png]({{site.url}}/assets/images/blog/thread_safety_2.png)
+
+假设将每一个内存操作当作一个队列中的一个元素，那么内存序就等于是一个分割线，分割线前面的操作必须在分割线后面的操作之前完成。
+
+# 2019-05-07补充 结束
+
 ```
 std::atomic<int> ai = 0;
 std::atomic<int> aj = 0;
@@ -531,3 +563,5 @@ dispatch_async(dispatch_get_main_queue(), ^{
 [https://github.com/apple/darwin-libplatform/blob/master/include/libkern/OSAtomicDeprecated.h](https://github.com/apple/darwin-libplatform/blob/master/include/libkern/OSAtomicDeprecated.h)
 
 [https://github.com/gnustep/libs-base/blob/master/Source/NSLock.m](https://github.com/gnustep/libs-base/blob/master/Source/NSLock.m)
+
+[pwpt](https://book.douban.com/subject/1941123/)
