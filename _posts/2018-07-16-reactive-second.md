@@ -117,13 +117,126 @@ merge效果，按信号序列发送值依次进行转发出来。
 
 # Fliter Operator
 
-## ignore
+## ignoreElements
+
+ignoreElements顾名思义，忽略信号中发送的next event，但会转发错误和完成。
 
 ## skip
 
+skip 会忽略信号中发送的一些next event。
+
+- skip 
+
+会跳过信号发送的前n个next event。
+
+- skipWhile
+
+当给定条件为false 后开始正常发送next event，后面给定条件为true也正常发送。
+
+- skipUntil
+
+忽略原信号发送的next event，直到第二个信号发送next event后，原信号发送的next event正常被发送。
+
 ## take
 
-## distinct
+take 会取信号中发送的若干个next event，和skip效果相反。
+
+- take
+
+取信号发送的前n个next event。
+
+- takeWhile
+
+当给定条件为false后，后面的next event将不会被发送，后面给定条件为true也不会发送。
+
+- takeUntil
+
+原信号next event正常被发送，直到第二个信号发送next event后，原信号发送的next event被忽略。
+
+## elementAt
+
+elementAt 只发送信号发送的第n个next event。
+
+> n从0开始计数。
+
+## filter
+
+filter 给定一个条件，只发送信号中符合条件的next event。
+
+## distinctUntilChanged
+
+过滤信号中发送的重复的next evnet。
+
+默认是根据`Equatable`协议来比较是否相等，不过RxSwift中提供了自定义比较方法的接口。
 
 # Combine Operator
 
+## startWith
+
+在信号发送之前，先发送一个给定的next event。
+
+## concat
+
+连接两个信号的next event。
+
+## merge
+
+合并两个信号的next event。
+
+## CombineLatest
+
+组合两个信号发送的next event，如下图所示：
+
+![reactive_second_1]({{site.url}}/assets/images/blog/rac_second_1.png)
+
+## zip
+
+![reactive_second_2]({{site.url}}/assets/images/blog/rac_second_2.png)
+
+可以看到zip和combineLatest的区别在于是否使用先前的event。
+
+## withLatestFrom
+
+![reactive_second_3]({{site.url}}/assets/images/blog/rac_second_3.png)
+
+当一个信号触发后，发送另一个信号当前最新的event。
+
+## sample
+
+![reactive_second_4]({{site.url}}/assets/images/blog/rac_second_4.png)
+
+可以看到sample和withLatestFrom的区别在于，不会重复发送相同的event。
+
+而且withLatestFrom中，触发器作为调用者；sample中，触发器作为参数。
+
+## amb （ambiguous）
+
+![reactive_second_5]({{site.url}}/assets/images/blog/rac_second_5.png)
+
+只会转发信号序列中第一个发送event的信号。
+
+## switchLatest
+
+![reactive_second_6]({{site.url}}/assets/images/blog/rac_second_6.png)
+
+效果类似flatMapLatest。只发送信息序列中最新信号发送的event。
+
+## reduce
+
+![reactive_second_7]({{site.url}}/assets/images/blog/rac_second_7.png)
+
+reduce 将信号中发送的所有event依次执行一个方法，最后只发送一个结果。
+
+## scan
+
+![reactive_second_8]({{site.url}}/assets/images/blog/rac_second_8.png)
+
+类似reduce，将reduce的计算结果全部发送，而不是仅仅发送最后的结果。
+
+# References
+
+[http://reactivex.io/documentation/operators.html](http://reactivex.io/documentation/operators.html)
+
+[https://store.raywenderlich.com/products/rxswift](https://store.raywenderlich.com/products/rxswift)
+{% highlight swift %}
+{% endhighlight %}
