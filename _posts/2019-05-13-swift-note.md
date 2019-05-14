@@ -64,6 +64,22 @@ guard case .pending(let _handlers) = self.sealant else {
 
 之前说到的枚举中使用`for case`也可以使用where子句来添加限定条件的。
 
+# fatalError
+
+先看一个例子：
+
+{% highlight swift %}
+class Box<T> {
+    func inspect() -> Sealant<T> { fatalError() }
+    func inspect(_: (Sealant<T>) -> Void) { fatalError() }
+    func seal(_: T) {}
+}
+{% endhighlight %}
+
+定义了一个Box类，其中两个`inspect`方法调用了`fatalError`，其实可以猜到是父类给出的方法不希望被调用，需要子类自己去实现。
+
+`fatalError`调用后程序中止，给出设定的提示信息。
+
 # References 
 
 [https://docs.swift.org/swift-book/LanguageGuide/TheBasics.html](https://docs.swift.org/swift-book/LanguageGuide/TheBasics.html)
