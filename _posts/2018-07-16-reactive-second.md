@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "【Reative】学习笔记第二弹"
+title:  "【Reative】学习笔记第二弹(Operators)"
 date:   2018-07-16
 excerpt:  "本文是笔者学习Reative的第二篇文章，主要介绍Observable的各种操作"
 tag:
@@ -187,23 +187,23 @@ filter 给定一个条件，只发送信号中符合条件的next event。
 
 组合两个信号发送的next event，如下图所示：
 
-![reactive_second_1]({{site.url}}/assets/images/blog/rac_second_1.png)
+![reactive_second_1]({{site.url}}/assets/images/blog/reactive_second_1.png)
 
 ## zip
 
-![reactive_second_2]({{site.url}}/assets/images/blog/rac_second_2.png)
+![reactive_second_2]({{site.url}}/assets/images/blog/reactive_second_2.png)
 
 可以看到zip和combineLatest的区别在于是否使用先前的event。
 
 ## withLatestFrom
 
-![reactive_second_3]({{site.url}}/assets/images/blog/rac_second_3.png)
+![reactive_second_3]({{site.url}}/assets/images/blog/reactive_second_3.png)
 
 当一个信号触发后，发送另一个信号当前最新的event。
 
 ## sample
 
-![reactive_second_4]({{site.url}}/assets/images/blog/rac_second_4.png)
+![reactive_second_4]({{site.url}}/assets/images/blog/reactive_second_4.png)
 
 可以看到sample和withLatestFrom的区别在于，不会重复发送相同的event。
 
@@ -211,25 +211,25 @@ filter 给定一个条件，只发送信号中符合条件的next event。
 
 ## amb （ambiguous）
 
-![reactive_second_5]({{site.url}}/assets/images/blog/rac_second_5.png)
+![reactive_second_5]({{site.url}}/assets/images/blog/reactive_second_5.png)
 
 只会转发信号序列中第一个发送event的信号。
 
 ## switchLatest
 
-![reactive_second_6]({{site.url}}/assets/images/blog/rac_second_6.png)
+![reactive_second_6]({{site.url}}/assets/images/blog/reactive_second_6.png)
 
 效果类似flatMapLatest。只发送信息序列中最新信号发送的event。
 
 ## reduce
 
-![reactive_second_7]({{site.url}}/assets/images/blog/rac_second_7.png)
+![reactive_second_7]({{site.url}}/assets/images/blog/reactive_second_7.png)
 
 reduce 将信号中发送的所有event依次执行一个方法，最后只发送一个结果。
 
 ## scan
 
-![reactive_second_8]({{site.url}}/assets/images/blog/rac_second_8.png)
+![reactive_second_8]({{site.url}}/assets/images/blog/reactive_second_8.png)
 
 类似reduce，将reduce的计算结果全部发送，而不是仅仅发送最后的结果。
 
@@ -238,5 +238,3 @@ reduce 将信号中发送的所有event依次执行一个方法，最后只发�
 [http://reactivex.io/documentation/operators.html](http://reactivex.io/documentation/operators.html)
 
 [https://store.raywenderlich.com/products/rxswift](https://store.raywenderlich.com/products/rxswift)
-{% highlight swift %}
-{% endhighlight %}
