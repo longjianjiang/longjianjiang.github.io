@@ -518,7 +518,7 @@ OC中还额外提供了一个 `NSConditionLock`，内部持有一个 `NSConditio
 
 ### GCD & NSOperation
 
-苹果在文档中说过让我们最好不要直接使用线程相关的API，而推荐使用GCD和NSOperation PI进行异步任务的开发，把线程管理的工作交给系统。
+苹果在文档中说过让我们最好不要直接使用线程相关的API，而推荐使用GCD和NSOperation API进行异步任务的开发，把线程管理的工作交给系统。
 
 在说GCD和NSOperation时，首先来看一下需要知道的两个概念：
 
@@ -545,6 +545,28 @@ dispatch_async(dispatch_get_main_queue(), ^{
 这两个词指的是执行任务的方式。所谓串行其实就是一次执行只能一个任务，并且当前一个任务执行完后才能执行下一个任务。并发则可以同时执行多个任务。
 
 并发(concurrency)其实和并行(parallelism)表现上类似，但是有一定区别。简单理解，并发指的是逻辑上的同时执行，具体到某一个时间点，依然是只能执行一个任务；而并行则是具体到某一个时间点仍然是执行多个任务。
+
+#### GCD
+
+前面说到了多线程，多线程解决的其中一个问题就是将耗时操作丢到其他线程，不至于阻塞主线程。而GCD的优点就在于，如果现在有一个耗时的操作你不想导致阻塞主线程，那么可以将这个操作作为一个异步任务添加到队列中去执行，优点在于不需要去写线程管理的代码，这些GCD内部帮我们处理了。
+
+GCD的主要内容就是两个，一个是任务，另一个就是队列。
+
+所谓任务就是实际需要执行的操作，分为同步任务和异步任务，区别这里不赘述。任务需要添加到队列中，由队列进行派发处理。
+
+队列分为两种，serial和concurrent。队列会将任务派发到线程上执行，不同的任务所在的线程可能不一样。所以队列只是一个派发任务的结构和线程其实没什么关系。
+
+GCD中还提供了一些实用的功能，group，barrier实现任务的依赖，semaphores实现任务获取资源的一致性等等，笔者这里不展开。
+
+最后笔者想说下关于使用`dispatch_sync`可能导致的死锁问题。给出Apple文档的一段话：
+
+```
+Do not call the dispatch_sync function from a task that is executing on the same queue that you pass to your function call. 
+Doing so will deadlock the queue. If you need to dispatch to the current queue, do so asynchronously using the dispatch_async function.
+```
+
+####  NSOperation
+
 
 ## References
 
