@@ -567,6 +567,16 @@ Doing so will deadlock the queue. If you need to dispatch to the current queue, 
 
 ####  NSOperation
 
+在前面GCD中，讲到了任务，任务在GCD中一般以block为单位进行组织。而NSOperation算是一种面向对象的任务组织方式，NSOperation本身就是一个抽象类，定义了任务应该如何组织。
+
+NSOperation可以直接执行，或者也可以添加到NSOperationQueue中，让OQ进行派发执行。
+
+同样的NSOperation依然区分同步和异步，默认是同步的，可以通过`isConcurrent`来指定。当异步Operation直接通过`start`方法执行时，这个时候需要手动创建线程，比如`YYWebImageOperation`内部新建了一个线程来执行网络IO操作。不过也可以将这个异步的Operation添加到OQ中，OQ内部会派发到其他线程中执行，OQ不论是异步还是同步的Operation都会派发到新线程中进行执行。
+
+当自定义同步Operation时，只需要重写main方法即可，start方法内部会去调用main方法。
+
+当自定义异步Operation时，而且不添加到OQ中，这个时候需要重写start方法，同时需要自己更新Opeation的状态，比如`isFinished`,`isExecuting`，手动发KVO通知。为什么需要发送KVO通知呢，因为Operation是可以添加依赖的，当依赖的Operation执行完成后，收到通知另一个Operation可以开始执行。同时需要指定了`completionBlock`，收到完成通知后需要执行这个回调。
+
 
 ## References
 
