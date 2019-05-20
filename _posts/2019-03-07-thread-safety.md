@@ -565,6 +565,138 @@ Do not call the dispatch_sync function from a task that is executing on the same
 Doing so will deadlock the queue. If you need to dispatch to the current queue, do so asynchronously using the dispatch_async function.
 ```
 
+{% highlight objc%}
+dispatch_queue_t sq = dispatch_queue_create("com.longjianjiang.sq", NULL);
+dispatch_async(sq, ^{
+	NSLog(@"Task one");
+	dispatch_sync(sq, ^{
+		NSLog(@"Task two");
+	});
+	NSLog(@"Task one complete");
+});	
+{% endhighlight %}
+
+上述代码会导致所谓的死锁。
+
+为什么会导致死锁，空说无凭，下面从libdispatch的源码中来看到底是如何导致死锁的。
+
+{% highlight cpp%}
+void dispatch_sync(dispatch_queue_t dq, dispatch_block_t work) {
+	uintptr_t dc_flags = DC_FLAG_BLOCK;
+	_dispatch_sync_f_inline(dq, work, _dispatch_Block_invoke(work), dc_flags);
+}
+
+static inline void
+_dispatch_sync_f_inline(dispatch_queue_t dq, void *ctxt,
+		dispatch_function_t func, uintptr_t dc_flags) {
+    // 串行队列
+	if (likely(dq->dq_width == 1)) {
+		return _dispatch_barrier_sync_f_inline(dq, ctxt, func, dc_flags);
+	}
+}
+
+static inline void
+_dispatch_barrier_sync_f_inline(dispatch_queue_t dq, void *ctxt,
+		dispatch_function_t func, uintptr_t dc_flags) {
+	dispatch_tid tid = _dispatch_tid_self();
+
+	dispatch_lane_t dl = upcast(dq)._dl;
+	if (unlikely(!_dispatch_queue_try_acquire_barrier_sync(dl, tid))) {
+		return _dispatch_sync_f_slow(dl, ctxt, func, DC_FLAG_BARRIER, dl,
+				DC_FLAG_BARRIER | dc_flags);
+	}
+}
+{% endhighlight %}
+
+`_dispatch_queue_try_acquire_barrier_sync`方法通过使用原子操作来设置queue的`dp_state`的值来实现lock机制。当被lock后，会将线程ID记录到`dp_state`。这样在serial队列中，如果是同步任务，必须等待该任务执行完毕后，队列中的其他任务才能派发执行。
+
+所以如果queue被某个线程lock后，再次尝试获得lock那么就会失败，则会走到`_dispatch_sync_f_slow` 方法。
+
+{% highlight cpp%}
+static void
+_dispatch_sync_f_slow(dispatch_queue_class_t top_dqu, void *ctxt,
+		dispatch_function_t func, uintptr_t top_dc_flags,
+		dispatch_queue_class_t dqu, uintptr_t dc_flags) {
+	dispatch_queue_t top_dq = top_dqu._dq;
+	dispatch_queue_t dq = dqu._dq;
+
+	pthread_priority_t pp = _dispatch_get_priority();
+	struct dispatch_sync_context_s dsc = {
+		.dc_flags    = DC_FLAG_SYNC_WAITER | dc_flags,
+		.dc_func     = _dispatch_async_and_wait_invoke,
+		.dc_ctxt     = &dsc,
+		.dc_other    = top_dq,
+		.dc_priority = pp | _PTHREAD_PRIORITY_ENFORCE_FLAG,
+		.dc_voucher  = _voucher_get(),
+		.dsc_func    = func,
+		.dsc_ctxt    = ctxt,
+		.dsc_waiter  = _dispatch_tid_self(),
+	};
+
+	__DISPATCH_WAIT_FOR_QUEUE__(&dsc, dq);
+
+	if (dsc.dsc_func == NULL) {
+		dispatch_queue_t stop_dq = dsc.dc_other;
+		return _dispatch_sync_complete_recurse(top_dq, stop_dq, top_dc_flags);
+	}
+
+	_dispatch_introspection_sync_begin(top_dq);
+	_dispatch_trace_item_pop(top_dq, &dsc);
+	_dispatch_sync_invoke_and_complete_recurse(top_dq, ctxt, func,top_dc_flags
+			DISPATCH_TRACE_ARG(&dsc));
+}
+
+static void
+__DISPATCH_WAIT_FOR_QUEUE__(dispatch_sync_context_t dsc, dispatch_queue_t dq) {
+	uint64_t dq_state = _dispatch_wait_prepare(dq);
+	if (unlikely(_dq_state_drain_locked_by(dq_state, dsc->dsc_waiter))) {
+		DISPATCH_CLIENT_CRASH((uintptr_t)dq_state,
+				"dispatch_sync called on queue "
+				"already owned by current thread");
+	}
+
+	_dispatch_thread_frame_save_state(&dsc->dsc_dtf);
+
+	if (_dq_state_is_suspended(dq_state) ||
+			_dq_state_is_base_anon(dq_state)) {
+		dsc->dc_data = DISPATCH_WLH_ANON;
+	} else if (_dq_state_is_base_wlh(dq_state)) {
+		dsc->dc_data = (dispatch_wlh_t)dq;
+	} else {
+		_dispatch_wait_compute_wlh(upcast(dq)._dl, dsc);
+	}
+
+	if (dsc->dc_data == DISPATCH_WLH_ANON) {
+		dsc->dsc_override_qos_floor = dsc->dsc_override_qos =
+				(uint8_t)_dispatch_get_basepri_override_qos_floor();
+		_dispatch_thread_event_init(&dsc->dsc_event);
+	}
+	dx_push(dq, dsc, _dispatch_qos_from_pp(dsc->dc_priority));
+	_dispatch_trace_runtime_event(sync_wait, dq, 0);
+	if (dsc->dc_data == DISPATCH_WLH_ANON) {
+		_dispatch_thread_event_wait(&dsc->dsc_event); // acquire
+	} else {
+		_dispatch_event_loop_wait_for_ownership(dsc);
+	}
+	if (dsc->dc_data == DISPATCH_WLH_ANON) {
+		_dispatch_thread_event_destroy(&dsc->dsc_event);
+		// If _dispatch_sync_waiter_wake() gave this thread an override,
+		// ensure that the root queue sees it.
+		if (dsc->dsc_override_qos > dsc->dsc_override_qos_floor) {
+			_dispatch_set_basepri_override_qos(dsc->dsc_override_qos);
+		}
+	}
+}
+{% endhighlight %}
+
+可以看到`__DISPATCH_WAIT_FOR_QUEUE__`中进行了检测，如果queue的`dp_state`已经被当前线程lock过一次，直接触发crash，定位到crash的位置，方便了调试，开头给的例子运行就会crash，调用栈停在了`__DISPATCH_WAIT_FOR_QUEUE__`方法。
+
+之前的例子是在当前线程中往serial队列中添加了一个taskOne，继续又在taskOne执行中往serial队列添加了一个同步任务taskTwo导致了死锁。
+
+如果在taskOne执行过程中切换到另一个线程往serial队列中添加一个同步任务taskTwo，同样也会导致死锁。但是这个时候GCD代码中就检测不出来死锁，因为并不是在同一个线程进行添加的。
+
+检测后，`_dispatch_thread_event_wait`方法进行信号量等待。所以这个时候`dispatch_sync`函数是不能返回的，serial队列也就被阻塞了。另一方面，添加到serial队列里的taskTwo等着被serial队列派发执行。这就是互相等待导致了死锁。
+
 ####  NSOperation
 
 在前面GCD中，讲到了任务，任务在GCD中一般以block为单位进行组织。而NSOperation算是一种面向对象的任务组织方式，NSOperation本身就是一个抽象类，定义了任务应该如何组织。
@@ -580,6 +712,8 @@ NSOperation可以直接执行，或者也可以添加到NSOperationQueue中，�
 
 ## References
 
+{% highlight cpp%}
+{% endhighlight %}
 [https://stackoverflow.com/questions/46088363/why-does-stdcondition-variablewait-need-mutex](https://stackoverflow.com/questions/46088363/why-does-stdcondition-variablewait-need-mutex)
 
 [http://blog.vladimirprus.com/2005/07/spurious-wakeups.html](http://blog.vladimirprus.com/2005/07/spurious-wakeups.html)

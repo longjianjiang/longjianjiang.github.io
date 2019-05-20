@@ -61,7 +61,21 @@ public protocol ObservableType: ObservableConvertibleType {
 }
 {% endhighlight %}
 
+下面给出Observable的定义：
 
+{% highlight swift %}
+public class Observable<Element> : ObservableType {
+    public func subscribe<Observer: ObserverType>(_ observer: Observer) -> Disposable where Observer.Element == Element {
+        rxAbstractMethod() // fatalError()
+    }
+
+    public func asObservable() -> Observable<Element> {
+        return self
+    }
+}
+{% endhighlight %}
+
+可以看到Observable只是一个父类，遵守并实现了上面两个协议的方法，作为Observable一个最重要的方法就是`subscribe`。
 # Subject
 
 # 总结
