@@ -709,6 +709,7 @@ NSOperation可以直接执行，或者也可以添加到NSOperationQueue中，�
 
 当自定义异步Operation时，而且不添加到OQ中，这个时候需要重写start方法，同时需要自己更新Opeation的状态，比如`isFinished`,`isExecuting`，手动发KVO通知。为什么需要发送KVO通知呢，因为Operation是可以添加依赖的，当依赖的Operation执行完成后，收到通知另一个Operation可以开始执行。同时需要指定了`completionBlock`，收到完成通知后需要执行这个回调。
 
+总体来说，Operation的方式虽然创建比较复杂，需要子类化，但是一旦创建好，复用性更好。
 
 ## References
 
