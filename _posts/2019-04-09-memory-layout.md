@@ -20,6 +20,8 @@ comments: true
 
 内核总是驻留在内存中，因为要随时处理中断和系统调用。这部分内存应用程序没有权限进行读写。
 
+当进程进行系统调用(system call) 时，系统调用依然是在当前进程的内存空间的内核区域中，这样系统调用的代码可以直接的访问到进程的用户区内存，也不需要切换页表。
+
 ### Stack
 
 栈用来存放**stack frame**信息的，所谓栈帧其实就是栈内存上的一个片段，该片段就是一个函数调用，当函数返回时，栈帧对应的那段内存就会被回收。栈帧会为函数的局部变量分配内存，同时保存函数的返回地址。
@@ -47,5 +49,7 @@ BSS(block started by symbol)段，存储了未初始化或初始化值为0的全
 保留段，位于地址的最低部分，没有对应的物理地址。
 
 ## References
+
+[https://github.com/mit-pdos/xv6-public](https://github.com/mit-pdos/xv6-public)
 
 [https://manybutfinite.com/post/anatomy-of-a-program-in-memory/](https://manybutfinite.com/post/anatomy-of-a-program-in-memory/)
