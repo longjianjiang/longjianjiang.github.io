@@ -24,6 +24,24 @@ public func dataTask(_: PMKNamespacer, with convertible: URLRequestConvertible) 
 
 这个特性用的还是比较多的，不过知道了也就习以为常了。
 
+# @autoclosure
+
+先上一段代码：
+
+{% highlight swift %}
+func logIfTrue(@autoclosure predicate: () -> Bool) {
+    if predicate() {
+        print("True")
+    }
+}
+
+logIfTrue(5 > 7)
+{% endhighlight %}
+
+可以看到加了`@autoclosure`后，对于这种closure，我们直接传了一个表达式，编译器会帮我们转成closure的形式。
+
+[ref](https://swifter.tips/autoclosure/)
+
 # enum 
 
 ## Associated Values
