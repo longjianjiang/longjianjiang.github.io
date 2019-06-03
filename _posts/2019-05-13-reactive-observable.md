@@ -4,7 +4,7 @@ title:  "【Reative】学习笔记第三弹(Observable & Subject)"
 date:   2019-05-13
 excerpt:  "本文是笔者学习Reative的第三篇文章，主要介绍Observable和Subject"
 tag:
-- Reative
+- Reactive
 comments: true
 ---
 

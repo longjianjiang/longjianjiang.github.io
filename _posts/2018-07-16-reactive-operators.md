@@ -4,7 +4,7 @@ title:  "【Reative】学习笔记第二弹(Operators)"
 date:   2018-07-16
 excerpt:  "本文是笔者学习Reative的第二篇文章，主要介绍Observable的各种操作"
 tag:
-- Reative
+- Reactive
 comments: true
 ---
 
