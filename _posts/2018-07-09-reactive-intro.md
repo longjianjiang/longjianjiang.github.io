@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "【Reative】学习笔记第一弹(Intro)"
+title:  "【Reactive】学习笔记第一弹(Intro)"
 date:   2018-07-09
 excerpt:  "本文是笔者学习Reative的第一篇文章，主要介绍一些基本概念"
 tag:

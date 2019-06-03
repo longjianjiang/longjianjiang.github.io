@@ -38,6 +38,8 @@ comments: true
 
 实际我们创建一个disposable的时候，通常使用`Disposables`提供的接口，这些接口对应根据参数列表的不同实际创建的是不同类型的disposable。此外还有一些公开的disposable可以使用。
 
+下面笔者给出一个disposable的类图：
+
 # dispose
 
 subscribe方法会返回一个disposable，通常不会对返回的这个disposable进行dispose，而使用`DisposeBag`。`DisposeBag`有一个数组存储了所有的disposable，当bag销毁的时候，会将数组中所有的disposable进行dispose。
