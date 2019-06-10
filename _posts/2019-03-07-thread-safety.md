@@ -213,7 +213,9 @@ condition_variable::wait(unique_lock<mutex>& __lk, _Predicate __pred)
 
 在unlock之后，优点在于生产者可以立即去进行下一次的争夺mutex从而继续生产；缺点在于，因为此时mutex被释放，不仅仅wait的线程可以获取到这个mutex，其他的线程同样也可以获取到mutex，所以如果对实时性要求比较高就会出现问题。
 
-相对应的在unlock之前，首先signal到wait的线程，这样wait的线程可以优先的拿到mutex进行处理；但是这种方式可能会造成wait的线程因为拿不到mutex而继续处于阻塞，以至于浪费了一些时间。所以会有一个叫`wait morphing`的优化，将线程从条件变量等待队列中移动到mutex等待队列中，减少了一次上下文切换。
+相对应的在unlock之前，首先signal到wait的线程，这样wait的线程可以优先的拿到mutex进行处理；但是这种方式可能会造成wait的线程因为拿不到mutex而继续处于阻塞，因为一旦被唤醒后就会去尝试获取mutex，但是此时mutex还未unlock，所以浪费了一些时间。直到unlock之后被唤醒的线程才可以获取mutex进行操作。
+
+> 有一个叫`wait morphing`的优化，将线程从条件变量等待队列中移动到mutex等待队列中，减少了一次上下文切换。
 
 ### semaphores
 

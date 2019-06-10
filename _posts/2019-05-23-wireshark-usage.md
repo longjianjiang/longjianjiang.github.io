@@ -12,4 +12,23 @@ comments: true
 
 # 过滤
 
+## ip
+
+- source
+
+`ip.src == ''`
+
+- destination
+
+`ip.dst == ''`
+
+- either
+
+`ip.addr == ''`
+
+## tcp
+
+- 查找`Keep-Alive`包
+
+`tcp.analysis.keep_alive`
  
