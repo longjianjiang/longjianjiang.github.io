@@ -32,3 +32,6 @@ comments: true
 
 `tcp.analysis.keep_alive`
  
+ - 查找特定的Flags
+
+ `tcp.flags.reset == 1`, `tcp.flags.syn == 1`
