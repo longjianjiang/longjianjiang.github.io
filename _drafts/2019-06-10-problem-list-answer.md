@@ -62,6 +62,21 @@ ssl握手阶段是明文传输，第三个随机数使用DH算法来增加安全
 
 如果是游戏类建立的TCP连接，因为间隔定时的发送心跳包给服务器，所以服务器可以短时间知道客户端离线。
 
+## 11
+
+```
+Swift index 的设计。
+```
+
+## 10
+
+NSDictionary: 用来存储key&value形式的数据，使用哈希表来实现，所以内部会强制对key进行copy，这样对应value的位置就不会变。
+要求key实现`NSCopying`，所以当key是自定义对象的时候，强制copy会影响性能，所以这个时候需要提供一种不拷贝的选择。可以使用`NSMapTable`。
+
+NSHashTable: 类似NSSet，存储不重复的元素，NSSet内部会对持有元素，也就是对元素进行一次retain操作。当需要存储弱引用的时候，就需要使用到NSHashTable，该类提供了一个`weakObjectsHashTable`快捷方法来专门存储弱引用。
+
+NSHashTable相比NSSet，提供了自定义的内存管理选项，不仅仅是默认的`strong`的方式，同时也提供了不copy的选项，最后提供了hash和equality的方式。这三个方面，Apple提供了定义好的`NSPointerFunctionsOptions`，我们按需组合即可。
+
 ## 4
 
 cpp中调用虚方法是通过虚函数表地址去虚函数表中找到对应的方法实现，完成调用。每个类会维护一个虚函数表，如果没有子类没有重写父类的虚方法，表中指向相同的函数实现地址。
