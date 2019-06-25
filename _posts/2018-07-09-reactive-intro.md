@@ -138,3 +138,7 @@ Reactive的本质其实就是回调函数（callback）：
 4.当创建信号的callback中异步事件完成后，订阅者根据不同事件再去回调对应的事件callback
 
 所以可以看到，响应式其实并没有多么神秘，其实就是框架层面帮我们完成了这个callback的调用，这样使用起来更加优雅更加简洁。
+
+## References
+
+[Erik Meijer](https://www.youtube.com/watch?v=sTSQlYX5DU0&list=LL_xIFP1PL2j8KnloQYZ41qg&index=17&t=0s)

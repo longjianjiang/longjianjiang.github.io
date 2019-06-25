@@ -64,9 +64,9 @@ ssl握手阶段是明文传输，第三个随机数使用DH算法来增加安全
 
 ## 11
 
-```
-Swift index 的设计。
-```
+Swift String由Character组成，每个Character在unicode编码方式下占的位数是不一样的，所以如果使用Int作为下标来取字符就会出错，所以String添加了Index结构体来表示每个字符的下标，下标运算符只接受Index类型。
+
+String提供了`startIndex`表示第一个字符的下标，`endIndex`表示最后一个字符的后一个下标，用来作为边界判断。
 
 ## 10
 
@@ -76,6 +76,9 @@ NSDictionary: 用来存储key&value形式的数据，使用哈希表来实现，
 NSHashTable: 类似NSSet，存储不重复的元素，NSSet内部会对持有元素，也就是对元素进行一次retain操作。当需要存储弱引用的时候，就需要使用到NSHashTable，该类提供了一个`weakObjectsHashTable`快捷方法来专门存储弱引用。
 
 NSHashTable相比NSSet，提供了自定义的内存管理选项，不仅仅是默认的`strong`的方式，同时也提供了不copy的选项，最后提供了hash和equality的方式。这三个方面，Apple提供了定义好的`NSPointerFunctionsOptions`，我们按需组合即可。
+
+## 9
+
 
 ## 4
 
