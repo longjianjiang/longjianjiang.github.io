@@ -79,6 +79,17 @@ NSHashTable相比NSSet，提供了自定义的内存管理选项，不仅仅是�
 
 ## 9
 
+## 6
+
+用STL的容器存储OC的对象，相当于存储指向结构体的指针。
+
+自己用`vector`做了一个测试，发现vector会将添加的对象进行一次retain，当栈上的vector销毁时，会对vector内的对象进行一次release。
+
+## 5
+
+placement new是将对象的创建内存分配和初始化分开，用提前分配好的内存去给某个对象进行初始化。
+
+objc中实现这个功能，等于就是把`alloc`中calloc分配内存和初始化isa的工作给拆分开来，需要在`objc_object`中增加一个placement new的方法，外界根据`class_getInstanceSize`获取类的大小，提供已分配的内存，新增方法中直接初始化isa即可。
 
 ## 4
 
