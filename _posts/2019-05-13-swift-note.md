@@ -98,6 +98,16 @@ class Box<T> {
 
 `fatalError`调用后程序中止，给出设定的提示信息。
 
+# subscript(_:default:)
+
+```
+subscript(key: Key, default defaultValue: @autoclosure () -> Value) -> Value { get set }
+```
+
+Swift Dictionary一个下标运算符，根据名字也可以猜出是干嘛的，当某个key不存在字典中时，使用这个默认值。
+
+[ref](https://developer.apple.com/documentation/swift/dictionary/2894528-subscript)
+
 # References 
 
 [https://docs.swift.org/swift-book/LanguageGuide/TheBasics.html](https://docs.swift.org/swift-book/LanguageGuide/TheBasics.html)
