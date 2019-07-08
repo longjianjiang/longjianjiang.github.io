@@ -108,6 +108,19 @@ Swift Dictionary一个下标运算符，根据名字也可以猜出是干嘛的�
 
 [ref](https://developer.apple.com/documentation/swift/dictionary/2894528-subscript)
 
+# IndexSet
+
+一个存储另一个集合中元素idx的set，遍历的时候可以使用`rangeView`方法，根据idx进行生成对应的range。
+
+```
+let idxSet: IndexSet = [1, 2, 5, 7]
+
+for range in idxSet.rangeView {
+	print(range)
+}
+```
+
+
 # References 
 
 [https://docs.swift.org/swift-book/LanguageGuide/TheBasics.html](https://docs.swift.org/swift-book/LanguageGuide/TheBasics.html)
