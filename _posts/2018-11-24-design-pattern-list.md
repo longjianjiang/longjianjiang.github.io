@@ -82,15 +82,31 @@ delegate: 当需要让外界知道一些动作或者数据的时候，可以定�
 
 > 有时候某个类默认提供一个全局的实例，但是同时允许我们创建自己的实例，比如`FileManager`类，一般我们在后台线程会自己创建一个`FileManager`类的实例。
 
+## Mediator Pattern
+
+组件化中用到了中介者模式，之前工程中各个模块相互依赖，随着工程规模的扩大，导致各个模块很难独立出来。这个时候需要一个中间层，也就是所谓的Mediator，各个模块只依赖Mediator，这样子各个模块就独立出来了。
+
+此时Mediator提供调用其他模块的接口，需要依赖其他模块现在只需要依赖Mediator即可，而且Mediator自身并不依赖任何模块。
+
+Mediator使用runtime进行调度。
+
+## Iterator Pattern
+
+迭代器模式笔者是在算法中接触到的，STL中使用了大量的迭代器的接口，这样做的好处在于抽象了具体的数据结构，让某一个算法可以适用于不同的数据结构。
+
+## Facade Pattern
+
+外观模式，目的在于新建一个facade层，这个层对外提供某个系统下的若干功能，这样外界使用直接调用这个facade提供的方法即可，不需要知道系统内部的结构。
+
+## Observer Pattern
+
+监听者模式，iOS中的KVO就是一种监听者模式，或者使用Rx的第三方框架也可以实现监听者模式。    
+
 ## Memento Pattern
 
 备忘录模式，笔者之前没有接触过这种模式。主要目的是存储类的某个状态同时提供一个方法使得该类未来可以恢复到该状态。    
   
 不过这种目的，其实类似于为了不使某个类变得很大很复杂，将一部分功能转移出来类似，这里的功能就是提供一种状态恢复的功能。        
-
-## Observer Pattern
-
-监听者模式，iOS中的KVO就是一种监听者模式，或者使用Rx的第三方框架也可以实现监听者模式。    
 
 ## Builder Pattern
 
@@ -99,3 +115,6 @@ delegate: 当需要让外界知道一些动作或者数据的时候，可以定�
 [https://www.cnblogs.com/weidagang2046/archive/2009/12/10/1620587.html](https://www.cnblogs.com/weidagang2046/archive/2009/12/10/1620587.html)
 
 [https://design-patterns.readthedocs.io/zh_CN/latest/read_uml.html](https://design-patterns.readthedocs.io/zh_CN/latest/read_uml.html)
+
+[https://www.oodesign.com/](https://www.oodesign.com/)
+
