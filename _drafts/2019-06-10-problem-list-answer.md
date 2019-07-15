@@ -134,6 +134,22 @@ fishhook
 
 ## 1
 
+1> 
+
+UIView继承自UIResponder，可以处理用户点击事件。
+
+CALayer用来管理可视内容。UIView里有一个layer属性，其实UIView是CALayer的一个代理，当CALayer需要display的时候，这个时候会调用代理也就是UIView的`drawRect:`方法进行内容的绘制。
+绘制完成后会将layer的contents进行渲染，这一步由Core Animation完成。
+
+因为渲染操作并不是在UIKit中实现，所以这部分渲染的逻辑可以复用，实际上UIKit与AppKit就是共用了同一套渲染逻辑。
+
+2>
+
+前面说到`drawRect:`用来进行内容的绘制。不知道这里所说的性能具体是哪方面，屏幕的刷新率是60fps，也就是说16.7ms会进行一次刷新，而内容展示由绘制和渲染两步组成，分别由CPU和GPU来完成。可以通过time profiler进行实际的观察。
+
+3>
+
+最本质的区别应该是UI Dynamic引入来动力模型，类似2D物理引擎。实现类似重力，碰撞效果更加逼真。
 
 # References
 
