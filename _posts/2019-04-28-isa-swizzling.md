@@ -32,7 +32,7 @@ auto ref = weak_p.lock();
 
 那么 ZeroingWeakRef 是如何实现的呢？ 主要利用了isa-swizzling，下面笔者简单介绍其实现：
 
-首先创建一个全局的`gObjectWeakRefsMap`，用来存储所有对象的弱引用关系，key为obj，key是一个set。
+首先创建一个全局的`gObjectWeakRefsMap`，用来存储所有对象的弱引用关系，key为obj，value是一个set。
 
 当调用`initWithTarget`时，以该对象的类动态创建一个该类的子类，同时将obj的isa指针指向新创建的子类。该子类重写dealloc方法，在dealloc方法中，首先会根据obj和`gObjectWeakRefsMap`找到存储该对象所有弱引用的set，对该set中的所有对象进行置空。最后调用父类的dealloc方法。
 

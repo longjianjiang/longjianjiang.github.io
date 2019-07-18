@@ -449,6 +449,11 @@ enum {
     BLOCK_BYREF_CALLER      = 128, // called from __block (byref) copy/dispose support routines.
 };
 
+static void _Block_assign_default(void *value, void **destptr) {
+    *destptr = value;
+}
+static void (*_Block_assign)(void *value, void **destptr) = _Block_assign_default;
+
 void _Block_object_assign(void *destAddr, const void *object, const int flags) {
     switch (os_assumes(flags & BLOCK_ALL_COPY_DISPOSE_FLAGS)) {
       case BLOCK_FIELD_IS_OBJECT:
@@ -632,9 +637,15 @@ static void __Block_byref_id_object_copy_131(void *dst, void *src) {
 
 4._Block_assign将堆上新生成的byref结构体通过指针赋值到堆上新生成block中的捕获的byref结构体。
 
+过程如下图所示：
+
+![anonymous_function_2]({{site.url}}/assets/images/blog/anonymous_function_2.png)
+
 - __block 中 对象类型/__block 中 __weak 对象类型
 
 将obj通过指针赋值到desc指向的对象。
+
+---
 
 至此`_Block_object_assign`结束。下面继续看`_Block_object_dispose`，当block对象销毁时，会调用`Block_descriptor_2`中的dispose函数指针，也就是类似如下的方法:
 

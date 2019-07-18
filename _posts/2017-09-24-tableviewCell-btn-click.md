@@ -102,3 +102,7 @@ override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
 ## 最后
 
 本文的Demo下载地址[星星Cell](https://github.com/longjianjiang/BlogDemo/tree/master/TableviewCellSubviewClickDemo)， [事件响应](https://github.com/longjianjiang/BlogDemo/tree/master/EventHandlingDemo)
+
+## References
+
+[https://www.jianshu.com/p/d8512dff2b3e](https://www.jianshu.com/p/d8512dff2b3e)
