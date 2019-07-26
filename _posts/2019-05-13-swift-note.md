@@ -120,6 +120,31 @@ for range in idxSet.rangeView {
 }
 ```
 
+# Access Control
+
+因为swift没有头文件，所以访问控制需要我们使用特定的标识符来表明代码的访问权限。
+
+一般的业务开始，并不需要关心访问控制，用默认的internal即可，但是模块化的开发中，不可避免的需要写一些framework，这个时候就需要使用到这些标识符。
+
+- public
+
+- open
+
+- internal
+
+- fileprivate
+
+- private
+
+其实看名字能知道一二，下面记录下自己认为需要注意的点。
+
+1. open，public的区别？
+
+区别主要在于类是否能被其他module进行继承从而重载方法。
+
+2. fileprivate 干嘛的？
+
+当同文件中的其他类想要使用某个类的private属性，这个时候可以使用fileprivate。
 
 # References 
 
