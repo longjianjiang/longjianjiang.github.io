@@ -128,7 +128,9 @@ objc的运行时的消息转发动态性更强，类中所有的成员方法都�
 
 ## 3
 
-fishhook
+fishhook是一个可以hookC语言系统函数的库。原理是通过`_dyld_register_func_for_add_image`注册一个回调，没有dyld加载新的动态连接库的时候以及已经加载进内存的动态连接库都会执行一次回调。这个时候fishhook会进行查找symbol，进行替换函数指针，达到hook的效果。
+
+所以非动态连接库的符号自然是不能通过fishhook进行修改的。
 
 ## 2
 

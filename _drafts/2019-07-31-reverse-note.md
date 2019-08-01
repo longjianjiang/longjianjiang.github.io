@@ -55,4 +55,13 @@ class-dump这个工具使用Runtime特性，将mach-O文件中的@interface和@p
 # References
 
 [https://github.com/AloneMonkey/frida-ios-dump](https://github.com/AloneMonkey/frida-ios-dump)
+
+[https://www.tylinux.com/2018/03/12/how-dumpdecrypted-dylib-works/](https://www.tylinux.com/2018/03/12/how-dumpdecrypted-dylib-works/)
+
+[https://github.com/stefanesser/dumpdecrypted](https://github.com/stefanesser/dumpdecrypted)
+
 [http://stevenygard.com/projects/class-dump/](http://stevenygard.com/projects/class-dump/)
+
+[https://github.com/rpetrich/CaptainHook](https://github.com/rpetrich/CaptainHook)
+
+[https://pandara.xyz/2016/08/13/fake_wechat_location/](https://pandara.xyz/2016/08/13/fake_wechat_location/)

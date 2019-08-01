@@ -369,7 +369,7 @@ dyld (dynamic linker) ，简单的说负责将可执行文件中需要的镜像�
 
 > 所谓懒加载表中的符号就是指，当用到时dyld才会通过`dyld_stub_binder`去链接到指定的动态链接库，然后再去执行；而非懒加载则当动态链接库第一次被绑定时就会被加载。
 
-所以上述fishhook的主要工作就是在于寻找到需要hook的函数名，这里用到了额外三张表，动态符号表，符号表和字符串表,这三个表都是在`__LINKEDIT`段的。
+所以上述fishhook的主要工作就是在于寻找到需要hook的函数名，这里用到了额外三张表，动态符号表，符号表和字符串表。
 
 ```
 Symbol Table（symtab）: 符号表记录了符号的映射。在 Mach-O 中，符号表是由结构体 n_list 构成。
@@ -382,6 +382,7 @@ String Table（strtab）: 字符串表存放了符号表中可读的字符串，
 所以fishhook寻找的主要步骤如下：
 
 ### rebind_symbols_for_image 方法
+
 - 找到`LC_SEGEMENT_64(__LINKEDIT)`, `LC_SYMTAB`, `LC_DYSYMTAB` 三个加载命令
 
 - 根据以上三个加载命令，找到动态符号表、符号表和字符串表的地址
@@ -390,7 +391,7 @@ String Table（strtab）: 字符串表存放了符号表中可读的字符串，
 
 ### perform_rebinding_with_section 方法
 
-- 首先找到section对应的动态符号表的数组指针，然后遍历section，从动态符号表中取到符号表的index，然后根据index取到结构体n_list, 接着根据n_list中的n_strx也就是该符号名在字符串表中的偏移量，最后用字符串表的地址就可以得到该符号的名字。这个时候遍历我们开始传递过去的一个`rebinding`结构体，比较name是否相等，则进行函数指针替换。
+- 首先找到section(__nl_symbol_ptr, __la_symbol_ptr)对应的动态符号表的数组指针，然后遍历section，从动态符号表中取到符号表的index，然后根据index取到结构体n_list, 接着根据n_list中的n_strx也就是该符号名在字符串表中的偏移量，最后用字符串表的地址就可以得到该符号的名字。这个时候遍历我们开始传递过去的一个`rebinding`结构体，比较name是否相等，则进行函数指针替换。
 
 所以我们调用printf，会调用到new_printf, 而new_printf中调用orig_printf会调用原来的printf，因为我们将先前传递的函数指针的实现替换成了系统的函数的实现。
 
