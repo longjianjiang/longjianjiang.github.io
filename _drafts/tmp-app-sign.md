@@ -35,3 +35,4 @@ app签名的流程：
 [https://www.sslshopper.com/what-is-a-csr-certificate-signing-request.html](https://www.sslshopper.com/what-is-a-csr-certificate-signing-request.html)
 [https://blog.cnbang.net/tech/3386/](https://blog.cnbang.net/tech/3386/)
 [https://www.apple.com/business/site/docs/iOS_Security_Guide.pdf](https://www.apple.com/business/site/docs/iOS_Security_Guide.pdf)
+[https://www.objc.io/issues/17-security/inside-code-signing/](https://www.objc.io/issues/17-security/inside-code-signing/)
