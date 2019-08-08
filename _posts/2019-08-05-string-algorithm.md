@@ -283,7 +283,7 @@ D	  | 0 | 0 | 0 | 4 | 0 | 0 |   |
 
 此时p前面是"ABCDAB", 前后缀匹配是2，所以继续更新复制的列为状态2所在列。
 
-```
+{% highlight cpp %}
 		0	1	2	3	4	5	6
 		A	B	C	D	A	B	D
 ------+---+---+---+---+---+---+---+
@@ -295,7 +295,7 @@ C	  | 0 | 0 | 3 | 0 | 0 | 0 | 3 |
 ------+---+---+---+---+---+---+---+
 D	  | 0 | 0 | 0 | 4 | 0 | 0 | 7 | 
 ------+---+---+---+---+---+---+---+
-```
+{% endhighlight %}
 
 到了状态6，从状态2也就是第3列进行复制。
 
@@ -358,5 +358,11 @@ int strStr_dfa(string haystack, string needle) {
 # References
 
 [https://www.cnblogs.com/tangzhengyue/p/4315393.html](https://www.cnblogs.com/tangzhengyue/p/4315393.html)
+
 [https://blog.csdn.net/v_july_v/article/details/7041827](https://blog.csdn.net/v_july_v/article/details/7041827)
+
 [http://www.ruanyifeng.com/blog/2013/05/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm.html](http://www.ruanyifeng.com/blog/2013/05/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm.html)
+
+[https://judes.me/tech/2016/04/10/kmp.html](https://judes.me/tech/2016/04/10/kmp.html)
+
+[https://blog.csdn.net/congduan/article/details/45459963](https://blog.csdn.net/congduan/article/details/45459963)
