@@ -10,7 +10,7 @@ comments: true
 
 > 笔者在这里记录下字符串相关的算法。
 
-## KMP
+# KMP
 
 给定字符串s和子串p，让我们寻找p在s中的位置。
 
@@ -354,8 +354,78 @@ int strStr_dfa(string haystack, string needle) {
 }
 {% endhighlight %}
 
+# Trie
+
+Trie也就是所谓的字典树，一般用在搜索提示和分词。
+
+下面给出一个Trie的简单实现:
+
+{% highlight cpp%}
+struct TrieNode {
+	bool is_end = false;
+	array<TrieNode*, 26> children = { nullptr };
+
+	~TrieNode() {
+		for (auto child: children) {
+			delete child;
+			child = nullptr;
+		}
+	}
+};
+
+class Trie {
+	TrieNode* root;
+public:
+    /** Initialize your data structure here. */
+    Trie() {
+		root = new TrieNode();
+    }
+
+	~Trie() {
+		delete root;
+		root = nullptr;
+	}
+    
+    /** Inserts a word into the trie. */
+    void insert(string word) {
+       	auto node = root;
+		for (auto ch: word) {
+			int idx = ch - 'a';
+			if (node->children[idx] == nullptr) {
+				node->children[idx] = new TrieNode();
+			} 
+			node = node->children[idx];
+		}
+		node->is_end = true;
+    }
+    
+    /** Returns if the word is in the trie. */
+    bool search(string word) {
+       	auto node = root;
+		for (auto ch : word) {
+			int idx = ch - 'a';
+			if (node->children[idx] == nullptr) {
+				return false;
+			}
+			node = node->children[idx];
+		}
+		return node->is_end; // case insert("apple"); search("app")
+    }
+}
+{% endhighlight %}
+
+# AC Automaton
+
+当给定一个字符串和多个子串进行查找时。这个时候可以对多个子串依次进行KMP查找，但是当子串较多时，此时效率并不高。
+
+AC自动机就是来解决这类问题的，AC自动机首先时一颗Trie，其次使用了KMP的思想，使用fail指针来尝试不匹配的指向。
+
+# Suffix Array
+
 
 # References
+
+## KMP
 
 [https://www.cnblogs.com/tangzhengyue/p/4315393.html](https://www.cnblogs.com/tangzhengyue/p/4315393.html)
 
@@ -366,3 +436,17 @@ int strStr_dfa(string haystack, string needle) {
 [https://judes.me/tech/2016/04/10/kmp.html](https://judes.me/tech/2016/04/10/kmp.html)
 
 [https://blog.csdn.net/congduan/article/details/45459963](https://blog.csdn.net/congduan/article/details/45459963)
+
+## AC Automaton
+
+[https://www.cnblogs.com/nullzx/p/7499397.html](https://www.cnblogs.com/nullzx/p/7499397.html)
+
+[https://segmentfault.com/a/1190000000484127](https://segmentfault.com/a/1190000000484127)
+
+## Suffix Array
+
+[https://blog.bill.moe/suffix-array-notes/](https://blog.bill.moe/suffix-array-notes/)
+
+[https://www.cnblogs.com/jinkun113/p/4743694.html](https://www.cnblogs.com/jinkun113/p/4743694.html)
+
+[https://oi.men.ci/suffix-array-notes/](https://oi.men.ci/suffix-array-notes/)
