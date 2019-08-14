@@ -420,8 +420,77 @@ public:
 
 AC自动机就是来解决这类问题的，AC自动机首先时一颗Trie，其次使用了KMP的思想，使用fail指针来尝试不匹配的指向。
 
-# Suffix Array
+# Suffix Tree & Suffix Array
 
+当s不经常改变时候，我们可以为s建后缀树，以后search子串的时间复杂度就是O(m)，m是子串的长度。
+
+后缀树是根据s所有后缀建立的一颗trie，这颗trie会进行压缩，将只有一个孩子节点的节点合并。
+
+而后缀数组就是将后缀树中存在的分支拿出来，可以通过对后缀树进行DFS进行获得，结果也就是s的所有后缀，这样空间的占用会大大减少。不过构建后缀数组可以不通过后缀树。
+
+一般后缀数组使用比较广泛，下面介绍后缀数组的构造:
+
+## n^2Logn
+
+前面知道后缀数组其实就是s的所有后缀，只是我们需要按后缀的字典序进行排序，下面给出一个例子:
+
+```
+s = "banana"
+0 banana                          5 a
+1 anana     Sort the Suffixes     3 ana
+2 nana      ---------------->     1 anana
+3 ana        alphabetically       0 banana
+4 na                              4 na
+5 a                               2 nana
+
+So the suffix array for "banana" is {5, 3, 1, 0, 4, 2}
+```
+
+这种排序的构建时间复杂度为O(n^2Logn), 排序需要nLogn，每次比较又是n。
+
+## nLogn
+
+为了耗时更少，需要改进方法。倍增算法就是一个优化算法，只需要比较Logn次加上排序，时间复杂度降低到O(nLognLogn)，当使用线性排序时间复杂度还可以进一步降低到O(nLogn)。
+
+以banana为例子来说明:
+
+首先根据字典序获得长度为2^0也就是1的子串的排序:
+
+```
+Index     Suffix            Rank
+ 0        banana             98
+ 1        anana              97
+ 2        nana               110
+ 3        ana                97
+ 4        na                 110
+ 5        a                  97
+```
+
+接下来获取长度为2^1也就是2的子串的排序，这个时候用双关键字来进行排序，第一个关键字为长度2^(k-1)这里是2^0的子串的排名，第二关键字使用上一步长度为1的子串排名，取每个位置i+2^(k-1)这里是2^0的排名；当i+2^(k-1)大于s的size返回-1即可。
+
+```
+Index    Suffix            First			Second			Rank	
+ 0       banana             98              97 				2
+ 1       anana              97              110				1
+ 2       nana               110             97				3
+ 3       ana                97              110				1
+ 4       na                 110             97				3
+ 5       a                  97             -1				0
+```
+
+接下来获取长度为4的子串的排序:
+
+```
+Index    Suffix            First		Second			    Rank	
+ 0       banana             2              3 				3
+ 1       anana              1              1				2
+ 2       nana               3              3				5
+ 3       ana                1              0				1
+ 4       na                 3             -1				4
+ 5       a                  0             -1				0
+```
+
+此时rank数组已经计算结束了，因为长度为8的子串超过了s的长度。接下来根据rank求sa就很简单了。也就是[5, 3, 1, 0, 4, 2]
 
 # References
 
@@ -450,3 +519,7 @@ AC自动机就是来解决这类问题的，AC自动机首先时一颗Trie，其
 [https://www.cnblogs.com/jinkun113/p/4743694.html](https://www.cnblogs.com/jinkun113/p/4743694.html)
 
 [https://oi.men.ci/suffix-array-notes/](https://oi.men.ci/suffix-array-notes/)
+
+[https://www.geeksforgeeks.org/suffix-array-set-1-introduction/](https://www.geeksforgeeks.org/suffix-array-set-2-a-nlognlogn-algorithm/)
+
+[https://www.geeksforgeeks.org/suffix-array-set-2-a-nlognlogn-algorithm/](https://www.geeksforgeeks.org/suffix-array-set-2-a-nlognlogn-algorithm/)
