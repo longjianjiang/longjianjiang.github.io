@@ -496,6 +496,8 @@ Index    Suffix            First		Second			    Rank
 
 # References
 
+[https://www.zhihu.com/question/27168319](https://www.zhihu.com/question/27168319)
+
 ## KMP
 
 [https://www.cnblogs.com/tangzhengyue/p/4315393.html](https://www.cnblogs.com/tangzhengyue/p/4315393.html)
