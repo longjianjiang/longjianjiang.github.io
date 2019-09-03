@@ -106,3 +106,5 @@ override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
 ## References
 
 [https://www.jianshu.com/p/d8512dff2b3e](https://www.jianshu.com/p/d8512dff2b3e)
+
+[https://medium.com/ios-os-x-development/understanding-cocoa-and-cocoa-touch-responder-chain-12fe558ebe97](https://medium.com/ios-os-x-development/understanding-cocoa-and-cocoa-touch-responder-chain-12fe558ebe97)
