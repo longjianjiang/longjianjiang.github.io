@@ -103,6 +103,10 @@ override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
 
 本文的Demo下载地址[星星Cell](https://github.com/longjianjiang/BlogDemo/tree/master/TableviewCellSubviewClickDemo)， [事件响应](https://github.com/longjianjiang/BlogDemo/tree/master/EventHandlingDemo)
 
+## 一个疑问
+
+UIControl的addTargetForSelector方法，触发的事件。touches方法只会停留在button这一层。笔者尝试新建一个UIButton的子类，重写touches方法，内部调用super，但是事件并没有往上传递。不知道这里UIControl内部是如何进行屏蔽的。
+
 ## References
 
 [https://www.jianshu.com/p/d8512dff2b3e](https://www.jianshu.com/p/d8512dff2b3e)

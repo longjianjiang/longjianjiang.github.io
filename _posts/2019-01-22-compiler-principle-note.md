@@ -51,7 +51,6 @@ relocated machine code
 
 > 实际运行中有些步骤可能会组合起来，组合起来的步骤之间生成的中间表示不需要被明确的构造出来。
 
-
 ### 补充
 
 最近笔者再看autoconf和automake的时候了解到其实在预编译之前还有其他的步骤，将其补充到这里：
@@ -60,9 +59,9 @@ relocated machine code
 
 同时config步骤还会生成一个Makefile文件，这个文件的说明了源文件之间的依赖关系，假设A文件依赖B文件，那么编译的时候得先编译B然后才编译A，同时当B改变的时候，A需要重新编译。此时也就知道了该程序使用到了那些系统库。此外Makefile中会保存着编译器和连接器的参数选项。
 
-生成config.h 以及 Makefile这一工作的是configure脚步，因为手工写这个脚步比较复杂，所以有了autoconf这个工具。configure脚步会根据`Makefile.in` 模版文件来生成Makefile，为了不让手工写这个模块文件，automake用来自动生成这个模版文件。
+生成config.h 以及 Makefile这一工作的是configure脚本，因为手工写这个脚步比较复杂，所以有了autoconf这个工具。configure脚步会根据`Makefile.in` 模版文件来生成Makefile，为了不让手工写这个模块文件，automake用来自动生成这个模版文件。
 
-所以有了autoconf和automake，我们只需要编写`configure.ac`，一组宏定义，autoconf根据这个文件去生成configure脚步；`Makefile.am` 这个文件里描述文件的依赖关系，automake根据这个文件去生成Makefile.in文件，从而继续生成Makefile。automake不单独使用，需要和autoconf一起使用。
+所以有了autoconf和automake，我们只需要编写`configure.ac`，一组宏定义，autoconf根据这个文件去生成configure脚本；`Makefile.am` 这个文件里描述文件的依赖关系，automake根据这个文件去生成Makefile.in文件，从而继续生成Makefile。automake不单独使用，需要和autoconf一起使用。
 
 下面是两个工具的具体工作流程图：
 
