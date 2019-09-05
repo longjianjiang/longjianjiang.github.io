@@ -18,11 +18,21 @@ UIView绘制的时候，CPU执行`drawRect`方法，通过contents将数据写�
 
 GPU处理的单位是Texture，控制GPU的是OpenGL，所以bitmap到Texture之间需要进行一次转换，Core Animation就是完成这层转换的。Core Animation会创建一个OpenGL的Texture和CGImageRef(bitmap)绑定，通过TextureId进行标识。绑定关系建立后，剩下的事情就是GPU将Texture渲染到屏幕上了。大致过程是这样的，GPU将内存中的bitmap搬到VRAM中处理，然后将Texture进行渲染。
 
-实际GPU主要的耗时在于要进行Compositing，也就是将多个Texture进行拼接，也就是View的层级，`addSubview:`。第二个问题是图片尺寸，假设内存中有一张200*200的图片需要放到100*100的imageView中，如果不做处理，GPU需要对大图进行缩放显示，对像素点进行sampling，同时兼顾pixel alignment。第三个问题就是所谓的离屏渲染，主要问题在于渲染这种layer的时候，需要额外开辟内存，绘制好圆角这些，然后将绘制好的bitmap进行渲染，CALayer提供了一种缓存机制，`shouldRasterize`。
+实际GPU主要的耗时在于要进行Compositing，也就是将多个Texture进行拼接，也就是View的层级，`addSubview:`。第二个问题是图片尺寸，假设内存中有一张200*200的图片需要放到100*100的imageView中，如果不做处理，GPU需要对大图进行缩放显示，对像素点进行sampling，同时兼顾pixel alignment。第三个问题就是所谓的离屏渲染，主要问题在于渲染这种layer的时候，需要额外开辟内存，绘制好圆角这些，然后将绘制好的bitmap进行渲染，这中间会涉及到上下文切换，CALayer提供了一种缓存机制，`shouldRasterize`。
 
+以上过程也是Runloop相关的，当一个Runloop开始的时候，会调用`[CATransaction begin]`，Runloop结束的时候调用`[CATransaction commit]`，begin和commit之间做一个layer tree的操作，比如修改view的层级，修改layer的属性，view的frame等等。commit之后，CPU进行绘制，GPU进行渲染，最终展示到屏幕中。
 
 # AsyncDisplayKit
 
+AsyncDisplayKit 是一个保持界面流程的库，我们已经大概了解了Display的流程，而这个库优化的点其实也是针对CPU和GPU两个方面。
+
+CPU：从A5开始多核成为主流，所以可以将一些耗时的CPU操作放到后台线程，从而减轻主线程的工作，多核可以满足后台线程的并发执行。
+
+GPU：减少Compositing，也就是将一些不需要响应事件的sub-layer合成渲染成一张Texture，这个工作同样可以放到后台线程。
+
+AS通过创建Node封装了UIView和CALayer，使用Node就像使用View一样，Node是线程安全的，可以在后台线程创建，layout，绘制Node。
+
+AS内部注册了一个Runloop的observer，监听了`beforeWaiting`，`exit`事件，所有Node的提交会放在`_ASAsyncTransactionGroup`中，等到一次Runloop到来的时候，一次性将group中的transaction进行commit。此时绘制已经在后台线程完毕，将绘制好的image赋值给layer的contents，通知Node显示完成。
 
 # References
 
