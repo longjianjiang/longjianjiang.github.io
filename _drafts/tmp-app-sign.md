@@ -15,9 +15,22 @@ app签名的流程：
 
 对app签名使用的是`codesign`这个命令，会对app里所有文件(各种图片音频资源，framework)除可执行文件进行计算hash(单纯的hash没有用私钥加密)，保存在`_CodeSignature/CodeResources`中。app签过名的可执行文件会多一条load commands，`LC_CODE_SIGNATURE`，可执行文件中对应有`Code Signature`，一段二进制的数据，所以签过名的二进制文件体积会变大。
 
-`Code Signature`中最重要的是CodeDirectory部分，是整个MachO文件的hash，具体是将MachO文件按4K大小进行分页，对每页hash，按照顺序保存下来。同样的和文件一样依然没有进行加密，因为非对称加密的性能不太好，所以只需要保证这些hash没有被篡改就好。同时Info.plist，CodeResources，Entitlements等文件也会计算hash。
+> 对framework签名和对app签名一样，首先对framework里的资源进行hash，存放在`_CodeSignature/CodeResources`中，其次framework中可执行文件中有`LC_CODE_SIGNATURE`load command，`Code Signature`数据段。
 
-`Code Signature`中CMS Signature中会对CodeDirectory进行计算hash，最后用私钥加密计算好的这个hash。
+`Code Signature`中最重要的是CodeDirectory部分，是整个MachO文件的hash，具体是将MachO文件按4K大小进行分页，对每页hash，按照顺序保存下来。同样的和文件一样依然没有进行加密，因为非对称加密的性能不太好，所以只需要保证这些hash没有被篡改就好。在Maco0文件开始页的前面，存在几个特殊的页，存储了Info.plist，CodeResources，Entitlements等文件的hash。综上，CodeDirectory是一个分页的机构，存储了app里一些资源的hash以及二进制文件的hash。
+
+`Code Signature`中还有CMS Signature，这段签名中除了存储了证书的信息，还存储着签名信息。结构如下：
+
+```
+CMS Signature:
+	Content:
+		certificates; //证书链
+		signerInfos；// 签名信息
+			signedAttrs；//对 `CodeDirectory`计算的hash值，叫做CDHash
+			signature； // signedAttrs计算hash，然后用私有加密的签名
+```
+
+可以看到只有CMS Signature 中的signature是用私钥加密的签名，其他的都只是求了一个hash而已。
 
 ```
 这里需要注意的是，当我们从获得cer证书后，keychain会将这个证书和CSR进行关联，选择某个证书进行签名的时候，keychain会找到对应CSR的私钥进行签名。
@@ -44,9 +57,6 @@ app签名的流程：
 这个时候使用iOS App Signer这个工具，指定证书以及Provisioning Profile文件即可重签名。
 
 这个工具首先会用证书对app里对framework进行重签名。第二步是对App进行重签名，本次签名需要指定entitlements，`codesign -f -s "证书名称或者SHA1值" --entitlements resign.entitlements Target.app`。 而resign.entitlements 可以根据`.mobileprovision`来生成，该文件中包含entitlements的信息。
-
-# 疑问
-
 
 # References
 
