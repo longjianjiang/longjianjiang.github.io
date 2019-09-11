@@ -139,6 +139,7 @@ atos -arch <Binary Architecture> -o <Path to dSYM file>/Contents/Resources/DWARF
 
 调试的符号表和二进制中的符号表有什么关系？
 
+crash 地址如何对应到符号表中的地址？
 
 # References
 
