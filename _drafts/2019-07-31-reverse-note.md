@@ -58,7 +58,7 @@ class-dump这个工具使用Runtime特性，将mach-O文件中的@interface和@p
 
 `dumpdecrypted`具体实现也不复杂，通过`_dyld_register_func_for_add_image`添加回调，每次尝试将加密的load command分三步写进文件。
 
-> 根据代码可以知道，只有一个load command是加密的；
+> 根据代码可以知道，只有一个load command是加密的；也就是`LC_CODE_SIGNATURE`，codesign的时候会对二进制文件进行签名。
 
 1. 尝试将当前加密load command之前的内容写进文件；
 2. 写当前加密的内容；
