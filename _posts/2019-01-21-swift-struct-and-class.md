@@ -12,7 +12,7 @@ comments: true
 
 首先给出一个[答案](https://www.mikeash.com/pyblog/friday-qa-2015-07-17-when-to-use-swift-structs-and-classes.html): 当需要值语义就选struct；当需要引用语义，就选class。
 
-上面答案提到了值和引用，两者的本质区别其实是存储内容的地方不同。值类型的数据存放在栈上，而引用类型的数据则存放在堆上。
+上面答案提到了值和引用，两者的一个区别其实是存储内容的地方不同。值类型的数据存放在栈上，而引用类型的数据则存放在堆上。
 
 下面笔者拿Swift中的数组类型来说明值类型和引用类型的区别：
 
@@ -102,8 +102,107 @@ aa name nancy, bb name nancy.
 
 当我们建立数据体系结构的时候，苹果推荐我们使用协议，因为协议既适用于struct也适用于class。
 
+## 2019-09-14 补充
+
+对于一个对象是选择struct还是class之前，首先是确定这个对象的语义。
+
+所谓值语义对象的特征是内容和计算，值对象从语义是不可变的。
+
+引用语义对象的特征是标识，状态，行为，引用对象从语义上是不可拷贝的。
+
+```
+这里从语义的不可变是不是可以理解为在进行赋值的时候，s2其实是s1的一份内容拷贝，所以当修改s2内部的成员不会影响到s1。
+应该就是另一篇文章中所说的`copy by value`。
+
+相对应的引用对象语义的不可拷贝，是不是可以理解为c1赋值给c2，其实他们指向的还是堆上同一块地址。
+```
+
+当这个对象有状态的变化时，此时只能使用引用语义，对应的也就只能选择class。其他情况则可以使用struct。拿HTTP请求来说，Request因为有状态，初始化，发送中，发送成功等，所以必须用class；对应的Response，只是一个请求的返回内容而已，所以可以使用struct。
+
+---
+
+前面提到引用对象从语义上是不可拷贝的，可能会联想到NSObject的copy方法。
+
+而NSObject的copy方法和mutableCopy方法则是对应两个协议：
+
+{% highlight objc%}
+@protocol NSCopying
+
+- (id)copyWithZone:(nullable NSZone *)zone;
+
+@end
+
+@protocol NSMutableCopying
+
+- (id)mutableCopyWithZone:(nullable NSZone *)zone;
+
+@end
+{% endhighlight %}
+
+自定义子类可以实现这两个协议，因为调用copy和mutableCopy，就是去调用这两个协议的方法，NSObject没有实现这两个协议，所以对NSObject调用copy和mutableCoy会出现`unrecognized selector sent to instance`错误。
+
+{% highlight objc%}
++ (id)copy {
+    return (id)self;
+}
+
++ (id)copyWithZone:(struct _NSZone *)zone {
+    return (id)self;
+}
+
+- (id)copy {
+    return [(id)self copyWithZone:nil];
+}
+
++ (id)mutableCopy {
+    return (id)self;
+}
+
++ (id)mutableCopyWithZone:(struct _NSZone *)zone {
+    return (id)self;
+}
+
+- (id)mutableCopy {
+    return [(id)self mutableCopyWithZone:nil];
+}
+{% endhighlight %}
+
+所谓深拷贝和浅拷贝，给出一张Apple的示意图：
+
+![swift_struct_and_class_1]({{site.url}}/assets/images/blog/swift_struct_and_class_1.png)
+
+主要区别在于处理引用对象。
+
+最后给出NSString和NSMutableString的copy协议的实现。
+
+{% highlight objc%}
+// NSString
+- (id)copyWithZone:(NSZone *)zone {
+    if (NSStringClass == Nil)
+        NSStringClass = [NSString class];
+    return RETAIN(self);
+}
+- (id)mutableCopyWithZone:(NSZone*)zone {
+    return [[NSMutableString allocWithZone:zone] initWithString:self];
+}
+
+// NSMutableString
+-(id)copy {
+    return [[NSString alloc] initWithString:self];
+}
+-(id)copyWithZone:(NSZone*)zone {
+    return [[NSString allocWithZone:zone] initWithString:self];
+}
+{% endhighlight %}
+
+NSString的copy就是简单的retain，当然自定义子类的时候，`copyWithZone:`方法完全可以新建一个对象。
+
 ## References
 
 [https://docs.swift.org/swift-book/LanguageGuide/ClassesAndStructures.html](https://docs.swift.org/swift-book/LanguageGuide/ClassesAndStructures.html)
 
 [https://www.mikeash.com/pyblog/friday-qa-2015-07-17-when-to-use-swift-structs-and-classes.html](https://www.mikeash.com/pyblog/friday-qa-2015-07-17-when-to-use-swift-structs-and-classes.html)
+
+[https://www.cnblogs.com/weidagang2046/archive/2010/07/24/value-vs-ref.html](https://www.cnblogs.com/weidagang2046/archive/2010/07/24/value-vs-ref.html)
+
+[https://developer.apple.com/library/archive/documentation/General/Conceptual/DevPedia-CocoaCore/ObjectCopying.html](https://developer.apple.com/library/archive/documentation/General/Conceptual/DevPedia-CocoaCore/ObjectCopying.html)
