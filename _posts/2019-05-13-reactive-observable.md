@@ -12,7 +12,7 @@ comments: true
 
 # Observable
 
-Observable是RxSwift中所谓的冷信号，通常用来来执行某一个具体的任务，将执行的过程，从开始到结束这一整个过程进行分发给订阅者。
+Observable是RxSwift中所谓的冷信号(Push style)，通常用来来执行某一个具体的任务，将执行的过程，从开始到结束这一整个过程进行分发给订阅者。
 
 下面笔者给出一个例子：
 

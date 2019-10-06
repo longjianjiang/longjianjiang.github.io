@@ -10,7 +10,7 @@ comments: true
 
 本文主要介绍【Reative】中Observable的Operator，笔者认为理解这些操作对后面将Observable应用到实际工程中有很大帮助，因为实际工程中的业务都是通过简单Observable进行不断变换所抽象出来的。
 
-# Transfrom Operator
+# Transfrom Operators
 
 ## map
 
@@ -115,7 +115,7 @@ merge效果，按信号序列发送值依次进行转发出来。
 对于第一种merge效果，ReactiveSwift中还允许自定义，也就是说默认merge是允许信号序列中每个信号发送值一次能转发`UInt.max`个，所以为merge的效果，如果每次只允许信号序列中每个信号发送值一次能转发1个，此时也就是concat的效果，必须等信号序列中第一个信号的值转发完后才能继续转发第二个信号的值，以此类推下去。
 
 
-# Fliter Operator
+# Fliter Operators
 
 ## ignoreElements
 
@@ -169,7 +169,7 @@ filter 给定一个条件，只发送信号中符合条件的next event。
 
 默认是根据`Equatable`协议来比较是否相等，不过RxSwift中提供了自定义比较方法的接口。
 
-# Combine Operator
+# Combine Operators
 
 ## startWith
 
@@ -233,11 +233,39 @@ reduce 将信号中发送的所有event依次执行一个方法，最后只发�
 
 类似reduce，将reduce的计算结果全部发送，而不是仅仅发送最后的结果。
 
+# Connectable Operators
+
+当订阅的Observable执行有一定代价的时候，我们并不想每一次订阅都去执行一次操作，这个时候就需要用到`multicast`，也就是所谓的多播。
+
+举个例子，网络请求使用Observable进行封装，订阅这个Observable，我们想要的效果其实是每次不论多少个订阅者，只发送一次请求，请求完成后将结果进行通知所有的订阅者，这个时候就需要用到connect operator。
+
+这个多播的实现其实用到了Subject，`publish`，`replay`其实就是指定了`PublishSubject`, `ReplaySubject`。
+
+`refCount` 当Observable第一次被订阅的时候，会自动`connect`原先的Observable。
+
+`share` 其实就是前面几个操作符的组合。
+
+{% highlight swift %}
+public func share(replay: Int = 0, scope: SubjectLifetimeScope = .whileConnected)
+    -> Observable<Element> {
+    switch scope {
+    case .forever:
+        switch replay {
+        case 0: return self.multicast(PublishSubject()).refCount()
+        default: return self.multicast(ReplaySubject.create(bufferSize: replay)).refCount()
+        }
+    case .whileConnected:
+        switch replay {
+        case 0: return ShareWhileConnected(source: self.asObservable())
+        case 1: return ShareReplay1WhileConnected(source: self.asObservable())
+        default: return self.multicast(makeSubject: { ReplaySubject.create(bufferSize: replay) }).refCount()
+        }
+    }
+}
+{% endhighlight %}
+
 # References
 
 [http://reactivex.io/documentation/operators.html](http://reactivex.io/documentation/operators.html)
 
 [https://store.raywenderlich.com/products/rxswift](https://store.raywenderlich.com/products/rxswift)
-
-{% highlight swift %}
-{% endhighlight %}
