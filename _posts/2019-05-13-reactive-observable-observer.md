@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  "【Reactive】学习笔记第三弹(Observable & Subject)"
+title:  "【Reactive】学习笔记第三弹(Observable & Observer)"
 date:   2019-05-13
-excerpt:  "本文是笔者学习Reative的第三篇文章，主要介绍Observable和Subject"
+excerpt:  "本文是笔者学习Reative的第三篇文章，主要介绍Observable和Observer"
 tag:
 - Reactive
 comments: true
@@ -75,7 +75,32 @@ public class Observable<Element> : ObservableType {
 }
 {% endhighlight %}
 
-可以看到Observable只是一个父类，遵守并实现了上面两个协议的方法，作为Observable一个最重要的方法就是`subscribe`。
+可以看到Observable只是一个父类，遵守并实现了上面两个协议的方法，作为Observable一个最重要的方法就是`subscribe`，参数则是一个observer。
+
+`Producer`则是一个Observable的子类，实现了`subscribe(_:)`方法：
+
+{% highlight swift %}
+class Producer<Element> : Observable<Element> {
+    override init() {
+        super.init()
+    }
+
+    override func subscribe<Observer: ObserverType>(_ observer: Observer) -> Disposable where Observer.Element == Element {
+    	let disposer = SinkDisposer()
+        let sinkAndSubscription = self.run(observer, cancel: disposer)
+        disposer.setSinkAndSubscription(sink: sinkAndSubscription.sink, subscription: sinkAndSubscription.subscription)
+
+        return disposer
+    }
+
+    func run<Observer: ObserverType>(_ observer: Observer, cancel: Cancelable) -> (sink: Disposable, subscription: Disposable) where Observer.Element == Element {
+        rxAbstractMethod()
+    }
+}
+{% endhighlight %}
+
+# Observer
+
 # Subject
 
 # 总结
