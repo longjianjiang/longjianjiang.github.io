@@ -1,6 +1,8 @@
 
 # redux
 
+一个单向数据流的结构。
+
 # async
 
 # thunk
