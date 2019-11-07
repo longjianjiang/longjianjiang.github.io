@@ -51,6 +51,12 @@ AVAssetTrack 表示多媒体资源中的轨道，一般视频有两个track，�
 
 - 使用AVAssetResourceLoader 回调手动接管整个数据的下载过程；
 
+# 视频播放清晰度切换
+
+一般视频清晰度切换就是有多个不同清晰度的资源，切换的时候，销毁之前的，加载新的进行播放，这个过程中可以加loading取截图。
+
+另一种就是所谓的无缝切换，就是不存在资源切换的问题，这种其实是用到了DASH（Dynamic Adaptive Streaming HTPP）这种流式协议。服务器会将视频文件进行切分成时间长度相等的segments，每个segments有不同的分辨率，通过GET请求进行获取。这个时候如果进行切换清晰度，就是在当前segment下载完成后，下一个segment的请求去请求新的分辨率的分段，所以自然就是无缝的。
+
 # References
 
 [Apple Document](https://developer.apple.com/library/archive/documentation/AudioVideo/Conceptual/AVFoundationPG/Articles/00_Introduction.html)
@@ -60,3 +66,5 @@ AVAssetTrack 表示多媒体资源中的轨道，一般视频有两个track，�
 [https://github.com/vitoziv/VIMediaCache/tree/master](https://github.com/vitoziv/VIMediaCache/tree/master)
 
 [https://sky-weihao.github.io/2015/10/06/Video-streaming-and-caching-in-iOS/](https://sky-weihao.github.io/2015/10/06/Video-streaming-and-caching-in-iOS/)
+
+[DASH](https://bitmovin.com/dynamic-adaptive-streaming-http-mpeg-dash/)
