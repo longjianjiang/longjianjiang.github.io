@@ -19,8 +19,8 @@
 
 ---
 
-当控制权订阅Store的时候，当设计到分页的上拉和下拉的时候，update内部需要除了需要处理列表的刷新，还需要额外的处理loading状态，所以看上去就不那么清晰。
-参看了React中的实现，component直接订阅store，也就是说和state相关的component都会去订阅state，所以每个component做的事情都分布在了各个component中，自然就清晰了很多。
+当控制器订阅Store的时候，当设计到分页的上拉和下拉的时候，update内部需要除了需要处理列表的刷新，还需要额外的处理loading状态，所以看上去就不那么清晰。
+参看了React中的实现(connect)，component直接订阅store，也就是说和state相关的component都会去订阅state，所以每个component做的事情都分布在了各个component中，自然就清晰了很多。
 
 # References
 
