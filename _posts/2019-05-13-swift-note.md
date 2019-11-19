@@ -146,6 +146,10 @@ for range in idxSet.rangeView {
 
 当同文件中的其他类想要使用某个类的private属性，这个时候可以使用fileprivate。
 
+# Codable
+
+[ref](https://developer.apple.com/documentation/foundation/archives_and_serialization/encoding_and_decoding_custom_types)
+
 # References 
 
 [https://docs.swift.org/swift-book/LanguageGuide/TheBasics.html](https://docs.swift.org/swift-book/LanguageGuide/TheBasics.html)
