@@ -24,3 +24,7 @@
 ---
 
 核心还是webview的`evaluateJavaScript`来进行中转。JS端和Native端通过responseId来判断是对方回调自己，此时直接根据Id取到callback来进行调用即可。callbackId的时候则是去调用对方。
+
+# References
+
+[https://github.com/marcuswestin/WebViewJavascriptBridge](https://github.com/marcuswestin/WebViewJavascriptBridge)
