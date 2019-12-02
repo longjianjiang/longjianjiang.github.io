@@ -393,6 +393,8 @@ String Table（strtab）: 字符串表存放了符号表中可读的字符串，
 
 - 首先找到section(__nl_symbol_ptr, __la_symbol_ptr)对应的动态符号表的数组指针，然后遍历section，从动态符号表中取到符号表的index，然后根据index取到结构体n_list, 接着根据n_list中的n_strx也就是该符号名在字符串表中的偏移量，最后用字符串表的地址就可以得到该符号的名字。这个时候遍历我们开始传递过去的一个`rebinding`结构体，比较name是否相等，则进行函数指针替换。
 
+从`__la_symbol_ptr` 到 string table 的寻找可以参考这里[ref](https://blog.csdn.net/Hello_Hwc/article/details/103330564).
+
 所以我们调用printf，会调用到new_printf, 而new_printf中调用orig_printf会调用原来的printf，因为我们将先前传递的函数指针的实现替换成了系统的函数的实现。
 
 上述步骤中涉及了很多关于偏移的计算，其实这些规则在apple提供的头文件中都有说明，这里就不具体说明了。
