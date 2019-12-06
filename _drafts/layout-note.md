@@ -30,6 +30,8 @@
 
 Masonry 封装了`NSLayoutConstraint`的接口，提供了链式调用的语法。
 
+当view使用xib中设置约束，或者下面提到的快捷方式设置的约束，如果此时去update或者remake是不会起作用的，因为内部存储了通过自身接口创建的约束，不会去更改其他方式创建的约束。
+
 ## NSLayoutAnchor
 
 iOS9 Apple提供了一种快捷的方式进行创建约束，如下所示:
