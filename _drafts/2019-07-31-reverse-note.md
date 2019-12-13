@@ -13,7 +13,7 @@ curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 python3 get-pip.py
 ```
 
-用python下的pip包管理工具：`pip install frida`.
+用python下的pip包管理工具：`pip3 install frida`.
 
 - 手机安装frida
 
@@ -29,7 +29,7 @@ python3 get-pip.py
 
 > 2, 3 两步都是在电脑终端执行即可。前提是手机通过USB连接到电脑。
 
-4. 下载`frida-ios-dump`，在该目录下执行`./dump.py app名称`。
+4. 下载`frida-ios-dump`，在该目录下执行`python3 dump.py app名称`。
 
 这一步需要注意：
 4.1> 首先需要修改dump.py 里的用户名和密码，密码就是越狱手机终端的密码；
