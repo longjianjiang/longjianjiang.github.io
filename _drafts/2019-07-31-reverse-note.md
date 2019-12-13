@@ -7,6 +7,12 @@
 
 - 电脑安装frida
 
+```
+brew install python; // python3
+curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+python3 get-pip.py
+```
+
 用python下的pip包管理工具：`pip install frida`.
 
 - 手机安装frida
