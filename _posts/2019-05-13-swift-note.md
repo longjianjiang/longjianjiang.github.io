@@ -8,7 +8,7 @@ tag:
 comments: true
 ---
 
-本文笔者记录下自己从开源代码中看到的一些Swift语言特性，这样更容易去应用到自己写的代码中。
+本文笔者记录下自己从开源代码中看到的一些自己没有见过的Swift语言特性，这样更容易去应用到自己写的代码中。
 
 # Trailing Closures
 
@@ -150,9 +150,32 @@ for range in idxSet.rangeView {
 
 [ref](https://developer.apple.com/documentation/foundation/archives_and_serialization/encoding_and_decoding_custom_types)
 
+# URLComponents & URLQueryItem
+
+在写构建URL的时候，当后面存储参数的时候，写的时候还是比较容易出错的，所以Swift里面提供了两个对象来处理这个事情。
+
+URLComponents 负责构建URL（scheme，host，path），URLQueryItem 用来负责构建参数，这样我们只需要写对应的值，拼接的工作这两个类进行完成。
+
+{% highlight swift%}
+let searchTerm = "obi wan kenobi"
+let format = "wookiee"
+
+var urlComponents = URLComponents()
+urlComponents.scheme = "https"
+urlComponents.host = "swapi.co"
+urlComponents.path = "/api/people"
+urlComponents.queryItems = [
+   URLQueryItem(name: "search", value: searchTerm),
+   URLQueryItem(name: "format", value: format)
+]
+
+print(urlComponents.url?.absoluteString)
+// https://swapi.co/api/people?search=obi%20wan%20kenobi&format=wookie
+{% endhighlight %}
+
+[ref](https://medium.com/swift2go/building-safe-url-in-swift-using-urlcomponents-and-urlqueryitem-alfian-losari-510a7b1f3c7e)
+
 # References 
 
 [https://docs.swift.org/swift-book/LanguageGuide/TheBasics.html](https://docs.swift.org/swift-book/LanguageGuide/TheBasics.html)
 
-{% highlight swift %}
-{% endhighlight %}
