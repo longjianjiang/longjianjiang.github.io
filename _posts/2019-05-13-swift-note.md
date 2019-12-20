@@ -82,6 +82,13 @@ guard case .pending(let _handlers) = self.sealant else {
 
 之前说到的枚举中使用`for case`也可以使用where子句来添加限定条件的。
 
+for 循环中使用if，swiftlint 会推荐使用where，例如下面例子：
+{% highlight swift%}
+for item in list where item.isPlaying {
+	print("do sth")
+}
+{% endhighlight %}
+
 # fatalError
 
 先看一个例子：
