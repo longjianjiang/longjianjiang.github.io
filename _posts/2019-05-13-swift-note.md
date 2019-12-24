@@ -76,6 +76,12 @@ guard case .pending(let _handlers) = self.sealant else {
 
 不仅仅可以使用上面的`guard case`，还可以使用`if case`和`for case`，具体可以参考[这里](http://alisoftware.github.io/swift/pattern-matching/2016/05/16/pattern-matching-4/)。
 
+## enum codable
+
+枚举实现codable，参考如下：
+
+[ref](https://blog.untitledkingdom.com/codable-enums-in-swift-3ab3dacf30ce)
+
 # where
 
 在范型中，添加where子句来检查参数类型是否符合条件。
