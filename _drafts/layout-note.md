@@ -26,6 +26,10 @@
 1> 保存btn的top约束，设置text的时候，更新约束；
 2> btn的top约束设置两个，一个相对于label，一个相对于父view，设置text时，text为空，将label移除，这样才能让优先级低的相对于父view的约束生效。
 
+## 问题
+
+今天修一个bug的时候，发现当Cell高度不够展示约束设置的内容的时候，会不展示Label的内容，开始以为约束出问题了。
+
 ## Masonry
 
 Masonry 封装了`NSLayoutConstraint`的接口，提供了链式调用的语法。
