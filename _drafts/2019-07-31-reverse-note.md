@@ -13,6 +13,10 @@ curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 python3 get-pip.py
 ```
 
+```
+sudo easy_install pip; // python2.7 系统自带
+```
+
 用python下的pip包管理工具：`pip3 install frida`.
 
 - 手机安装frida
