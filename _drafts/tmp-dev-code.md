@@ -38,3 +38,28 @@ override var isHighlighted: Bool {
 ## Cell 圆角
 
 当collectionView背景色为白色，cell背景色是白色，这个时候加了圆角当cell是看不出效果的，因为都是白色。
+
+# 安全区域相关
+
+默认的listView内容会自动设置contentInset来保证安全区域不显示内容，但是有些UI就是从(0, 0) 开始设计的，所以需要设置如下来消除自动的inset：
+
+```swift
+listView.contentInsetAdjustmentBehavior = .never
+```
+
+当我们需要知道安全区域的inset的值的时候，通过`safeAreaInsets`来获取。假设要想在listView的cell中获取inset的话，则需要通过superView也就是外面的listView来获取，并且需要在`layoutSubviews`(会被调用多次)时候才去获取，init的时候还没有值。
+
+# UIButton 相关
+
+1> inset
+
+假设有一个btn，包含一段文字和一个图标，文字是会变化的，要求自适应btn的宽度。
+
+首先设置约束不能设置宽度，默认btn会根据内容进行计算出一个`intrinsicContentSize`，但是一般情况下，设计稿中的文字和图片之间以及和btn之间都会存在间距，所以在设置`imageEdgeInset`之前需要先设置`contentEdgeInset`，这样btn内部计算`intrinsicContentSize`的时候就会加上inset，这样接下去设置图片或者文字的inset的时候就可以有位置进行偏移，否则就显示不下了。
+
+例子如下：
+
+```swift
+speedButton.contentEdgeInsets = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 5+6) // 6其实就是下面image需要设置的inset
+speedButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: 6, bottom: 0, right: 0)
+```
