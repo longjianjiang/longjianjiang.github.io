@@ -84,9 +84,19 @@ guard case .pending(let _handlers) = self.sealant else {
 
 # where
 
+在定义协议的时候，如果需要制定遵守协议必须是某个类，可以使用where进行约束，如下：
+
+```swift
+protocol ViewProtocol where Self: UIView {}
+```
+
+---
+
 在范型中，添加where子句来检查参数类型是否符合条件。
 
 之前说到的枚举中使用`for case`也可以使用where子句来添加限定条件的。
+
+---
 
 for 循环中使用if，swiftlint 会推荐使用where，例如下面例子：
 {% highlight swift%}
