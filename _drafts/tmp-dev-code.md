@@ -61,5 +61,5 @@ listView.contentInsetAdjustmentBehavior = .never
 
 ```swift
 speedButton.contentEdgeInsets = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 5+6) // 6其实就是下面image需要设置的inset
-speedButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: 6, bottom: 0, right: 0)
+speedButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: 6, bottom: 0, right: -6) // right需要加-6，否则图片的frame就不对了，需要往右加6，这样图片就不会被挤；iOS13以下不加-6图片显示偏移；
 ```
