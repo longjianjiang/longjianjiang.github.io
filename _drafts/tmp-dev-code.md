@@ -94,3 +94,29 @@ extension CALayer {
 ```
 
 如果一个View既要设置圆角也要有阴影，此时可以外面加一个父view设置阴影，父View在添加这个设置了圆角的view。
+
+# Timer, WeakProxy
+
+OC中使用YYWeakProxy，swift可以使用如下的方案：
+
+```swift
+class TargetProxy {
+	private weak var target: CollegeTryMsgTopBannerView?
+
+	init(target: CollegeTryMsgTopBannerView) {
+		self.target = target
+	}
+
+	@objc func addBarrage() {
+		print("add one barrage")
+		let node = TextBarrageNode(barrageNode: target?.tryMsg)
+		target?.barragePanel?.add(barrage: node)
+	}
+}
+let timer = Timer.scheduledTimer(timeInterval: interval,
+							 target: TargetProxy(target: self),
+							 selector: #selector(TargetProxy.addBarrage),
+							 userInfo: nil,
+							 repeats: true)
+RunLoop.main.add(timer, forMode: .common)
+```
