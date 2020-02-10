@@ -120,3 +120,7 @@ let timer = Timer.scheduledTimer(timeInterval: interval,
 							 repeats: true)
 RunLoop.main.add(timer, forMode: .common)
 ```
+
+# present
+
+A presentViewController 到B 后，A.presentedViewController就是B，B.presentingViewController就是A
