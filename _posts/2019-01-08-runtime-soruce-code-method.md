@@ -160,6 +160,8 @@ Person *p = [[Person alloc] init];
 
 可以看到栈底的方法就是之前我们说过的 objc_msgSend, 不过后面怎么多了 uncached, 我们其实可以猜到是没有在缓存中找到IMP，下面我们就从源代码中寻找答案。
 
+> objc_msgSend 会存在尾递归调用优化，所谓尾递归就是方法最后仅仅调用函数，可以将调用函数返回值返回，这样OC方法转成objc_msgSend的时候就不需要进行一次压栈操作。
+
 其实类似 objc_msgSend 有多个不同类型，如下所示:
 
 ```
