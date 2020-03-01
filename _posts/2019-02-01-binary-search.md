@@ -206,3 +206,16 @@ end
 
 因为寻找方向的不同，导致了最后结果的不同。
 
+
+# STL
+
+STL 中也提供了三个常用的查找方法。
+
+`binary_search()` 给定左闭右开的区间中查找target是否存在;
+
+`upper_bound()` 给定左闭右开的区间中查找第一个大于target的迭代器;
+
+`lower_bound()` 给定左闭右开的区间中查找第一个不小于target的迭代器，也就是第一个大于等于target的；
+
+upper_bound 和 lower_bound 所指定的区间需要是有序的，内部实现就是使用二分进行查找的；
+
