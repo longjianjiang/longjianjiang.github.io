@@ -78,9 +78,7 @@ self.timer = [NSTimer weak_scheduleTimerWithTimeInterval:1 repeats:YES block:^{
 
 这种方式同样可以让self释放，但是却引入了一个新的问题，导致NSTimer类自身循环引用，所以timer的这个block依然会被一直调用，虽然此时weakSelf为nil。
 
-```
-不过笔者具体还没想明白怎么解释类自身循环引用。
-```
+今天看到Effective Objc书上的关于Timer的提到这个问题，当使用这种方式来避免循环引用时，需要在用到timer的类里的dealloc方法中，调用timer的`invalidate`方法，这样定时器就不会继续触发。对于self来说，因为是NSTimer的类实例，本身是一个单例，不会被回收，计时器是否会引用其实没什么影响。
 
 ## KVO
 
