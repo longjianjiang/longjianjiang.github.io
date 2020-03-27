@@ -124,3 +124,11 @@ RunLoop.main.add(timer, forMode: .common)
 # present
 
 A presentViewController 到B 后，A.presentedViewController就是B，B.presentingViewController就是A
+
+# URL 中文
+
+```swift
+let urlStr = "https://host/path?q=布鲁斯"
+let encodeURLStr = urlStr.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed)
+let decodeURLStr = encodeURLStr.removingPercentEncoding
+```
