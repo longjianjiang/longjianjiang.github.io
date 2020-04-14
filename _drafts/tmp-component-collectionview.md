@@ -39,6 +39,13 @@ protocol XXXSection: class {
 
 这样基本实现的组件化的ListView，但是缺点是Section的协议没有进行统一的抽象，导致每次需要重复创建。
 
+上述方式存在的几个问题：
+
+- didSelected 方法里带有打点的代码  
+提供一个类似插件的方案，在点击之前/之后允许做一些事情；  
+
+- configCell方法中，有操作`indexPath.row`，有出现crash的风险；  
+
 ---
 
 
