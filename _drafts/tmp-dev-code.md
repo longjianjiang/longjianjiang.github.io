@@ -132,3 +132,7 @@ let urlStr = "https://host/path?q=布鲁斯"
 let encodeURLStr = urlStr.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed)
 let decodeURLStr = encodeURLStr.removingPercentEncoding
 ```
+
+# swift protocol property type subclass
+
+[ref](https://stackoverflow.com/questions/32231420/swift-protocol-property-type-subclass)
