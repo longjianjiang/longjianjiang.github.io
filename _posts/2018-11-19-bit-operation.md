@@ -51,6 +51,12 @@ int getSum(int a, int b) {
 >>  : 将左操作数的值往右边移动右操作数指定的位数，也就是左操作数最右边的右操作数指定的位数被丢弃，左边空出来的位补0或者左操作数的符号位，第一种叫做逻辑右移，第二种叫算数右移
 ```
 
+{% highlight cpp%}
+int a = -3;
+std::cout << std::hex << ((unsigned)a >> 1) << std::endl; // 逻辑右移
+std::cout << std::hex << (a >> 1) << std::endl; // 算数右移
+{% endhighlight %}
+
 > 以上就是所有的和位运算相关的操作符。      
 
 ## 补码
