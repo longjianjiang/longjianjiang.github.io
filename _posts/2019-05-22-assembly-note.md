@@ -41,10 +41,25 @@ stp r0, r1, [sp, #16]	=> push r0, r1 onto the stack, then sp = sp + 16
 ldp r0, r1, [sp, #16]	=> pop r0, r1 off the stack at sp+16 position, putting them into r0, r1
 ```
 
+# Register
+
+## CPSR (Current Program Status Register)
+
+CPSR 是32位寄存器，有如下标记位：
+
+Z, bit[30] : zero condition flag. 最后一条flag-setting的指令结果为0，设置Z bit为1.
+
+[ref](https://developer.arm.com/docs/ddi0595/b/aarch32-system-registers/cpsr)
+
+# Instruction
+
+## tst
+
+tst x10, x10; 用于把一个寄存器的内容和另一个寄存器的内容或立即数进行按位的与运算，并根据运算结果更新CPSR中条件标志位的值。当前运算结果为1，则Z bit=0；当前运算结果为0，则Z bit=1
+
+[ref](http://www.keil.com/support/man/docs/armasm/armasm_dom1361289913099.htm)
+
 # @PAGE, @PAGEOFF
 
 [ref](https://reverseengineering.stackexchange.com/questions/14385/what-are-page-and-pageoff-symbols-in-ida)
 
-# References
-
-[ref](http://www.keil.com/support/man/docs/armasm/armasm_dom1361289913099.htm)
