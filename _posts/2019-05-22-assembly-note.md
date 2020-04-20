@@ -61,5 +61,8 @@ tst x10, x10; 用于把一个寄存器的内容和另一个寄存器的内容或
 
 # @PAGE, @PAGEOFF
 
+指令长度是32位，所以不能存放更长的地址，所以需要使用@PAGE先取基于PC的偏移的高21位，才使用@PAGEOFF取偏移的12位，这样就可以取到完整的偏移，加上PC就可以找到实际的地址；
+
 [ref](https://reverseengineering.stackexchange.com/questions/14385/what-are-page-and-pageoff-symbols-in-ida)
+[ref](https://juejin.im/post/5c9df4c4e51d4502c94c16dd)
 
