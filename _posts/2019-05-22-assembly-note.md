@@ -41,3 +41,10 @@ stp r0, r1, [sp, #16]	=> push r0, r1 onto the stack, then sp = sp + 16
 ldp r0, r1, [sp, #16]	=> pop r0, r1 off the stack at sp+16 position, putting them into r0, r1
 ```
 
+# @PAGE, @PAGEOFF
+
+[ref](https://reverseengineering.stackexchange.com/questions/14385/what-are-page-and-pageoff-symbols-in-ida)
+
+# References
+
+[ref](http://www.keil.com/support/man/docs/armasm/armasm_dom1361289913099.htm)
