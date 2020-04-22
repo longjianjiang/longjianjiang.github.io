@@ -136,3 +136,45 @@ let decodeURLStr = encodeURLStr.removingPercentEncoding
 # swift protocol property type subclass
 
 [ref](https://stackoverflow.com/questions/32231420/swift-protocol-property-type-subclass)
+
+# 梯形（左上/左下 带圆角）的绘制
+
+绘制圆角的时候角度需要注意，需要从圆心的右边开始为0，然后逆时针方向，分别是90度，180度。
+
+其次就是额外画出交点的圆角，分成两步，首先画线空出半径的宽度，然后在这个空出的半径的矩形中找到远点进行一次`addArc`即可。
+
+```swift
+override func draw(_ rect: CGRect) {
+	super.draw(rect)
+
+	let diff: CGFloat = 4
+	let radius: CGFloat = 2
+
+	let path = UIBezierPath()
+	path.lineJoinStyle = .round
+	path.move(to: .zero)
+	path.addLine(to: CGPoint(x: rect.width-diff, y: 0))
+	path.addLine(to: CGPoint(x: rect.width, y: rect.height))
+
+	path.addLine(to: CGPoint(x: radius, y: rect.height))
+	path.addArc(withCenter: CGPoint(x: radius, y: rect.height-radius),
+				radius: radius,
+				startAngle: CGFloat.pi / 2,
+				endAngle: CGFloat.pi,
+				clockwise: true)
+
+	path.addLine(to: CGPoint(x: 0, y: radius))
+	path.addArc(withCenter: CGPoint(x: radius, y: radius),
+				radius: radius,
+				startAngle: CGFloat.pi,
+				endAngle: CGFloat.pi * 1.5,
+				clockwise: true)
+	path.close()
+
+	let shapeLayer = CAShapeLayer()
+	shapeLayer.path = path.cgPath
+	shapeLayer.fillColor = UIColor.assistPurpleColor.cgColor
+
+	layer.insertSublayer(shapeLayer, at: 0)
+}
+```
