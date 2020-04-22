@@ -259,6 +259,14 @@ CPU中存在一个页表寄存器，用来存放页表的开始地址和页表�
 
 ![os_memory_management_15]({{site.url}}/assets/images/blog/os_memory_management_15.png)
 
+## 内存分配
+
+[ref](http://www.leviathan.vip/2019/04/13/Linux%E5%86%85%E6%A0%B8%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-%E7%89%A9%E7%90%86%E5%86%85%E5%AD%98%E7%9A%84%E5%88%86%E9%85%8D/)
+
+### slab
+
+[ref](https://www.ibm.com/developerworks/cn/linux/l-linux-slab-allocator/index.html)
+
 ## 总结
 
 本文将操作系统的内存管理进行了一个简单的总结。
