@@ -125,6 +125,15 @@ RunLoop.main.add(timer, forMode: .common)
 
 A presentViewController 到B 后，A.presentedViewController就是B，B.presentingViewController就是A
 
+iOS13默认的present不是全屏，所以present之前，需要设置控制器的`modalPresentationStyle`属性，这样才可以全屏的present；
+
+```swift
+let shareVC = ColumnPlanShareController()
+// 使用 `.fullScreen`会导致不能看到presetning 的控制器
+shareVC.modalPresentationStyle = .overCurrentContext
+vc?.present(shareVC, animated: true, completion: nil)
+```
+
 # URL 中文
 
 ```swift
