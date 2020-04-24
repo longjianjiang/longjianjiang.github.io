@@ -93,7 +93,7 @@ extension CALayer {
 }
 ```
 
-如果一个View既要设置圆角也要有阴影，此时可以外面加一个父view设置阴影，父View在添加这个设置了圆角的view。
+如果一个View既要设置圆角也要有阴影，此时可以外面加一个父view设置阴影，父View在添加这个设置了圆角的view。需要注意的是，需要设置父View或者子View的背景色，否则默认透明的阴影显示不出来。
 
 # Timer, WeakProxy
 
