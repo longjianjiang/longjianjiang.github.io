@@ -15,6 +15,10 @@ if (condition) {
 
 [ref](https://stackoverflow.com/questions/3042818/hide-the-rightbarbuttonitem-of-a-navigation-controller)
 
+## cell中某个view需要做动画
+
+这个时候需要等于listView加载完毕，也就是reloadData()后进行动画。因为UI操作一定是在主线程，所以可以使用GCD将动画操作加到队列中，这样reload完成后，此时view也都加载完毕，可以正常的进行动画显示；
+
 ## Cell 中存在animationImageView
 
 ```
