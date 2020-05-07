@@ -41,6 +41,12 @@ stp r0, r1, [sp, #16]	=> push r0, r1 onto the stack, then sp = sp + 16
 ldp r0, r1, [sp, #16]	=> pop r0, r1 off the stack at sp+16 position, putting them into r0, r1
 ```
 
+```
+ldr x0, [x1, #8]		=> Load from address X1 + 8
+ldr x0, [x1, #8]!		=> Pre-index: Update X1 first (to X1 + #8), then load from the new address 
+ldr x0, [x1], #8		=> Post-index: Load from the unmodified address in X1 first, then update X1 (to X1 + #8)
+```
+
 # Register
 
 ## CPSR (Current Program Status Register)
