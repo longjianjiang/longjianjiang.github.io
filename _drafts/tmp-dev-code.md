@@ -138,6 +138,10 @@ shareVC.modalPresentationStyle = .overCurrentContext
 vc?.present(shareVC, animated: true, completion: nil)
 ```
 
+```
+modalTransitionStyle = .crossDissolve; // 设置present的渐变效果；
+```
+
 # URL 中文
 
 ```swift
