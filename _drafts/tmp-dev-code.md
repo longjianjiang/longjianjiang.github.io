@@ -201,3 +201,8 @@ override func draw(_ rect: CGRect) {
 开发中有个页面collectionView，有两组，都是一张网络图片并且知道宽高，第一组距离顶部10；  
 因为之前高度直接使用的是375对应的高度，而且contentMode为`xxfill`，默认clipToBounds是false，所以顶部就超出了，之前以为的collectionView未生效。  
 设置fill的时候，需要考虑clipToBounds。 
+
+# UserDefaults
+
+UserDefaults 存储字典时，key如果不是string时，此时就不能使用UserDefaults 存储，此时存储的对象不是`Property List`。
+UserDefaults 存储Set<Int>时也会失败；
