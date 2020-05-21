@@ -206,3 +206,7 @@ override func draw(_ rect: CGRect) {
 
 UserDefaults 存储字典时，key如果不是string时，此时就不能使用UserDefaults 存储，此时存储的对象不是`Property List`。
 UserDefaults 存储Set<Int>时也会失败；
+
+# view 重复添加
+
+比如某些情况需要在cell上额外增加一个提示的view，假设重复很多个提示的view的颜色会变深而且点击事件会无法触发，这个时候就需要适当的做移除操作；
