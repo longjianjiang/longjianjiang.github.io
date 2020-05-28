@@ -212,3 +212,13 @@ UserDefaults 存储Set<Int>时也会失败；
 # view 重复添加
 
 比如某些情况需要在cell上额外增加一个提示的view，假设重复很多个提示的view的颜色会变深而且点击事件会无法触发，这个时候就需要适当的做移除操作；
+
+# autoresizing cell
+
+collectionview 当我们遇到高度不固定的，通常会设置约束去自动算高，不过有些内容因为只设置了左右的约束，而宽度是不固定的。
+
+一种方式是设置一个宽度约束，比如取屏幕宽度减去两边间距，这样有个问题是iPad分屏的时候会出问题；
+
+另一种方式是，在flowLayout的delegate里使用collectionView的宽度返回，然后在cell中的prefer修改layoutAttribute方法中使用宽度去根据autolayout算实际的高度，然后更新layoutAttribute；
+
+第三种情况是，cell的大小是固定的，因为使用了estimatedSize同时约束是根据cell的大小来设置的，这个时候同样会根据约束去计算出实际的大小，但是还是有可能宽度不是collectionView的宽度，这个时候直接使用flowLayout代理的设置的itemSize，直接在cell的prefer方法中返回方法中的layoutAttribute中即可（此时layoutAttribute就是flowLayout中的）；
