@@ -177,7 +177,7 @@ UIView.transition(from: oldView, to: newView, duration: 0.33,
 
 之前的动画都是设置`animatable`的属性，UIKit帮助我们实现对应的动画效果。但是现在我们大多更多的使用Auto Layout来进行布局界面，此时上面的几种动画方法同样也是有效的，只是此时我们操作的是约束。
 
-需要在animation block里调用`layoutIfNeeded()`, 来进行更新约束。
+需要在animation block里调用父view的`layoutIfNeeded()`, 来进行更新约束。
 
 # UIViewPropertyAnimator 更新于2017-11-11
 
