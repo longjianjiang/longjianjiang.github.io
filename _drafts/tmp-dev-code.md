@@ -97,6 +97,8 @@ extension CALayer {
 }
 ```
 
+设置view的layer的`cornerRadius`和shadow是可以同时生效的。
+
 如果一个View既要设置圆角也要有阴影，此时可以外面加一个父view设置阴影，父View在添加这个设置了圆角的view。需要注意的是，需要设置父View或者子View的背景色，否则默认透明的阴影显示不出来。
 
 listview 的`clipToBounds`是true，会导致阴影显示不全，此时需要设置为false，才能显示正常；
