@@ -67,6 +67,14 @@ iOS9 Apple提供了一种快捷的方式进行创建约束，如下所示:
 NSLayoutConstraint *constraint = [myView.topAnchor constraintEqualToAnchor:otherView.topAnchor constant:10];
 {% endhighlight %}
 
+## UIStackView
+
+使用stackView可以少写很多约束，还是比较方便的。stackView可以理解为一个布局的容器，他的大小是由subviews决定的，而且是拥有intrinsicContentSize的。
+
+stackView有水平布局和垂直布局，alignment是布局方向的垂直方向上的对齐方式，distribution是布局方向上的布局策略。
+
+当alignment 和 distribution 都设置为fill的时候，假设是水平方向布局，此时水平方向的左右约束就只能设置一个，否则和intrinsicContentSize的width约束就冲突了。
+
 # flexbox
 
 flexbox是CSS中使用布局算法。
