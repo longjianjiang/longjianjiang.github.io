@@ -142,8 +142,8 @@ NSNumber的实现也是一种抽象工厂，首先NSNumber内部定义了若干�
 
 所谓builder就是将创建这个对象，同时负责操作这些属性，处理相关逻辑，这样就可以将这部分逻辑独立出来，粒度更加小，也就更容易复用。
 
-[ref](https://blog.csdn.net/justloveyou_/article/details/78298420)
-
+[ref1](https://blog.csdn.net/justloveyou_/article/details/78298420)
+[ref2](https://www.swiftbysundell.com/articles/using-the-builder-pattern-in-swift/)
 # References
 
 [https://www.cnblogs.com/weidagang2046/archive/2009/12/10/1620587.html](https://www.cnblogs.com/weidagang2046/archive/2009/12/10/1620587.html)
