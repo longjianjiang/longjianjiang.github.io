@@ -136,7 +136,13 @@ NSNumber的实现也是一种抽象工厂，首先NSNumber内部定义了若干�
 
 [ref](https://www.cnblogs.com/qiaoconglovelife/p/5750290.html)
 
-## Builder Pattern
+## 生成器模式
+
+生成器模式是构建对象的一种设计模式，一般当某个对象较为复杂属性比较多，而且这些属性可能会有较大的变化，这些变化可能是有一些特定的逻辑。
+
+所谓builder就是将创建这个对象，同时负责操作这些属性，处理相关逻辑，这样就可以将这部分逻辑独立出来，粒度更加小，也就更容易复用。
+
+[ref](https://blog.csdn.net/justloveyou_/article/details/78298420)
 
 # References
 
