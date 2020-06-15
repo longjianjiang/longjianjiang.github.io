@@ -47,6 +47,12 @@ ldr x0, [x1, #8]!		=> Pre-index: Update X1 first (to X1 + #8), then load from th
 ldr x0, [x1], #8		=> Post-index: Load from the unmodified address in X1 first, then update X1 (to X1 + #8)
 ```
 
+```
+temporaryLabel:
+    b temporaryLabel # 类似 jmp指令，此时不会将下一个指令地址保存到lr；
+	bl temporaryLabel # 同样是跳转到某个位置，但是执行完后回来继续执行下一个指令；
+```
+
 # Register
 
 ## CPSR (Current Program Status Register)
