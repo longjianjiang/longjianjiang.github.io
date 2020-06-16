@@ -57,6 +57,14 @@ enum Result<T> {
 }
 {% endhighlight %}
 
+## RawValue 
+
+enum RawValue 和 Associated Values 只能二选一。
+
+因为RawValue是一个`RawRepresentable`协议，如果有RawValue的枚举带了AC，此时`init?(rawValue: Self.RawValue)`初始化的时候，是不确定AC的值的，也就导致了枚举的不唯一。
+
+[ref](https://medium.com/@PhiJay/why-swift-enums-with-associated-values-cannot-have-a-raw-value-21e41d5ec11)
+
 ## match
 
 先上一段代码：

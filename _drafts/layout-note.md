@@ -75,6 +75,16 @@ stackView有水平布局和垂直布局，alignment是布局方向的垂直方�
 
 当alignment 和 distribution 都设置为fill的时候，假设是水平方向布局，此时水平方向的左右约束就只能设置一个，否则和intrinsicContentSize的width约束就冲突了。
 
+## UILayoutGuide
+
+所谓UILayoutGuide是一个虚拟的矩形区域，可以和AutoLayout交互，但是不会加入view的层级也就不会拦截手势相关的消息。
+
+最常见的应该是`safeAreaLayoutGuide`，规定了一个不被导航栏，tabbar，toolbar这些挡住的区域，使用他来设置约束就不用hard code相关的数字了。
+
+`layoutMarginsGuide`就是view的margin；`readableContentGuide`规定了一个相对友好的阅读区域，一般使用在iPad里。
+
+我们也可以自定义一个UILayoutGuide，此时作用就相等于一个容器，子view相对于这个layoutGuide来设置约束。
+
 # flexbox
 
 flexbox是CSS中使用布局算法。
