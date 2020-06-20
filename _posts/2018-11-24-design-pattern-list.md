@@ -84,6 +84,8 @@ delegate: 当需要让外界知道一些动作或者数据的时候，可以定�
 
 有时候，我们想要的其实不一定是类一定有一个唯一的对象，而是保证类对象有一个唯一的状态。这个时候可以使用[MonoState](https://www.jianshu.com/p/9840f04669f4)。
 
+[单例的思考](https://www.cnblogs.com/weidagang2046/archive/2009/10/31/1593473.html#!comments)
+
 ## Mediator Pattern
 
 组件化中用到了中介者模式，之前工程中各个模块相互依赖，随着工程规模的扩大，导致各个模块很难独立出来。这个时候需要一个中间层，也就是所谓的Mediator，各个模块只依赖Mediator，这样子各个模块就独立出来了。
