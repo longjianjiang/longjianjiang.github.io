@@ -92,3 +92,5 @@ objc`load`方法的执行；
 [http://www.samirchen.com/ios-app-launching/](http://www.samirchen.com/ios-app-launching/)
 
 [http://lingyuncxb.com/2018/01/30/iOS%E5%90%AF%E5%8A%A8%E4%BC%98%E5%8C%96/](http://lingyuncxb.com/2018/01/30/iOS%E5%90%AF%E5%8A%A8%E4%BC%98%E5%8C%96/)
+
+[http://www.zoomfeng.com/blog/launch-time.html](http://www.zoomfeng.com/blog/launch-time.html)
