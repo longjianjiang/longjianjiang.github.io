@@ -167,6 +167,8 @@ OC里面的集合遍历提供的方法也是一种迭代器模式，其中一种
 装饰对象中持有原有对象，对原对象操作之前添加若干操作，来进行扩展原对象的行为。
 比如给UIImage增加图片处理的装饰器。
 
+[ref](https://medium.com/swiftcraft/swift-solutions-decorator-pattern-49fcfb18c1ce)
+
 ### 责任链模式
 
 对象中持有同一类型的其他对象，形成一条链条，定义一个操作，链条上的对象都有机会去进行处理。
