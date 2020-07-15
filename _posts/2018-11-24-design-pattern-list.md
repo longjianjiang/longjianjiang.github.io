@@ -208,3 +208,4 @@ delegate: 当需要让外界知道一些动作或者数据的时候，可以定�
 
 [https://www.oodesign.com/](https://www.oodesign.com/)
 
+[https://medium.com/swiftcraft](https://medium.com/swiftcraft)
