@@ -139,6 +139,12 @@ MAKVONotificationCenter的实现依然是内部创建了一个私有类作为监
 
 只能将班级作为每个学生的观察者，来进行统计平均身高，当新的学生加入班级或者学生离开班级，都有做对应的addObserver和removeObserver操作来保证平均身高的准确性。
 
+## 隐藏组件细节
+
+我们知道，isa决定了方法的调用，所以有些时候， 对外的暴露的组件不想让外界通过runtime的方式去进行调用，我们也可以通过isa-swizzling进行替换isa。
+
+[ref](https://www.jianshu.com/p/b5c940f6d80d)
+
 ## 总结
 
 本文主要介绍了isa-swizzling和KVO的相关内容。
