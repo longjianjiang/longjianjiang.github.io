@@ -206,6 +206,12 @@ print(urlComponents.url?.absoluteString)
 
 [ref](https://medium.com/swift2go/building-safe-url-in-swift-using-urlcomponents-and-urlqueryitem-alfian-losari-510a7b1f3c7e)
 
+# init
+
+swift的构造方法分为两种，主要的和便利的。
+
+[ref](https://docs.swift.org/swift-book/LanguageGuide/Initialization.html)
+
 # References 
 
 [https://docs.swift.org/swift-book/LanguageGuide/TheBasics.html](https://docs.swift.org/swift-book/LanguageGuide/TheBasics.html)
