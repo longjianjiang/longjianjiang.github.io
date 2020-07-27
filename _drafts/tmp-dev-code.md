@@ -228,3 +228,9 @@ collectionview 当我们遇到高度不固定的，通常会设置约束去自�
 ---
 
 笔者今天在写一个页面的时候，有三个section，第一个section高度固定，第二个section是一组搜索词，高度固定，宽度通过cell的prefer的方法中计算；第三个section是固定高度的cell；在iOS11上的设备显示的时候，第三个section的cell和header会往上偏移，猜想是第二组的section高度还没计算出来，第三个section就展示出来了，所以导致了重叠，解决方法就是第三个section的header转cell，cell也实现prefer方法，手动赋值高度，同时flowLayoutDelegate itemSize的高度返回1，这样就可以正常显示了。
+
+# 手势
+
+今天遇到一个类似抖音的视频页面，视频View有添加pan手势处理快进，然后和scrollView的pan手势冲突了。
+
+解决方法，实现视频控制view手势的`shouldRecognizeSimultaneouslyWith`代理方法，判断手势的view是scrollView返回false即可。
