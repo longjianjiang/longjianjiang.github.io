@@ -234,3 +234,9 @@ collectionview 当我们遇到高度不固定的，通常会设置约束去自�
 今天遇到一个类似抖音的视频页面，视频View有添加pan手势处理快进，然后和scrollView的pan手势冲突了。
 
 解决方法，实现视频控制view手势的`shouldRecognizeSimultaneouslyWith`代理方法，判断手势的view是scrollView返回false即可。
+
+# lottie
+
+一个按钮左边👍图片，右边数字，点击的时候放在图片上面播放一次lottie动画，开始播放会透出未选中图片的灰色。
+
+查看了下是因为lottie的那个view背景是透明的，所以将lottieview 背景色设置为白色即可。
