@@ -240,3 +240,7 @@ collectionview 当我们遇到高度不固定的，通常会设置约束去自�
 一个按钮左边👍图片，右边数字，点击的时候放在图片上面播放一次lottie动画，开始播放会透出未选中图片的灰色。
 
 查看了下是因为lottie的那个view背景是透明的，所以将lottieview 背景色设置为白色即可。
+
+# collectionView 刷新
+
+listView中某个header有选中状态，去更新后发现没有生效，因为更新后触发了reload操作，所以header又重置了，所以没有看到刷新效果。
