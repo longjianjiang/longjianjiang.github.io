@@ -75,6 +75,12 @@ stackView有水平布局和垂直布局，alignment是布局方向的垂直方�
 
 当alignment 和 distribution 都设置为fill的时候，假设是水平方向布局，此时水平方向的左右约束就只能设置一个，否则和intrinsicContentSize的width约束就冲突了。
 
+---
+
+当UITextView放到stackView中，当变换textView高度约束进行展示内容的时候，有可能出现文字无法显示。
+
+解决方案是按条件将textView的滚动禁止，同时用一个view把textView包起来，这样测试就正常了。
+
 ## UILayoutGuide
 
 所谓UILayoutGuide是一个虚拟的矩形区域，可以和AutoLayout交互，但是不会加入view的层级也就不会拦截手势相关的消息。
