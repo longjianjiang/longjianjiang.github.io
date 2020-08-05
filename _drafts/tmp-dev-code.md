@@ -244,3 +244,8 @@ collectionview 当我们遇到高度不固定的，通常会设置约束去自�
 # collectionView 刷新
 
 listView中某个header有选中状态，去更新后发现没有生效，因为更新后触发了reload操作，所以header又重置了，所以没有看到刷新效果。
+
+# CAGradientLayer
+
+CAGradientLayer 的startPoint 和 endPoint 有时间直接看蓝湖上面的代码会不准确。
+两点之间的方向会影响效果，有水平方向和垂直方向，或者对角线方向。
