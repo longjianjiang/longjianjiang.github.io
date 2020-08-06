@@ -249,3 +249,30 @@ listView中某个header有选中状态，去更新后发现没有生效，因为
 
 CAGradientLayer 的startPoint 和 endPoint 有时间直接看蓝湖上面的代码会不准确。
 两点之间的方向会影响效果，有水平方向和垂直方向，或者对角线方向。
+
+# NumberFormatter
+
+当需要将数字改成多少万的时候，可以使用numberFormatter来做。如下是一个例子：
+
+```swift
+static func getReadableCnt(_ cnt: Int, addedSpacing: Bool = false) -> String {
+	let count = Double(cnt) / 10000.0
+	let formatter = NumberFormatter()
+	formatter.minimumFractionDigits = 0 // 1.0万显示成1
+	formatter.maximumFractionDigits = 1 // 保留一位小数
+
+	if count >= 1 {
+		let prefix = formatter.string(from: NSNumber(value: count)) ?? String(format: "%.1f", count)
+		if addedSpacing {
+			return String(format: "\(prefix) 万", count)
+		}
+		let countStr = String(format: "\(prefix)万", count)
+		return countStr
+	} else {
+		if addedSpacing {
+			return "\(cnt) "
+		}
+		return "\(cnt)"
+	}
+}
+```
