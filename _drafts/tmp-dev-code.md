@@ -276,3 +276,5 @@ static func getReadableCnt(_ cnt: Int, addedSpacing: Bool = false) -> String {
 	}
 }
 ```
+
+[ref](https://nshipster.com/formatter/)
