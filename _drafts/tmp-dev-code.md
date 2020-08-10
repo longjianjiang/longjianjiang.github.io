@@ -278,3 +278,16 @@ static func getReadableCnt(_ cnt: Int, addedSpacing: Bool = false) -> String {
 ```
 
 [ref](https://nshipster.com/formatter/)
+
+# UICollectionViewLayout
+
+在写一个瀑布流的layout的时候，开始可以正常显示，每次reloadData后，cell的显示就不对了。开始以为是layout计算出问题了，后来发现其实问题是图片的约束设置所导致的。
+
+```swift
+imgView.snp.remakeConstraints {
+	$0.top.leading.trailing.equalToSuperview()
+	$0.height.equalTo(imgView.snp.width).multipliedBy(item.coverUrl.imgPercent)
+}
+```
+
+开始高度约束是基于imgView的父view的宽度来设置的，每次reloadData就会出现高度拉伸的问题，后来改成基于自己的宽度就正常了。
