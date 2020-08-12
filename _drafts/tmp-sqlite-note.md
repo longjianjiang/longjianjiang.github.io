@@ -25,6 +25,11 @@ WAL则不直接将修改写入数据库，而是写入另外一个WAL文件中�
 
 如上图在进行同步的时候，当遇到end mark的时候，则需要停止同步，因为此时end mark后的数据正在被某个reader使用，如果进行同步等于重写了数据库中的数据，所以此时会进行一次记录本次同步的距离，下次继续同步。
 
+# 事务模型
+
+
 # References
 
 [https://www.sqlite.org/wal.html](https://www.sqlite.org/wal.html)
+
+[https://zhangbuhuai.com/post/sqlite.html](https://zhangbuhuai.com/post/sqlite.html)
