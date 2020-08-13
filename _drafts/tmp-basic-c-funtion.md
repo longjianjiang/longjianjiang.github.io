@@ -156,6 +156,55 @@ strlcat 通过第三个参数进行了检查。
 
 # 内存
 
+- memcpy, memmove
+
+memcpy 和 memmove都是从src开始将n个字节个字节移动到dest开始的位置。
+
+区别在于，memmove可以处理src和dest重叠的问题。所以速度也会有一定降低。
+
+```cpp
+char s[] = "1234567890";
+char* src = s;
+char* dest = s+2;
+
+memcpy(dest, src, 5); //  "12121890"
+memmove(dest, src, 5); // "12345890"
+```
+
+```cpp
+void* my_memcpy(void* dest, const void* src, size_t n)
+{
+    char*      d = (char*) dest;
+    const char*  s = (const char*) src;
+    while (n--)
+       *d++ = *s++;
+    return dest;
+}
+
+void* my_memmove(void* dest, const void* src, size_t n)
+{
+    char*     d  = (char*) dest;
+    const char*  s = (const char*) src;
+
+    if (s>d)
+    {
+         // start at beginning of s
+         while (n--)
+            *d++ = *s++;
+    }
+    else if (s<d)
+    {
+        // start at end of s
+        d = d+n-1;
+        s = s+n-1;
+
+        while (n--)
+           *d-- = *s--;
+    }
+    return dest;
+}
+```
+
 # References
 
 [https://www.cnblogs.com/edwardcmh/archive/2013/06/04/3117628.html](https://www.cnblogs.com/edwardcmh/archive/2013/06/04/3117628.html)
