@@ -235,6 +235,19 @@ collectionview 当我们遇到高度不固定的，通常会设置约束去自�
 
 解决方法，实现视频控制view手势的`shouldRecognizeSimultaneouslyWith`代理方法，尝试返回true即可同时识别两个手势，这样scrollView的pan手势就可以生效了。
 
+---
+
+今天在一个模块里，collectionView的宽度固定显示三个，cell个数则可能不满3个，此时也需要记录点击事件，所以需要添加一个手势，需要实现`shouldReceiveTouch`方法，判断点击的点是否存在对应的cell；
+
+```swift
+func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+	if goodsListView?.indexPathForItem(at: touch.location(in: goodsListView)) != nil {
+		return false
+	}
+	return true
+}
+```
+
 # lottie
 
 一个按钮左边👍图片，右边数字，点击的时候放在图片上面播放一次lottie动画，开始播放会透出未选中图片的灰色。
