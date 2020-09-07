@@ -215,6 +215,10 @@ void postorderTraverseNoneRecursive(TreeNode<int>* rootTree) {
 }
 {% endhighlight %}
 
+- 不使用stack的迭代实现
+
+[ref](https://www.cnblogs.com/AnnieKim/archive/2013/06/15/morristraversal.html)
+
 ### 广度优先遍历
 
 二叉树的层次遍历实现使用队列，将二叉树的左右子树依次入队列，遍历队列即可，参考代码如下:
