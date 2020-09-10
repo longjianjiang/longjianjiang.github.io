@@ -53,6 +53,10 @@ compress这个是拒绝缩小，也就是放大；
 
 今天修一个bug的时候，发现当Cell高度不够展示约束设置的内容的时候，会不展示Label的内容，开始以为约束出问题了。
 
+---
+
+今天遇到一个在11上collectionView一个cell未显示出来的问题，原因是subView设置约束根据同级的subview的subview去设置约束，导致没有显示出来，11以上是正常的，所以设置约束要保障在同一层级；
+
 ## Masonry
 
 Masonry 封装了`NSLayoutConstraint`的接口，提供了链式调用的语法。
