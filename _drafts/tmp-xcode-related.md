@@ -13,6 +13,12 @@
 
 描述了工程的目录结构，build settings，build phase，所有文件。
 
+# shortcut
+
+```
+shift + control + F/B: select text;
+```
+
 [ref](http://www.monobjc.net/xcode-project-file-format.html)
 
 [ref](http://yulingtianxia.com/blog/2016/09/28/Let-s-Talk-About-project-pbxproj/)
