@@ -68,6 +68,15 @@ speedButton.contentEdgeInsets = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 
 speedButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: 6, bottom: 0, right: -6) // right需要加-6，否则图片的frame就不对了，需要往右加6，这样图片就不会被挤；iOS13以下不加-6图片显示偏移；
 ```
 
+上面的例子(同时设置了图片和文字，并且宽度是自适应的)在设置粗体显示的手机上，显示的内容就会有重叠，导致显示不完全出现...这样的效果。
+其中一个解决方法如下：
+
+```swift
+btn.titleLabel?.lineBreakMode = .byClipping
+```
+
+[ref](https://zhoujinying.github.io/2019/09/12/UIButton-%E5%9C%A8%E7%B2%97%E4%BD%93%E6%96%87%E6%9C%AC%E4%B8%8B%E7%9A%84bug/)
+
 # 阴影
 
 layer设置阴影代码如下：
