@@ -71,7 +71,7 @@ springMoveLeftAnimation.beginTime = CACurrentMediaTime() + 0.3
 
 当动画结束后会保留最后一帧，然后设置`isRemovedOnCompletion`为`false`，所以动画就不会被移除，这样`colorView`就能够保持动画后的模样。但是现在因为不是真正的`colorView`，所以就不能做任何操作了，当`colorView`为输入框时，此时因为是`presentation layer `，也就不能响应用户的输入。而且这样做也会有性能问题，所以不建议设置`isRemovedOnCompletion`为`false`。
 
-此时还有一个有效的方法是，通常我们可以在`colorView`加入动画后，直接更新`colorView`的`x`，这样在动画结束后，`colorView`的位置就保持和动画后一致。
+此时还有一个有效的方法是，通常我们可以在`colorView`加入动画之前，直接更新`colorView`的`x`，这样在动画结束后，`colorView`的位置就保持和动画后一致。
 
 ### 控制动画
 
