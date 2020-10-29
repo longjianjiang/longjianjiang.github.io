@@ -350,3 +350,10 @@ imgView.snp.remakeConstraints {
 ```
 
 开始高度约束是基于imgView的父view的宽度来设置的，每次reloadData就会出现高度拉伸的问题，后来改成基于自己的宽度就正常了。
+
+# UITableView
+
+## tableViewFooter 
+
+设置footer的时候，需要指定frame，指定bounds会出现偏移的情况；
+
