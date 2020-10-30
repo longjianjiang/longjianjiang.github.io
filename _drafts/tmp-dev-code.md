@@ -357,3 +357,6 @@ imgView.snp.remakeConstraints {
 
 设置footer的时候，需要指定frame，指定bounds会出现偏移的情况；
 
+## 滚动到顶部
+
+首先尝试`scrollToRow`，有些情况，使用ScrollView的方法可能未完全移动到顶部；
