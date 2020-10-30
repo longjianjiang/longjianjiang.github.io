@@ -360,3 +360,7 @@ imgView.snp.remakeConstraints {
 ## 滚动到顶部
 
 首先尝试`scrollToRow`，有些情况，使用ScrollView的方法可能未完全移动到顶部；
+
+## scrollsToTop
+
+当ScrollView嵌套会导致点击状态栏回到顶部失效，解决方案只保持一个ScrollView的scrollsToTop为true，其他为false，这样系统就知道滚动哪一个了。
