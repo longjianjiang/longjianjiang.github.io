@@ -17,7 +17,15 @@
 
 ```
 shift + control + F/B: select text;
+control + 6: search method in files;
+command + option + 0: show/hide utilities panel;
+command + 0: show/hide navigator panel;
+command + shift + f: search;
 ```
+
+[ref](https://supereasyapps.com/blog/2014/9/15/14-xcode-time-saving-shortcuts-memorize-and-improve-your-productivity)
+
+# References
 
 [ref](http://www.monobjc.net/xcode-project-file-format.html)
 
