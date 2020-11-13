@@ -155,6 +155,10 @@ vc?.present(shareVC, animated: true, completion: nil)
 modalTransitionStyle = .crossDissolve; // 设置present的渐变效果；
 ```
 
+---
+
+点击发送按钮，present一个发送页面，发送页面按钮点击后需要先`dismiss`当前发送页面，animated设置为false，在completion里面进行present新的页面。
+
 # URL 中文
 
 ```swift
