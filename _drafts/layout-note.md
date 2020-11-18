@@ -85,6 +85,10 @@ stackView有水平布局和垂直布局，alignment是布局方向的垂直方�
 
 解决方案是按条件将textView的滚动禁止，同时用一个view把textView包起来，这样测试就正常了。
 
+---
+
+当stackView里面有两个label，当其中一个隐藏了此时是不展示padding的，需要注意的是，如果判断有问题，其中一个label设置的文字为nil，此时padding是会展示的。
+
 ## UILayoutGuide
 
 所谓UILayoutGuide是一个虚拟的矩形区域，可以和AutoLayout交互，但是不会加入view的层级也就不会拦截手势相关的消息。

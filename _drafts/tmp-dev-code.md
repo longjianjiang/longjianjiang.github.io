@@ -368,3 +368,9 @@ imgView.snp.remakeConstraints {
 ## scrollsToTop
 
 当ScrollView嵌套会导致点击状态栏回到顶部失效，解决方案只保持一个ScrollView的scrollsToTop为true，其他为false，这样系统就知道滚动哪一个了。
+
+# UICollectionView
+
+## contentInset
+
+今天遇到一个问题，collectionView水平方向设置了contentInset，此时默认flowLayout的size代理方法宽度返回了实际的宽度，导致layout内部一直在添加row，表现是界面卡住，内存一直在增长，直到crash。
