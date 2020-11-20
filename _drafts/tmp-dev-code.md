@@ -219,6 +219,10 @@ override func draw(_ rect: CGRect) {
 因为之前高度直接使用的是375对应的高度，而且contentMode为`xxfill`，默认clipToBounds是false，所以顶部就超出了，之前以为的collectionView未生效。  
 设置fill的时候，需要考虑clipToBounds。 
 
+---
+
+今天加载一张网络图，发现没有显示处理，然后在浏览器打开了图片链接看了下，看到底部有一条内容，开始以为是图片加载有问题，后来发现这张图顶部90%是透明，只有底部10%有一段信息，而imageView设置了fill，所以其实显示的是中间透明的部分，显示效果就是默认的背景色。
+
 # UserDefaults
 
 UserDefaults 存储字典时，key如果不是string时，此时就不能使用UserDefaults 存储，此时存储的对象不是`Property List`。
