@@ -378,3 +378,9 @@ imgView.snp.remakeConstraints {
 ## contentInset
 
 今天遇到一个问题，collectionView水平方向设置了contentInset，此时默认flowLayout的size代理方法宽度返回了实际的宽度，导致layout内部一直在添加row，表现是界面卡住，内存一直在增长，直到crash。
+
+# UISearchController
+
+今天遇到一个问题，连续push两个UISearchContainerController，第二个搜索页面的输入框无法编辑。解决方案是在自定义的UISearchContainerController中viewWillAppear设置`definesPresentationContext`为true，viewWillDisappear设置`definesPresentationContext`为false。
+
+[ref](https://www.jianshu.com/p/b065413cbf57)
