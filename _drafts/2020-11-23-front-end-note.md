@@ -61,3 +61,7 @@ console.log('DXYJSBridge初始化完成');
 ```
 
 更多[参考](https://segmentfault.com/a/1190000018266823)
+
+## jsbridge
+
+所谓jsbridge就是注入到一段脚本到webview上，一般是一个对象，这个对象有一个invoke方法用来给js进行调用native的方法。然后webview在收到脚本回调中根据name进行解析去分发处理，处理好了，调用`evaluateJavaScript`将结果回调给js。
