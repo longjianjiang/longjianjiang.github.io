@@ -65,3 +65,41 @@ console.log('DXYJSBridge初始化完成');
 ## jsbridge
 
 所谓jsbridge就是注入到一段脚本到webview上，一般是一个对象，这个对象有一个invoke方法用来给js进行调用native的方法。然后webview在收到脚本回调中根据name进行解析去分发处理，处理好了，调用`evaluateJavaScript`将结果回调给js。
+
+```
+window.webkit.messageHandlers.JSBridge.postMessage(msg)
+
+open func createWebViewConfiguration() -> WKWebViewConfiguration {
+
+	let configuration = WKWebViewConfiguration()
+	configuration.allowsInlineMediaPlayback = true
+
+	let script = WKUserScript(source: DXYWKWebViewController.JSCode, injectionTime: .atDocumentEnd, forMainFrameOnly: false)
+
+	let userContentController = WKUserContentController()
+	userContentController.addUserScript(script)
+
+	let scriptHandler = WeakScriptMessageHandler(realHandler: self)
+	userContentController.add(scriptHandler, name: "JSBridge")
+
+	configuration.userContentController = userContentController
+	return configuration
+}
+``
+
+JSBridge 就是向webview中注入的内容。`webkit.messageHandlers.xx.PostMessage` 是webkit提供的js向native发送消息的api。
+
+postMessage 后，`WKScriptMessageHandler` 的方法会触发：
+
+```swift
+open func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+	guard let message = message.body as? [String: AnyObject] else {
+		return
+	}
+	self.dispatchMessageFromJavaScript(self.webView, message: message)
+}
+```
+
+这个方法在进行handler的分发和调用`evaluateJavaScript` 将结果回调给js。
+
+[ref](https://juejin.im/post/6844904164586160142#heading-4)
