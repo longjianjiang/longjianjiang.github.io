@@ -1,8 +1,6 @@
 
 > 这里记录下阅读源代码期间，遇到的C函数。
 
-# 字符串
-
 # 文件
 
 - open
@@ -204,6 +202,32 @@ void* my_memmove(void* dest, const void* src, size_t n)
     return dest;
 }
 ```
+
+# 时间
+
+- gettimeofday(struct timeval *tv, struct timezone *tz);
+
+获取当前的时间和时区。
+
+```c
+struct timeval {
+   time_t      tv_sec;     /* seconds */
+    suseconds_t tv_usec;    /* microseconds */
+};
+struct timezone {
+   int tz_minuteswest;     /* minutes west of Greenwich */
+    int tz_dsttime;         /* type of DST correction */
+};
+```
+
+时间和时区的结构体。
+
+```c
+#define __timercmp(tvp, uvp, cmp) \
+    (((tvp)->tv_sec == (uvp)->tv_sec) ? ((tvp)->tv_usec cmp(uvp)->tv_usec) : ((tvp)->tv_sec cmp(uvp)->tv_sec))
+```
+
+比较timeval的宏。
 
 # References
 
