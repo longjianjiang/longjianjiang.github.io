@@ -89,6 +89,10 @@ stackView有水平布局和垂直布局，alignment是布局方向的垂直方�
 
 当stackView里面有两个label，当其中一个隐藏了此时是不展示padding的，需要注意的是，如果判断有问题，其中一个label设置的文字为nil，此时padding是会展示的。
 
+---
+
+当stackView内部放多个label，而且label的内容可能超过一行的时候，这个时候需要按次序设置后面的label的水平优先级(setContentCompressionResistancePriority)，否则会出现约束的冲突。
+
 ## UILayoutGuide
 
 所谓UILayoutGuide是一个虚拟的矩形区域，可以和AutoLayout交互，但是不会加入view的层级也就不会拦截手势相关的消息。
