@@ -373,6 +373,28 @@ imgView.snp.remakeConstraints {
 
 当ScrollView嵌套会导致点击状态栏回到顶部失效，解决方案只保持一个ScrollView的scrollsToTop为true，其他为false，这样系统就知道滚动哪一个了。
 
+## estimatedRowHeight
+
+今天在一个设置了自动算高的tableview里面，一共4页数据，滚动到底部，此时往上滚动的生活，会不断的抖动很难滚动到顶部。
+
+当使用了自动的高度，此时tableview会推迟计算contentSize，当滑动的时候才会去计算每个cell的高度，所以从底部往上滑动一直滑不上去的原因是因为contentSize这个时候是不对的。
+
+解决方案是存储每个cell的高度，[代码](https://stackoverflow.com/questions/28244475/reloaddata-of-uitableview-with-dynamic-cell-heights-causes-jumpy-scrolling)如下：
+
+```swift
+var cellHeights = [IndexPath: CGFloat]()
+
+func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+    cellHeights[indexPath] = cell.frame.size.height
+}
+
+func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
+    return cellHeights[indexPath] ?? UITableView.automaticDimension
+}
+```
+
+[ref](https://kangzubin.com/uitableview-estimatedrowheight/)
+
 # UICollectionView
 
 ## contentInset
