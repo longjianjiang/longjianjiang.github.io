@@ -359,6 +359,18 @@ imgView.snp.remakeConstraints {
 
 开始高度约束是基于imgView的父view的宽度来设置的，每次reloadData就会出现高度拉伸的问题，后来改成基于自己的宽度就正常了。
 
+# UIScrollView
+
+设置scrollView只能水平方向上滚动的一种方式，设置delegate，didScroll修改y。
+
+```swift
+func scrollViewDidScroll(_ scrollView: UIScrollView) {
+	if scrollView.contentOffset.y > 0 || scrollView.contentOffset.y < 0 {
+	   scrollView.contentOffset.y = 0
+	}
+}
+```
+
 # UITableView
 
 ## tableViewFooter 
