@@ -277,6 +277,7 @@ swift 的初始化分为两个阶段：
 `init!` 当确保调用`init?`一定可以返回，可以将init方法加!，来去除返回类型是optional；
 
 [ref](https://docs.swift.org/swift-book/LanguageGuide/Initialization.html)
+[ref](https://swifter.tips/init-keywords/)
 
 # References 
 
