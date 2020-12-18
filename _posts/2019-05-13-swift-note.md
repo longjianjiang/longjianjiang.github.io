@@ -94,7 +94,9 @@ guard case .pending(let _handlers) = self.sealant else {
 
 今天笔者看到将字典一个value进行 `as?` 成一个枚举类型，开始卡住as的逻辑是什么，后来想了下其实是设置的时候是enum，因为是Any所以取的时候判断一下类型而已。
 
-# where
+# Protocol
+
+## where
 
 在定义协议的时候，如果需要制定遵守协议必须是某个类，可以使用where进行约束，如下：
 
@@ -116,6 +118,48 @@ for item in list where item.isPlaying {
 	print("do sth")
 }
 {% endhighlight %}
+
+## Self
+
+协议中使用到的类型希望就是实现这个协议自身的话，可以使用`Self`进行代替。
+
+```swift
+protocol Copyable {
+    func copy() -> Self
+}
+```
+
+实现这个协议的类一是使用final修饰，保证不会有子类继承，如下所示：
+
+```swift
+final class Dog: Copyable {
+    var name = ""
+    func copy() -> Dog {
+        let res = type(of: self).init()
+        res.name = name
+        return res
+    }
+}
+```
+
+二是使用`typeof()`,同时指定一个`required`的init方法，来保证子类也可以响应init方法，如下所示：
+
+```swift
+class Person: Copyable {
+    var name = ""
+
+    func copy() -> Self {
+        let res = type(of: self).init(name: name)
+        return res
+    }
+
+    required init(name: String) {
+        self.name = name
+    }
+}
+```
+
+[ref](https://swifter.tips/use-self/)
 
 # fatalError
 
