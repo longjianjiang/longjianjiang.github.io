@@ -359,6 +359,12 @@ imgView.snp.remakeConstraints {
 
 开始高度约束是基于imgView的父view的宽度来设置的，每次reloadData就会出现高度拉伸的问题，后来改成基于自己的宽度就正常了。
 
+---
+
+当设置了estimatedSize后，更新某一组数据的时候，reloadData或者reloadSection都会导致collectionView滚动到顶部。
+
+此时需要调整的地方一是每个itemSize返回实际的高度，二是estimatedSize的高度设置单个cell可能最大的高度。
+
 # UIScrollView
 
 设置scrollView只能水平方向上滚动的一种方式，设置delegate，didScroll修改y。
