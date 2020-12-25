@@ -77,7 +77,7 @@ NSLayoutConstraint *constraint = [myView.topAnchor constraintEqualToAnchor:other
 
 stackView有水平布局和垂直布局，alignment是布局方向的垂直方向上的对齐方式，distribution是布局方向上的布局策略。
 
-当alignment 和 distribution 都设置为fill的时候，假设是水平方向布局，此时水平方向的左右约束就只能设置一个，否则和intrinsicContentSize的width约束就冲突了。
+当alignment 和 distribution 都设置为fill的时候，假设是水平方向布局，此时水平方向的左右约束其中一个要设置成模糊，否则和intrinsicContentSize的width约束就冲突了。
 
 ---
 
