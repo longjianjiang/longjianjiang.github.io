@@ -37,8 +37,12 @@ sudo easy_install pip; // python2.7 系统自带
 
 这一步需要注意：
 4.1> 首先需要修改dump.py 里的用户名和密码，密码就是越狱手机终端的密码；
+
 4.2> 期间可能会报错，xx module not found，`pip install module`即可；
+
 4.3> dump期间，需要打开app，这样才能进行内存dump；
+
+4.4> dump的时候，需要在dump.py中指定用户名和密码，同时用户需要是root，否则可能会出现SCPException，导致砸壳不成功；
 
 # class-dump
 
