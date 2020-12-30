@@ -57,7 +57,7 @@ class-dump这个工具使用Runtime特性，将mach-O文件中的@interface和@p
 
 `otool -L /path/xx.app/xx` 查看二进制文件使用的所有动态库；
 
-结合Reveal查看界面结构，View的名称，定位到具体的控制器。
+结合[Lookin](https://lookin.work/)查看界面结构，View的名称，定位到具体的控制器。
 
 # CaptainHook
 
