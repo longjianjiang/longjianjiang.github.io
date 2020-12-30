@@ -36,6 +36,7 @@ sudo easy_install pip; // python2.7 系统自带
 4. 下载`frida-ios-dump`，在该目录下执行`python3 dump.py app名称`。
 
 这一步需要注意：
+
 4.1> 首先需要修改dump.py 里的用户名和密码，密码就是越狱手机终端的密码；
 
 4.2> 期间可能会报错，xx module not found，`pip install module`即可；
