@@ -66,6 +66,9 @@ ps -e | grep appname
 debugserver localhost:1234 -a pid
 lldb: process connect connect:1234 // ip is 1234
 ```
+# lldb
+
+反反调试工具，[https://github.com/4ch12dy/xia0LLDB](https://github.com/4ch12dy/xia0LLDB)。
 
 # CaptainHook
 
