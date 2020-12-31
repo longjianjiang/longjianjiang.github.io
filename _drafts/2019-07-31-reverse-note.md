@@ -74,6 +74,8 @@ lldb: process connect connect:1234 // ip is 1234
 
 这一步使用`CaptainHook`提供的API，以及上一步头文件和UI的搜索，尝试Hook具体某个类的某个方法。
 
+[Logos](https://iphonedevwiki.net/index.php/Logos#.25orig)
+
 # 原理
 
 ## 砸壳
