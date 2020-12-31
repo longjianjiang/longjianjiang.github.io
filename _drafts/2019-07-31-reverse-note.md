@@ -59,6 +59,14 @@ class-dump这个工具使用Runtime特性，将mach-O文件中的@interface和@p
 
 结合[Lookin](https://lookin.work/)查看界面结构，View的名称，定位到具体的控制器。
 
+# debugserver 
+
+```
+ps -e | grep appname
+debugserver localhost:1234 -a pid
+lldb: process connect connect:1234 // ip is 1234
+```
+
 # CaptainHook
 
 这一步使用`CaptainHook`提供的API，以及上一步头文件和UI的搜索，尝试Hook具体某个类的某个方法。
