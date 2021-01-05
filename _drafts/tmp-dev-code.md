@@ -1,7 +1,9 @@
 
 # 日常开发速查
 
-## rightBarButtonItem 隐藏
+## navigationItem
+
+### rightBarButtonItem 隐藏
 
 ```
 if (condition) {
@@ -14,6 +16,16 @@ if (condition) {
 ```
 
 [ref](https://stackoverflow.com/questions/3042818/hide-the-rightbarbuttonitem-of-a-navigation-controller)
+
+### titleView
+
+有的时候需要展示自定义的titleView，想要撑满，需要修改一下自定义view的intrinsicContentSize，如下所示:
+
+```swift
+override var intrinsicContentSize: CGSize {
+	return UIView.layoutFittingExpandedSize
+}
+```
 
 ## cell中某个view需要做动画
 
