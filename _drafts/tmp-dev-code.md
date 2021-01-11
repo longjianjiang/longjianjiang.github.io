@@ -276,6 +276,22 @@ func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive t
 	return true
 }
 ```
+
+---
+
+某个view中同时添加pan和tap手势，需要实现shouldRequireFailureOf方法，否则两个会产生冲突：
+
+```swift
+func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
+					   shouldRequireFailureOf otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+	if gestureRecognizer.isKind(of: UITapGestureRecognizer.self)
+		&& otherGestureRecognizer.isKind(of: UIPanGestureRecognizer.self) {
+		return true
+	}
+	return false
+}
+```
+
 ## 判断手势的移动方向
 
 使用手势获取速度`velocity(in view: UIView?)`，判断两个方向正负，例子如下：
