@@ -18,4 +18,8 @@ canBeFreedNow() => false -> [DEINITED] -> [FREED] -> [DEAD]
 
 canBeFreedNow() => true -> [DEAD]
 
-[ref](https://zhongwuzw.github.io/2017/06/17/Swift%E4%B9%8BWeak%E5%BC%95%E7%94%A8/)
+# References
+
+[https://www.mikeash.com/pyblog/friday-qa-2015-12-11-swift-weak-references.html](https://www.mikeash.com/pyblog/friday-qa-2015-12-11-swift-weak-references.html)
+[Object lifecycle state machine](https://github.com/apple/swift/blob/main/stdlib/public/SwiftShims/RefCount.h)
+[https://www.mikeash.com/pyblog/friday-qa-2017-09-22-swift-4-weak-references.html](https://www.mikeash.com/pyblog/friday-qa-2017-09-22-swift-4-weak-references.html)
