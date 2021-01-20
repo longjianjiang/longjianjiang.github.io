@@ -283,6 +283,14 @@ swift 的初始化分为两个阶段：
 
 所谓lazySequence就是延迟计算操作（filter，map）到真正需要使用的时机，而不是立马去执行操作，类似懒加载的用途；
 
+```swift
+let arr = [1, 2, 4]
+let lazyArr = arr.lazy // LazySequence
+let lazyMapArr = lazyArr.map { $0 * 2 } // LazyMapSequence
+```
+
+如上代码，`.lazy`会构建一个LazySequence，此时map/filter等操作兼容了LazySequence，返回的结果是LazyMapSequence，这个结构体保存了原数组和transform block，来达到用到才去执行变换操作。
+
 # References 
 
 [https://docs.swift.org/swift-book/LanguageGuide/TheBasics.html](https://docs.swift.org/swift-book/LanguageGuide/TheBasics.html)
