@@ -281,7 +281,7 @@ swift 的初始化分为两个阶段：
 
 # LazySequence
 
-所谓lazySequence就是延迟计算操作（filter，map）到真正需要使用的时机，而不是立马去执行操作，而是存储原序列和对应的操作，类似懒加载的用途；
+所谓lazySequence就是延迟计算操作（filter，map）到真正需要使用的时机，而不是立马去执行操作，类似懒加载的用途；
 
 # References 
 
