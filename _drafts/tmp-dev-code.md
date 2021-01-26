@@ -452,3 +452,11 @@ func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: Inde
 今天遇到一个问题，连续push两个UISearchContainerController，第二个搜索页面的输入框无法编辑。解决方案是在自定义的UISearchContainerController中viewWillAppear设置`definesPresentationContext`为true，viewWillDisappear设置`definesPresentationContext`为false。
 
 [ref](https://www.jianshu.com/p/b065413cbf57)
+
+# UINavigationBar
+
+做一个个人主页的页面，有一张背景图会置顶展示，此时导航栏透明，滚动导航栏展示出来。
+
+这个时候，放置背景图的header中imgView超出`safeAreaGuide`顶部的高度(大于88)。需要设置tableview的`clipToBounds`为false。
+
+这样tablevie可以保持原有位置，导航栏也一直存在，需要做的就是滚动的时候监听，改变导航栏的是否透明和style即可，比较方便。
