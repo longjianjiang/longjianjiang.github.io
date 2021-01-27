@@ -460,3 +460,7 @@ func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: Inde
 这个时候，放置背景图的header中imgView超出`safeAreaGuide`顶部的高度(大于88)。需要设置tableview的`clipToBounds`为false。
 
 这样tablevie可以保持原有位置，导航栏也一直存在，需要做的就是滚动的时候监听，改变导航栏的是否透明和style即可，比较方便。
+
+# UILabel
+
+当UILabel设置了富文本，用到了`paragraphStyle`，这个时候记得设置段落的`lineBreakMode`，默认并不是`byTruncatingTail`，所以会出现文本超过不显示`....`。
