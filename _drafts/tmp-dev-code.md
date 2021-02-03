@@ -1,6 +1,10 @@
 
 # 日常开发速查
 
+```
+出现问题，下断点调试，view debug查看层级，而不是反复的重试或者查看代码，光看是看不出问题的。
+```
+
 ## navigationItem
 
 ### rightBarButtonItem 隐藏
