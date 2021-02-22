@@ -468,3 +468,18 @@ func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: Inde
 # UILabel
 
 当UILabel设置了富文本，用到了`paragraphStyle`，这个时候记得设置段落的`lineBreakMode`，默认并不是`byTruncatingTail`，所以会出现文本超过不显示`....`。
+
+# WebView
+
+加载富文本，可能会出现大小不对的情况，需要将返回的富文本加上html head进行包一下。
+
+```swift
+func getHTMLString(_ bodyHTML: String) -> String {
+	let head = "<head>"
+				+ "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\"> "
+				+ "<style>img{max-width: 100%; width:100%; height:auto;}*{margin:0px;}</style>"
+				+ "</head>"
+
+	return "<html>" + head + "<body>" + bodyHTML + "</body></html>"
+}
+```
