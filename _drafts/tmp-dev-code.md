@@ -483,3 +483,10 @@ func getHTMLString(_ bodyHTML: String) -> String {
 	return "<html>" + head + "<body>" + bodyHTML + "</body></html>"
 }
 ```
+
+# String
+
+```swift
+let spaceAndNewLineCount = text?.reduce(0) { $1.isWhitespace || $1.isNewline ? $0 + 1 : $0 } ?? 0
+let trimStr = text?.trimmingCharacters(in: .whitespacesAndNewlines)
+```
