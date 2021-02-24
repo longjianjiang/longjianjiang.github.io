@@ -487,6 +487,10 @@ func getHTMLString(_ bodyHTML: String) -> String {
 # String
 
 ```swift
-let spaceAndNewLineCount = text?.reduce(0) { $1.isWhitespace || $1.isNewline ? $0 + 1 : $0 } ?? 0
+let spaceAndNewLineCount = str.reduce(0) { $1.isWhitespace || $1.isNewline ? $0 + 1 : $0 } ?? 0
+let trimmed = str.filter { !" \n\t\r".contains($0) }
+// 这个系统的方法，只会过滤两边的空格比如 " xxx xxx "会变成"xxx xxx"，中间的空格不会过滤。
+// 当是" xxx xxxx  d",当这样最后空格有新的字符，此时过滤的结果还是原字符串。
+// 和想象中名字的效果差了不少。
 let trimStr = text?.trimmingCharacters(in: .whitespacesAndNewlines)
 ```
