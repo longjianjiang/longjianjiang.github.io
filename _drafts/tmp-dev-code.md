@@ -494,3 +494,13 @@ let trimmed = str.filter { !" \n\t\r".contains($0) }
 // 和想象中名字的效果差了不少。
 let trimStr = text?.trimmingCharacters(in: .whitespacesAndNewlines)
 ```
+
+# Number
+
+```swift
+向上取整：float ceilf(float); double ceil(double);
+
+向下取整：float floorf(float); double floor(double);
+
+四舍五入：float roundf(float); double round(double);
+```
