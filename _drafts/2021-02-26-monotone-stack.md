@@ -1,3 +1,12 @@
+---
+layout: post
+title: "单调栈"
+date: 2021-02-26
+excerpt: "所谓单调栈，首先是一个栈，其次就是栈内元素是升序或者降序"
+tag:
+- Algorithm
+comments: true
+---
 
 # 单调栈
 
