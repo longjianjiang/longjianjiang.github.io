@@ -10,6 +10,19 @@ comments: true
 
 > 本文是笔者学习crash日志符号化过程的笔记。
 
+# crash的类型
+
+## Mach 异常
+
+## OC 异常
+
+## TODO
+
+[ref](http://www.zoomfeng.com/blog/crash-anr.html)
+[os intro](https://www.jianshu.com/p/f0f50d471312)
+[mach exp intro](https://developer.aliyun.com/article/499180)
+[apple forum](https://developer.apple.com/forums/thread/65953)
+
 # 文件格式
 
 ## DSYM 
