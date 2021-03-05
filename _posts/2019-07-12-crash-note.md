@@ -7,22 +7,40 @@ tag:
 - iOS
 comments: true
 ---
+# Crash的类型
+## Mach 异常 / BSD 信号
 
-> 本文是笔者学习crash日志符号化过程的笔记。
+当我们的程序中代码写的有问题，比如说访问了一块已经释放的内存地址，会触发`EXC_BAD_ACCESS`异常。
 
-# crash的类型
+当出现了某个`EXC_XX`异常时，Mach的异常处理程序`exception_triage()`，调用`exception_deliver`将异常通过消息机制进行分发到一个`exception port`。 分发首先会尝试往当前线程上，然后会往进程上，最后会往Host进行分发。如果没有一个port返回值是成功，也就是没有进行捕获，那么程序就会被终止。
 
-## Mach 异常
+线程，进程，Host都有一个异常端口数组，通过调用`xxx_set_exception_ports()`（xxx为thread、task或host）可以设置这些异常端口，默认值是NULL。
+
+BSD层会在第一个进程启动的时候，调用`host_set_exception_ports()`，注册一个`exception port`，这样所有Mach层的异常都会被转发到BSD层，然后这些异常再被转成各种信号。比如`EXC_BAD_ACCESS`可能会被转成`SIGSEGV`。通过方法`threadsignal()`将信号投递到出错线程。可以通过方法signal(x, SignalHandler)来捕获single。
+
+硬件产生的信号(通过CPU Trap)被Mach层捕获，然后才转换为对应的Unix信号；苹果为了统一机制，于是操作系统和用户产生的信号(通过调用kill和pthread_kill)也首先沉下来被转换为Mach异常，再转换为Unix信号。
+
+所以捕获异常可以在Mach层注册port，也可以在BSD层监听signal，但是从上面的流程可以知道，为了获取所有的异常，需要在Mach层进行捕获。
+
+```
+// 1. 创建port
+mach_port_allocate
+// 2. 设置port发送权限，这样可以往这个port发送消息
+mach_port_insert_right
+// 3. 将创建的port设置为当前进程的exception port
+task_set_exception_ports
+// 4. 最后循环等待异常消息
+```
 
 ## OC 异常
 
-## TODO
+`NSException` 是应用层面的抛出异常，提供了更多的信息，比如reason，name，callStackSymbols信息，可以方便快速的定位问题。
 
-[ref](http://www.zoomfeng.com/blog/crash-anr.html)
-[os intro](https://www.jianshu.com/p/f0f50d471312)
-[mach exp intro](https://developer.aliyun.com/article/499180)
-[apple forum](https://developer.apple.com/forums/thread/65953)
+`NSException` 可以通过注册 `NSUncaughtExceptionHandler` 捕获异常信息。
 
+未被try catch的NSException会发出kill或pthread_kill信号-> Mach异常-> Unix信号（SIGABRT）。
+
+无论设置了NSSetUncaughtExceptionHandler与否，最终都会被转成Unix信号，只要该NSException没有被try catch。区别在于设置了，则在其ExceptionHandler中无法获得最终发送的Unix信号类型。
 # 文件格式
 
 ## DSYM 
