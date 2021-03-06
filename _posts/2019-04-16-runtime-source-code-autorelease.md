@@ -288,6 +288,15 @@ id objc_retainAutoreleasedReturnValue(id obj) {
 
 3.对应的`acceptOptimizedReturn`根据`RETURN_DISPOSITION_KEY`去TLS去取，取完重置位false，将结果返回，如果是true，那么`objc_retainAutoreleasedReturnValue`也不需要去调用retain了。
 
+## 问题
+
+Q：为什么需要autorelease？
+
+A：笔者认为autorelease存在的目的是为了每次runloop结束可以进行一次对象回收。
+
+main函数其实是包了一层autorelease pool的，所以这样每次runloop的push不用新建page，只需要插入nil，然后runloop结束的时候pop，对这层pool的对象进行回收。
+
+同时手动写autorelease pool可以在超过作用域立马回收，防止在循环中产生大量对象，这样可以分次进行释放，减小内存的使用压力。
 ## 总结
 
 本文介绍了autorelease的实现，其实依然是一个数据结构，理解了这个数据结构就能知道其实现原理。
