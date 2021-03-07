@@ -291,6 +291,20 @@ let lazyMapArr = lazyArr.map { $0 * 2 } // LazyMapSequence
 
 如上代码，`.lazy`会构建一个LazySequence，此时map/filter等操作兼容了LazySequence，返回的结果是LazyMapSequence，这个结构体保存了原数组和transform block，来达到用到才去执行变换操作。
 
+# 断言
+
+```swift
+// precondition 可以保证必须满足条件，才会继续往下执行；否则直接终止app（debug & release）
+precondition(word.count == 4)
+// preconditionFailure 直接终止app（debug & release）
+preconditionFailure()
+
+// 断言，debug下执行
+assert(condiiton, msg)
+// 断言失败，debug下执行
+assertionFailure(msg)
+```
+
 # References 
 
 [https://docs.swift.org/swift-book/LanguageGuide/TheBasics.html](https://docs.swift.org/swift-book/LanguageGuide/TheBasics.html)
