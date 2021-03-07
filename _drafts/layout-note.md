@@ -71,6 +71,10 @@ iOS9 Apple提供了一种快捷的方式进行创建约束，如下所示:
 NSLayoutConstraint *constraint = [myView.topAnchor constraintEqualToAnchor:otherView.topAnchor constant:10];
 {% endhighlight %}
 
+## 动画
+
+当需要更新约束做动画时，更新完需要后，需要调用父类的`layoutIfNeeded`来使布局立即更新，否则动画没有效果。
+
 ## UIStackView
 
 使用stackView可以少写很多约束，还是比较方便的。stackView可以理解为一个布局的容器，他的大小是由subviews决定的，而且是拥有intrinsicContentSize的。
@@ -92,6 +96,31 @@ stackView有水平布局和垂直布局，alignment是布局方向的垂直方�
 ---
 
 当stackView内部放多个label，而且label的内容可能超过一行的时候，这个时候需要按次序设置后面的label的水平优先级(setContentCompressionResistancePriority)，否则会出现约束的冲突。
+
+## 模糊约束
+
++------------------------------------------------+
+|  +----------+ +--------------+                 | 
+|  |          | |              |                 | 
+|  +----------+ +--------------+                 | 
++------------------------------------------------+
+
+如上有两个label，左边是折扣价label，右边是原价label，要保证左边的label一定可以显示的下，右边的label可以被折叠。
+
+首先我们需要设置右边label contentCompressionResistancePriority 为low。但是我们设置了以后会发现左边的label显示的区域比实际文字要长，这个时候需要额外设置右边label距离右边的一个模糊约束，这样左边label的宽度就是内容的宽度了。
+
+```swift
+groupBuyPriceLabel.snp.makeConstraints {
+    $0.top.equalTo(titleLabel.snp.bottom).offset(6)
+    $0.leading.equalTo(titleLabel)
+}
+originalPriceLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+originalPriceLabel.snp.makeConstraints {
+    $0.top.equalTo(groupBuyPriceLabel).offset(5)
+    $0.leading.equalTo(groupBuyPriceLabel.snp.trailing).offset(5)
+    $0.trailing.lessThanOrEqualToSuperview().inset(-15)
+}
+```
 
 ## UILayoutGuide
 
