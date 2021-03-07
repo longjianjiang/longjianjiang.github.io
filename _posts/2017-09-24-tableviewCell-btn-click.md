@@ -70,6 +70,8 @@ override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
 
 当用户点击一个绑定target／action的按钮后，一个点击事件会被发送给`UIApplication`,然后`UIApplication`会通知到按钮去执行这个action。
 
+(更详细的流程可以参考[这里](https://blog.ibireme.com/2015/05/18/runloop/))。
+
 >  当addTarget，我们传了nil，也就是没有target，`UIApplication`就会通知first responder去执行action;
 
 如果`first responder`没有实现这个action，那么此时就会按照事件那样根据`Responder Chain`进行寻找下一个响应者。
