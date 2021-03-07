@@ -112,3 +112,5 @@ UIControl的addTargetForSelector方法，触发的事件。touches方法只会�
 [https://www.jianshu.com/p/d8512dff2b3e](https://www.jianshu.com/p/d8512dff2b3e)
 
 [https://medium.com/ios-os-x-development/understanding-cocoa-and-cocoa-touch-responder-chain-12fe558ebe97](https://medium.com/ios-os-x-development/understanding-cocoa-and-cocoa-touch-responder-chain-12fe558ebe97)
+
+[http://smnh.me/hit-testing-in-ios/](http://smnh.me/hit-testing-in-ios/)
