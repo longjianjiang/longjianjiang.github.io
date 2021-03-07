@@ -103,3 +103,9 @@ open func userContentController(_ userContentController: WKUserContentController
 这个方法在进行handler的分发和调用`evaluateJavaScript` 将结果回调给js。
 
 [ref](https://juejin.im/post/6844904164586160142#heading-4)
+
+## hybrid
+
+TODO
+
+[ref](https://www.jianshu.com/p/efb4f93b10de)

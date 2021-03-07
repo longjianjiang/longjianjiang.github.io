@@ -43,3 +43,9 @@
 # 7
 
 [ref](https://shawnfoo.github.io/2018/11/19/%E4%B8%89%E5%B9%B4iOS%E9%9D%A2%E8%AF%95%E4%B9%8B%E5%A4%A7%E5%8E%82%E5%AF%BB%E6%A2%A6%E8%AE%B0/)
+
+# 8
+
+[ref](https://gsl201600.github.io/2019/12/18/iOS%E9%9D%A2%E8%AF%95%E9%A2%982019%E4%B8%8A/)
+
+[ref](https://github.com/LGCooci/LGiOSQuestions)

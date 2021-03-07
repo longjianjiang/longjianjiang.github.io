@@ -305,6 +305,14 @@ assert(condiiton, msg)
 assertionFailure(msg)
 ```
 
+# Existential
+
+TODO
+
+[ref](https://www.dazhuanlan.com/2019/10/16/5da5ff862ce5b/?__cf_chl_jschl_tk__=ae57189f0c7064d19f825a4a3a09e58fc4db9997-1599528725-0-ASF9fqhEjTEHOVigC1B2vll6fe0JBMbOM17I38GqbXuhoJLm5k-xTZnzbRVk8Ppam0BucNSX4-kCxpPlI5-RGqm0L7cYEW3jeT2PLPIUScHyMwIvb_qFII5KrBBAV_HsY57EK-RZIILgss2oYq7qhudNqna7FpWT4W7rGlDx7wY1eB0gQkwOU7MIy14SRlamHcPh4p1I4e8pDNPzDUfeJLqKpuFVccNUI5-QStH3RKBEu3JxrEMxnChCV40iB3zSlRc6W1cof89FFy0HpvZlsZ8xnGBBLilT1ufrWkJVyVDB7NINtW_dPaQcMsBURjyz3g)
+
+[ref](https://tech.meituan.com/2018/11/01/swift-compile-performance-optimization.html)
+
 # References 
 
 [https://docs.swift.org/swift-book/LanguageGuide/TheBasics.html](https://docs.swift.org/swift-book/LanguageGuide/TheBasics.html)

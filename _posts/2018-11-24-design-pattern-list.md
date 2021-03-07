@@ -165,6 +165,7 @@ OC里面的集合遍历提供的方法也是一种迭代器模式，其中一种
 所谓访问者模式，在不改变原类的结构下，添加一个访问者的接口，访问者根据原类对象去做一个新的操作，来达到扩展原对象的功能。
 
 [ref](https://medium.com/@lazarevzubov/visitor-design-pattern-in-ios-and-swift-universe-e7a953341a6f)
+[ref](https://www.jianshu.com/p/cd17bae4e949)
 
 ### 装饰模式
 
