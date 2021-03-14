@@ -63,6 +63,10 @@ Z, bit[30] : zero condition flag. 最后一条flag-setting的指令结果为0，
 
 [ref](https://developer.arm.com/docs/ddi0595/b/aarch32-system-registers/cpsr)
 
+## rip
+
+rip 指令寄存器，下一个指令会访问到的内存地址。
+
 # Instruction
 
 ## tst
