@@ -132,6 +132,10 @@ originalPriceLabel.snp.makeConstraints {
 
 我们也可以自定义一个UILayoutGuide，此时作用就相等于一个容器，子view相对于这个layoutGuide来设置约束。
 
+## intrinsicContentSize 
+
+当自定义view重写了intrinsicContentSize，并且可能intrinsicContentSize可能会根据内容进行改变，这个时候改变之后需要调用invalidateIntrinsicContentSize来使新的生效。
+
 # flexbox
 
 flexbox是CSS中使用布局算法。
