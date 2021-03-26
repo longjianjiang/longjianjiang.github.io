@@ -134,7 +134,7 @@ originalPriceLabel.snp.makeConstraints {
 
 ## intrinsicContentSize 
 
-当自定义view重写了intrinsicContentSize，并且可能intrinsicContentSize可能会根据内容进行改变，这个时候改变之后需要调用invalidateIntrinsicContentSize来使新的生效。
+当自定义view重写了intrinsicContentSize，并且可能intrinsicContentSize可能会根据内容进行改变，这个时候改变之后需要调用invalidateIntrinsicContentSize来进行一次更新。
 
 # flexbox
 
