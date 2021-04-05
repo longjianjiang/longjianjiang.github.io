@@ -292,7 +292,9 @@ id objc_retainAutoreleasedReturnValue(id obj) {
 
 Q：为什么需要autorelease？
 
-A：笔者认为autorelease存在的目的是为了每次runloop结束可以进行一次对象回收。
+A：需要这样一个延时的机制，普通函数的返回值默认都是autorelease的，这样可以保证返回值在超出函数作用域不被释放，从而可以给调用者使用。
+
+每次runloop结束可以进行一次对象回收。
 
 main函数其实是包了一层autorelease pool的，所以这样每次runloop的push不用新建page，只需要插入nil，然后runloop结束的时候pop，对这层pool的对象进行回收。
 
