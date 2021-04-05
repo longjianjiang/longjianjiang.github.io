@@ -305,6 +305,24 @@ assert(condiiton, msg)
 assertionFailure(msg)
 ```
 
+# guard
+
+guard 算是和if类似的一种选择分支语句。我个人使用guard有两种情况，一种是需要进行对可选类型进行解包，如果失败直接return。
+
+第二种是如果有些条件是符合guard的语义，使用guard进行判断，不符合提前返回。所以这种情况下，不是所有语义都适合guard，有些其实更适合if。
+
+1> 语义：需要保证age大于16，否则不合法。
+
+```swift
+guard age > 16 else { return }
+```
+
+2> 语义：age小于17，不合法。
+
+```swift
+if age < 17 { return }
+```
+
 # Existential
 
 TODO
