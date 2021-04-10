@@ -120,7 +120,7 @@ aa name nancy, bb name nancy.
 
 不可拷贝应该是堆上的分配的对象，只要一份，不能进行拷贝。可以进行的操作只能改变指向这块内存的指针。
 
-不可变是struct对象本身是不可变的，可变的是variable，也就是变量，当进行赋值的时候，其实并不是改了struct，而是生成了一个新的struct赋值给了variable。
+不可变是struct对象本身是不可变的，可变的是variable，也就是变量，当进行赋值的时候，其实并不是改了struct，而是生成了一个新的struct赋值给了variable。(如何验证？)
 ```
 
 当这个对象有状态的变化时，此时只能使用引用语义，对应的也就只能选择class。其他情况则可以使用struct。拿HTTP请求来说，Request因为有状态，初始化，发送中，发送成功等，所以必须用class；对应的Response，只是一个请求的返回内容而已，所以可以使用struct。
