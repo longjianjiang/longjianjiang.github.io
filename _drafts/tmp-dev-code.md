@@ -409,6 +409,31 @@ func scrollViewDidScroll(_ scrollView: UIScrollView) {
 }
 ```
 
+当需要监听scrollView移动方向和停止滚动时，快停止滚动时会触发停止减速的回调，但是之后还有继续触发一次didScrollD的回调，所以此时需要在didScroll的回调判断滚动的距离，将过小的值过滤，来达到触发滚动停止的执行。
+
+```swift
+func subscribeScroll() {
+	var oldY: CGFloat = 0
+	scholarshipScrollView.rx.contentOffset
+		.throttle(RxTimeInterval.milliseconds(100), scheduler: MainScheduler.instance)
+		.distinctUntilChanged()
+		.subscribe(onNext: { [weak self] point in
+			let newY = point.y
+
+			let diff = abs(newY-oldY)
+			var isHide = newY > oldY && diff > 2
+			if newY <= 0 { isHide = false }
+
+			self?.flipView.updateLeftViewDisplay(hide: isHide)
+			oldY = newY
+	}).disposed(by: rx.disposeBag)
+
+	scholarshipScrollView.rx.didEndDecelerating.skip(1).subscribe(onNext: { [weak self] _ in
+		self?.flipView.updateLeftViewDisplay(hide: false)
+	}).disposed(by: rx.disposeBag)
+}
+```
+
 # UITableView
 
 ## tableViewFooter 
