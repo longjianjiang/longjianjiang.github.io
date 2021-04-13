@@ -97,6 +97,10 @@ stackView有水平布局和垂直布局，alignment是布局方向的垂直方�
 
 当stackView内部放多个label，而且label的内容可能超过一行的时候，这个时候需要按次序设置后面的label的水平优先级(setContentCompressionResistancePriority)，否则会出现约束的冲突。
 
+---
+
+stackView中放uiview，uiview中放置stackView，这个时候uiview是展示不出来的。
+
 ## 模糊约束
 
 +------------------------------------------------+
