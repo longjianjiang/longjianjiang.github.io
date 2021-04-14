@@ -529,3 +529,7 @@ let trimStr = text?.trimmingCharacters(in: .whitespacesAndNewlines)
 
 四舍五入：float roundf(float); double round(double);
 ```
+
+# Xib
+
+发现在xib中创建一个custom的button，button只有一张图片，展示效果并不居中，换成代码的方式来创建就正常了。
