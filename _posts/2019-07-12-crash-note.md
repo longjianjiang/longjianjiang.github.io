@@ -16,7 +16,7 @@ comments: true
 
 线程，进程，Host都有一个异常端口数组，通过调用`xxx_set_exception_ports()`（xxx为thread、task或host）可以设置这些异常端口，默认值是NULL。
 
-BSD层会在第一个进程启动的时候，调用`host_set_exception_ports()`，注册一个`exception port`，这样所有Mach层的异常都会被转发到BSD层，然后这些异常再被转成各种信号。比如`EXC_BAD_ACCESS`可能会被转成`SIGSEGV`。通过方法`threadsignal()`将信号投递到出错线程。可以通过方法signal(x, SignalHandler)来捕获single。
+BSD层会在第一个进程启动的时候，调用`host_set_exception_ports()`，注册一个`exception port`，这样所有Mach层的异常都会被转发到BSD层，然后这些异常再被转成各种信号。比如`EXC_BAD_ACCESS`可能会被转成`SIGSEGV`。通过方法`threadsignal()`将信号投递到出错线程。可以通过方法signal(x, SignalHandler)来捕获signal。
 
 硬件产生的信号(通过CPU Trap)被Mach层捕获，然后才转换为对应的Unix信号；苹果为了统一机制，于是操作系统和用户产生的信号(通过调用kill和pthread_kill)也首先沉下来被转换为Mach异常，再转换为Unix信号。
 
