@@ -102,10 +102,10 @@ MAKVONotificationCenter的实现依然是内部创建了一个私有类作为监
 
 ### NSKeyValueObservingOptionPrior
 
-这是一个option，当`addObserver:forKeyPath:options:context:`时候可以传入，这个option的作用在于，当被观察者的property改变之前会调用一次通知，此时change字典中有`key:NSKeyValueChangeNotificationIsPriorKey, value:@YES`。所以这个时候观察者会收到两次通知。
+正常情况下，是在被观察属性的值改变后通过didChangeValueForKey:方法触发 KVO 消息。若在注册观察者时添加NSKeyValueObservingOptionPrior选项，则在属性值改变前，即在willChangeValueForKey:方法中也会触发一次 KVO 消息。此时，被观察属性值的改变会触发两次 KVO 消息，可以通过change中的NSKeyValueChangeNotificationIsPriorKey进行区分。
+### context
 
-当观察者自己的一个被观察的属性需要执行 `willChangeValueForKey`，而且观察者的属性依赖被观察者的属性，所以需要增加这个option，否则等到收到第二个通知再执行`willChangeValueForKey`就太迟了。
-
+kvo的api中有一个context参数，使用静态变量的地址作为这个参数可以方便高效（相比keypath的字符串比较）来区分不同的监听者。
 ### 手动通知
 
 有的时候想手动控制发送通知给观察者，需要重载NSObject的`automaticallyNotifiesObserversForKey：`方法，将需要手动控制的key返回NO。

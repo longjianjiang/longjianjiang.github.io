@@ -476,6 +476,36 @@ func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: Inde
 
 今天遇到一个问题，collectionView水平方向设置了contentInset，此时默认flowLayout的size代理方法宽度返回了实际的宽度，导致layout内部一直在添加row，表现是界面卡住，内存一直在增长，直到crash。
 
+---
+
+最近首页的一个需要是要将collectionView下拉更新的位置放在第一个section下面。
+
+所以需要设置collectionView的contentInset，同时再section的横滑的view放到控制器的view上，这样下拉的时候，seciton可以固定。
+
+此时需要处理的是，监听collectionView的滚动，然后改变section的位置，代码如下：
+
+```swift
+func updateWikiListView(_ offset: CGFloat) {
+	if offset < -pagingViewTopInset {
+		frame.origin.y = view.safeAreaInsets.top
+		return
+	}
+
+	var scrollY: CGFloat = 0
+	if offset < 0 {
+		scrollY = offset + pagingViewTopInset
+	} else if offset == 0 {
+		scrollY = pagingViewTopInset
+	} else {
+		scrollY = pagingViewTopInset + offset
+	}
+	if scrollY < 0 { scrollY = 0 }
+	
+	frame = CGRect(x: 0, y: view.safeAreaInsets.top - scrollY,
+								width: view.width, height: homeWikiListHeight)
+}
+```
+
 # UISearchController
 
 今天遇到一个问题，连续push两个UISearchContainerController，第二个搜索页面的输入框无法编辑。解决方案是在自定义的UISearchContainerController中viewWillAppear设置`definesPresentationContext`为true，viewWillDisappear设置`definesPresentationContext`为false。
@@ -533,3 +563,41 @@ let trimStr = text?.trimmingCharacters(in: .whitespacesAndNewlines)
 # Xib
 
 发现在xib中创建一个custom的button，button只有一张图片，展示效果并不居中，换成代码的方式来创建就正常了。
+
+# UITabbar
+
+当需要点击tabbaritem的时候，做动画，可以实现tabbarVC的代理，在selected方法里面做取tabbar的subview，然后找到imgView，给imgView加动画。
+
+```swift
+extension UITabBarController {
+    func animationItem() {
+        var itemViews = tabBar.subviews.filter { view -> Bool in
+            return "\(view.classForCoder)" == "UITabBarButton"
+        }
+		// 需要排序，顺序可能是不对的，不然根据selectedIndex取的item不对。
+        itemViews.sort(by: { $0.frame.minX < $1.frame.minX })
+
+        guard itemViews.count > selectedIndex else {
+            return
+        }
+
+        // 当有的时候某个tabitem显示返回顶部之类的文字，切换时需要设置为默认的标题；
+		if selectedIndex != 0, let label = itemViews.first?.subviews.last as? UILabel {
+			label.text = "首页"
+			label.textAlignment = .center
+		}
+
+        let itemView = itemViews[selectedIndex]
+        guard let itemImageView = itemView.subviews.first as? UIImageView else {
+            return
+        }
+
+        let impliesAnimation = CAKeyframeAnimation(keyPath: "transform.scale")
+        impliesAnimation.values = [1.0, 0.8, 1.0]
+        impliesAnimation.duration = 0.2
+        impliesAnimation.calculationMode = CAAnimationCalculationMode.cubic
+        itemImageView.layer.add(impliesAnimation, forKey: nil)
+    }
+}
+
+```

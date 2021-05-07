@@ -221,7 +221,7 @@ condition_variable::wait(unique_lock<mutex>& __lk, _Predicate __pred)
 
 C++20中引入了 `semaphores`，也就是所谓的信号量，现在还未加入标准库。
 
-所谓信号量其实就是大家公用一个counter，当counter为0时就阻塞。而且存在两个操作，counter+1，counter-1。这样多个线程操作同一个信号量，达到线程同步的效果。
+所谓信号量其实就是大家公用一个counter，当counter小于0时就阻塞。而且存在两个操作，counter+1，counter-1。这样多个线程操作同一个信号量，达到线程同步的效果。
 
 ## 非阻塞型同步
 
