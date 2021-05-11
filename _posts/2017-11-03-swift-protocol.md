@@ -8,11 +8,11 @@ tag:
 comments: true
 ---
 
-### 前言
+## 前言
 
 本文是笔者学习Swift协议的笔记。
 
-### 开始
+## 开始
 
 OC中判断是否遵守某个协议有对应的方法，Swift中也有，但是开始使用的时候遇到了问题：
 
@@ -52,6 +52,22 @@ mark protocol and methods in protocol as @objc can make these methods optional ;
 protocol can add extension to provide default implemention , use where to add constraints to protocol extension;
 ```
 
-#### 最后
+## POP
 
-未完待续
+所谓面向协议编程。定义一个协议其实就是定义一个接口，这个接口其实就是一种能力，你实现这个接口，就具有这种能力，不关心时何种类型。
+
+### 代码复用
+
+有一块逻辑最初写在某个对象中，但是随着业务发展，发现这个逻辑其他地方也需要，那这个时候可以定一个协议，把这块逻辑给放进协议的默认实现，这样需要使用的对象直接遵守协议就可以使用了。
+
+### 多肽
+
+有些时候同一个逻辑有不一样的实现，这个时候可以为这个逻辑抽象一个接口，不同的实现去遵守协议给出自己的实现，这样使用方只需要依赖这个协议就好，不关心具体的实现。
+
+## 协议的实现
+
+协议用了一个Existential Container的数据结构来存储。
+
+前三个word：Value buffer。用来存储Inline的值，如果word数大于3，则采用指针的方式，在堆上分配对应需要大小的内存
+第四个word：Value Witness Table(VWT)。每个类型都对应这样一个表，用来存储值的创建，释放，拷贝等操作函数。(管理 Existential Container 生命周期)
+第五个word：Protocol Witness Table(PWT)，用来存储协议的函数。
