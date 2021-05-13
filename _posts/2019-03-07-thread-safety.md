@@ -144,6 +144,7 @@ C++17标准库为我们提供了这种读写锁 `std::shared_mutex`，额外增�
 
 C++14标准库中提供了 `std::shared_lock`, 和之前的`std::unique_lock`类似，只是`lock`和`unlock`操作被替换为 `lock_shared` 和 `unlock_shared`。
 
+实现一个读写锁，[ref1](https://zhangbuhuai.com/post/dispatch-semaphore.html), [ref2](https://www.cnblogs.com/myd620/p/6129112.html)。
 ### std::recursive_mutex
 
 上述提到的mutex，如果在一个线程中被连续的lock多次，会产生死锁，而且会出现未定义行为。如果实际情况中真的需要对同一个mutex进行多次lock操作，C++提供了 `std::recursive_mutex`, 所谓的递归锁。递归锁释放时，需要调用相同数量的unlock，才能释放mutex。
@@ -736,3 +737,5 @@ NSOperation可以直接执行，或者也可以添加到NSOperationQueue中，�
 [https://github.com/gnustep/libs-base/blob/master/Source/NSLock.m](https://github.com/gnustep/libs-base/blob/master/Source/NSLock.m)
 
 [pwpt](https://book.douban.com/subject/1941123/)
+
+[https://timothyqiu.com/archives/spinlock-mutex-condition-variable-readers-writer-lock/](https://timothyqiu.com/archives/spinlock-mutex-condition-variable-readers-writer-lock/)
