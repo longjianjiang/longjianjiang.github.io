@@ -506,6 +506,10 @@ func updateWikiListView(_ offset: CGFloat) {
 }
 ```
 
+---
+
+需要加一个延时，重新设置inset才会生效。
+
 # UISearchController
 
 今天遇到一个问题，连续push两个UISearchContainerController，第二个搜索页面的输入框无法编辑。解决方案是在自定义的UISearchContainerController中viewWillAppear设置`definesPresentationContext`为true，viewWillDisappear设置`definesPresentationContext`为false。
