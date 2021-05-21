@@ -128,6 +128,7 @@ extension CALayer {
 
 listview 的`clipToBounds`是true，会导致阴影显示不全，此时需要设置为false，才能显示正常；
 
+类型购物车底部的view的上方会加阴影，此时需要将上方的listView离bottomView有一些间距，不然加了阴影被盖住了，就看不出了。
 # Timer, WeakProxy
 
 OC中使用YYWeakProxy，swift可以使用如下的方案：
