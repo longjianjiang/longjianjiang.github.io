@@ -27,6 +27,18 @@ id objc_retainAutorelease(id obj) {
     return objc_autorelease(objc_retain(obj));
 }
 
+void
+objc_storeStrong(id *location, id obj)
+{
+    id prev = *location;
+    if (obj == prev) {
+        return;
+    }
+    objc_retain(obj);
+    *location = obj;
+    objc_release(prev);
+}
+
 int main() {
     @autoreleasepool {
         id obj = [Sark new];
@@ -40,6 +52,7 @@ ar_obj_1赋值后，会调用一个`objc_autorelease`，也就是将`arr_obj_1`�
 
 ARC中只有将对象赋值给一个`__autoreleasing`修饰的左值，才会将其加入Pool中，否则是局部变量超过其作用域，从而导致其指向的对象释放。
 
+局部变量超出其作用域会触发`objc_storeStrong(id *location, id obj)`方法，此时obj是nil。
 ## 数据机构
 
 前面main函数中的`@autoreleasepool{}`，实际会被编译器转成如下代码:
