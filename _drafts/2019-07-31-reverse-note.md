@@ -45,6 +45,8 @@ sudo easy_install pip; // python2.7 系统自带
 
 4.4> dump的时候，需要在dump.py中指定用户名和密码，同时用户需要是root，否则可能会出现SCPException，导致砸壳不成功；
 
+[可以导出包，但是没有砸壳成功](https://github.com/AloneMonkey/frida-ios-dump/issues/118)
+
 # class-dump
 
 拿到砸壳的ipa后，首先dump出二进制文件的头文件信息。
