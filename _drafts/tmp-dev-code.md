@@ -606,3 +606,19 @@ extension UITabBarController {
 }
 
 ```
+
+# UIView
+
+当父view设置isHidden后，此时会隐藏整个view，包括子view，但是子view的isHidden并没有被设置为true。
+
+```
+- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
+    if (self.isHidden) {
+        return nil;
+    }
+    return [self.subView hitTest:point withEvent:event];
+}
+```
+
+上面的例子，父view里面重写了hitTest方法，如何加一个isHidden判断，否则还是会走到子view的hitTest方法，内部会进行跳转逻辑。
+
