@@ -12,6 +12,23 @@ AB两个请求，B请求需要用到A请求返回值。
 
 3> apiManager的形式，接口层面添加依赖的方法，每个apiManager会有一个依赖的set、自身的一个初始化为0的信号量。当自身请求成功好了后，会signal信号量，而每个发起请求的apiManager则会等候set里所有的都完成之后在请求。
 
+```
+- (void)waitForDependency:(dispatch_block_t)block {
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+        for (BaseAPIManager *apiManager in self.dependencySet) {
+            NSLog(@"wait %@",apiManager);
+            dispatch_semaphore_wait(apiManager.continueMutex, DISPATCH_TIME_FOREVER);
+            // 得到后立刻释放，防止其他请求无法进行
+            NSLog(@"%@ Done",apiManager);
+            dispatch_semaphore_signal(apiManager.continueMutex);
+        }
+        if(block) {
+            block();
+        }
+    });
+}
+```
+
 ## 统一回调
 
 同时发起若干请求，需要在所有请求完成时进行处理。
@@ -25,6 +42,27 @@ AB两个请求，B请求需要用到A请求返回值。
 若干任务同时执行，限制同时只能有两个任务被执行。
 
 1> 使用信号量，首先创建一个串行队列，负责执行判断信号量的异步任务。创建一个并行队列，负责执行异步的IO任务。
+
+```
+- (void)async:(dispatch_block_t)block {
+    
+    if (!block) {
+        return;
+    }
+
+    dispatch_async(_serialQueue,^{
+        dispatch_semaphore_wait(self.semaphore, DISPATCH_TIME_FOREVER);  //semaphore - 1
+
+        dispatch_async(self.queue,^{
+            if (block) {
+                block();
+            }
+            dispatch_semaphore_signal(self.semaphore);  //semaphore + 1
+        });
+        
+    });
+}
+```
 
 [ref](https://github.com/buaa0300/QSDispatchQueue/blob/master/QSDispatchQueue/QSDispatchQueue.m)
 
