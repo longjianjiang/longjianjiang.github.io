@@ -151,6 +151,15 @@ high address
 low address  
 ```
 
+```
+PUSH AX              ；将AX中的值入栈
+
+POP AX                ；将栈顶元素的值赋值给AX
+
+PUSH指令的实质就是SP = SP - 2，然后向SS：SP中写入数据;
+POP指令的实质就是读取SS：SP中的数据，然后SP = SP + 2。
+```
+
 > 根据上图可以看到一个函数调用对应一个栈帧。
 
 callee的汇编代码如下：
