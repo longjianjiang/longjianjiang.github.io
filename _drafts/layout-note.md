@@ -140,6 +140,10 @@ originalPriceLabel.snp.makeConstraints {
 
 当自定义view重写了intrinsicContentSize，并且可能intrinsicContentSize可能会根据内容进行改变，这个时候改变之后需要调用invalidateIntrinsicContentSize来进行一次更新。
 
+## layout变化
+
+当某个view根据兄弟view进行设置约束，此时兄弟view进行了一次removeFromSuperview然后重新添加操作后，会导致view的位置进行变化，因为之前的view已经不在了，约束也就找不到了。
+
 # flexbox
 
 flexbox是CSS中使用布局算法。
