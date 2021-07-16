@@ -622,3 +622,8 @@ extension UITabBarController {
 
 上面的例子，父view里面重写了hitTest方法，如何加一个isHidden判断，否则还是会走到子view的hitTest方法，内部会进行跳转逻辑。
 
+## converRect
+
+今天在做一个需求的时候，需要知道页面中某个view在控制器view中的rect，开始想到的时取superView，然后取superView的frame。
+
+后来发现其实可以使用covertRect方法来获取到某个view在外层view中的具体位置，这样就不用关心具体的层级了。
