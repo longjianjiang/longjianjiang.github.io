@@ -511,6 +511,14 @@ func updateWikiListView(_ offset: CGFloat) {
 
 需要加一个延时，重新设置inset才会生效。
 
+## willDisplay 方法
+
+今天在一个礼物页面，类似抖音直播送礼物，选中某个礼物需要做选中的UI展示。开始UI展示放在了cellForRow方法，这个时候的问题是，当滑动到下一页的时候，再回到上一页，选中状态没有展示，打断点发现其实走到了处理选中UI的方法中。
+
+后面本地测试，发现加延时可以生效，所以想到把选中UI更新的逻辑放在willDisplay方法，试了下，就正常了。在文档中也发现，有这样的建议：
+
+Use the collectionView:willDisplayCell:forItemAtIndexPath: delegate method to make any changes to the appearance of the cell to reflect its visual state such as selection.
+
 # UISearchController
 
 今天遇到一个问题，连续push两个UISearchContainerController，第二个搜索页面的输入框无法编辑。解决方案是在自定义的UISearchContainerController中viewWillAppear设置`definesPresentationContext`为true，viewWillDisappear设置`definesPresentationContext`为false。
