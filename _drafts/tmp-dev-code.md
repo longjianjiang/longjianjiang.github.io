@@ -635,3 +635,7 @@ extension UITabBarController {
 今天在做一个需求的时候，需要知道页面中某个view在控制器view中的rect，开始想到的时取superView，然后取superView的frame。
 
 后来发现其实可以使用covertRect方法来获取到某个view在外层view中的具体位置，这样就不用关心具体的层级了。
+
+## transform
+
+跑马灯的动画，可以通过设置transform动画来实现。固定起点和终点（负数）。
