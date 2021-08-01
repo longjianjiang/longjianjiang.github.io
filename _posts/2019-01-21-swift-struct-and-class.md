@@ -110,7 +110,6 @@ aa name nancy, bb name nancy.
 
 引用语义对象的特征是标识，状态，行为，引用对象从语义上是不可拷贝的。
 
-```
 这里从语义的不可变是不是可以理解为在进行赋值的时候，s2其实是s1的一份内容拷贝，所以当修改s2内部的成员不会影响到s1。
 应该就是另一篇文章中所说的`copy by value`。
 
@@ -121,6 +120,23 @@ aa name nancy, bb name nancy.
 不可拷贝应该是堆上的分配的对象，只要一份，不能进行拷贝。可以进行的操作只能改变指向这块内存的指针。
 
 不可变是struct对象本身是不可变的，可变的是variable，也就是变量，当进行赋值的时候，其实并不是改了struct，而是生成了一个新的struct赋值给了variable。(如何验证？)
+
+```
+struct Point {
+    var x: Int
+    var y: Int
+}
+
+var p = Point(x: 0, y: 0) {
+	didSet {
+		print("x = \(p.x), y = \(p.y)")
+	}
+}
+
+p.x = 5
+p.y = 7
+
+可以发现，当对p的x，y成员进行赋值时，触发了变量p的didSet。
 ```
 
 当这个对象有状态的变化时，此时只能使用引用语义，对应的也就只能选择class。其他情况则可以使用struct。拿HTTP请求来说，Request因为有状态，初始化，发送中，发送成功等，所以必须用class；对应的Response，只是一个请求的返回内容而已，所以可以使用struct。
