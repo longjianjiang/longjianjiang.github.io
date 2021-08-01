@@ -137,6 +137,13 @@ p.x = 5
 p.y = 7
 
 可以发现，当对p的x，y成员进行赋值时，触发了变量p的didSet。
+
+var points = [Point(x: 0, y: 0)] { 
+	didSet {
+		print("Array changed") 
+	}
+}
+points[0].x = 5; // Array changed
 ```
 
 当这个对象有状态的变化时，此时只能使用引用语义，对应的也就只能选择class。其他情况则可以使用struct。拿HTTP请求来说，Request因为有状态，初始化，发送中，发送成功等，所以必须用class；对应的Response，只是一个请求的返回内容而已，所以可以使用struct。
