@@ -768,6 +768,8 @@ static void __Block_byref_id_object_dispose_131(void *src) {
 
 注释1这段代码会调用`objc_loadWeakRetained`，会将弱引用指向的对象的引用计数加1，也就是为了防止弱引用指向的对象释放。
 
+这里需要注意的一点的是，如果在调用这个block之前，self已经被释放了，那么此时strongSelf依然是nil。因为在self释放之前执行block，此时block才会去对self有一个强引用来保证self不被释放。
+
 3.注释1这段代码中strongSelf为什么明确的使用`__strong`，不是默认使用的就是`__strong`吗？
 
 因为`typeof(weakSelf)`的修饰符不是`__strong`，所以需要明确指定。
