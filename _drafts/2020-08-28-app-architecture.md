@@ -16,3 +16,13 @@ viewmodel是tableview的delegate和datasource。一旦左边产生select事件�
 viewmodel对外提供了一个方法接收API数据，controller在进入页面时，加载API，并获得API数据，然后交给viewmodel。viewmodel在遇到翻页场景时，再代理给controller去发起api请求。api之所以放在controller中做，是因为这个viewmodel和tableview会被复用到其他业务线，API不能写死在viewmodel里面。
 
 总的来说，viewmodel做的事情就是处理不同tableview的行为，虽然它作为tableview的datasource，但并不是一个model的角色。之所以不用mvc是因为如果把这些行为放在controller里面，controller就要在同一个tableview代理方法里面区分不同的tableview来做不同的事情，所以拆分成两个对象各自管理各自的tableview，这两个拆分出来的对象就是viewmodel。
+
+# 控制器优化
+
+一般来说控制器存放了很多逻辑，需要进行拆分，而MVVM其实也算是对控制器优化的一种方式。
+
+常规来说对控制器优化有两方面：
+
+第一是对逻辑对拆分，把原本写在一个方法里面对大段逻辑进行拆分出单独对对象，可以是VM，可以是Helper，控制器去调用这些模块，然后这些模块内部再去调用一些小的逻辑处理方法。
+
+第二是更大力度的对view封装，把view对逻辑更加内聚，对外只暴露控制器真正关心对部分，其他的都是view自己处理就好，比如搜索框，控制器最关心的其实就是点击了搜索按钮时输入了什么内容，以及点击了取消按钮。其他的比如，搜索联想之类的逻辑，可以放到view本身去做就好，控制器其实并不关心。
