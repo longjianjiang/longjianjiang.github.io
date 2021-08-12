@@ -63,8 +63,6 @@ class-dump这个工具使用Runtime特性，将mach-O文件中的@interface和@p
 
 结合[Lookin](https://lookin.work/)查看界面结构，View的名称，定位到具体的控制器。
 
-可以安装reveal2loader这个插件，可以直接越狱手机上查看app的层级。
-
 # debugserver 
 
 ```
@@ -81,6 +79,19 @@ lldb: process connect connect:1234 // ip is 1234
 这一步使用`CaptainHook`提供的API，以及上一步头文件和UI的搜索，尝试Hook具体某个类的某个方法。
 
 [Logos](https://iphonedevwiki.net/index.php/Logos#.25orig)
+
+# dpkg
+
+手机越狱后cydia网络问题无法安装插件，看到网上越狱手机使用[reveal](https://www.jianshu.com/p/24897f77b39e)调试页面。所以搜了下可以使用dpkg在命令行中安装。
+
+安装需要两个deb，一个是 Reveal2Loader_1.0-3_iphoneos-arm.deb ，一个是 extensionlist_1.0-1.deb。
+
+安装过程是，使用iFunBox将这个两个deb文件放入到/var/mobile/Documents 目录下面，然后依次执行：
+
+```
+dpkg -i extensionlist_1.0-1.deb
+dpkg -i Reveal2Loader_1.0-3_iphoneos-arm.deb
+```
 
 # 原理
 
