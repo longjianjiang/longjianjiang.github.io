@@ -93,6 +93,8 @@ dpkg -i extensionlist_1.0-1.deb
 dpkg -i Reveal2Loader_1.0-3_iphoneos-arm.deb
 ```
 
+可以从[这个地址](http://www.cydiacrawler.com/index.php?cat=search&keyword=com.zidaneno5.extensionlist#.YRTi5VMzb_Q)去搜索deb文件。
+
 # 原理
 
 ## 砸壳
