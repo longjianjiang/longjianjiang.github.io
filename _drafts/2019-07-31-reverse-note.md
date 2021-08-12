@@ -63,6 +63,8 @@ class-dump这个工具使用Runtime特性，将mach-O文件中的@interface和@p
 
 结合[Lookin](https://lookin.work/)查看界面结构，View的名称，定位到具体的控制器。
 
+可以安装reveal2loader这个插件，可以直接越狱手机上查看app的层级。
+
 # debugserver 
 
 ```
