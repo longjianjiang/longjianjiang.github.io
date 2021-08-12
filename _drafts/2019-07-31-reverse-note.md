@@ -95,6 +95,8 @@ dpkg -i Reveal2Loader_1.0-3_iphoneos-arm.deb
 
 可以从[这个地址](http://www.cydiacrawler.com/index.php?cat=search&keyword=com.zidaneno5.extensionlist#.YRTi5VMzb_Q)去搜索deb文件。
 
+安装好reveal后，拖入到Patcher软件中，然后打开Reveal.app输入任意序列号即可激活。
+
 # 原理
 
 ## 砸壳
