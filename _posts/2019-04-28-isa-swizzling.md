@@ -80,6 +80,8 @@ self.timer = [NSTimer weak_scheduleTimerWithTimeInterval:1 repeats:YES block:^{
 
 今天看到Effective Objc书上的关于Timer的提到这个问题，当使用这种方式来避免循环引用时，需要在用到timer的类里的dealloc方法中，调用timer的`invalidate`方法，这样定时器就不会继续触发。对于self来说，因为是NSTimer的类实例，本身是一个单例，不会被回收，计时器是否会引用其实没什么影响。
 
+Timer 中新的block的api方法，内部应该也是这样实现的，target设置了Timer类本身。
+
 ## KVO
 
 KVO的实现其实也是使用到isa-swizzling，对象被某个观察者观察的时候，这个时候同样会动态创建一个该对象类的子类，重写property的set方法，在set方法里面调用`- willChangeValueForKey:`,`- didChangeValueForKey:`。这个时候将该对象的isa指向动态创建的这个类，这样property改变的时候可以通知到观察者。
