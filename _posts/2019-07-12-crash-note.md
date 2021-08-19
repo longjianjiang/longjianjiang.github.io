@@ -188,3 +188,17 @@ crash 地址如何对应到符号表中的地址？
 [ref3](https://developer.apple.com/library/archive/technotes/tn2151/_index.html#//apple_ref/doc/uid/DTS40008184-CH1-INTRODUCTION)
 
 [ref4](https://faisalmemon.github.io/ios-crash-dump-analysis-book/)
+
+# 附
+
+记录遇到的crash。
+
+- dict存储nil
+
+dict中存储string对象，但实际为nil，导致crash。解决方案： obj?:@"";
+
+- 对象类型错误
+
+消息中detail字段根据不同消息类型可能是不一样的类型，取的时候未判断导致取property的时候出现了unrecognized selector sent to instance。
+
+解决方案：取detail时进行消息类型的判断；
