@@ -28,6 +28,19 @@ var addCurrying = function(x) {
 
 `add(1, 2)` 等价于 `addCurrying(1)(2)`。
 
+一个优点是当某个函数需要多次调用，且部分参数相同时，通过柯里化可以减少重复参数样板代码。
+
+{% highlight javascript%}
+add(10, 1);
+add(10, 2);
+add(10, 3);
+
+var addTen = addCurrying(10);
+addTen(1);
+addTen(2);
+addTen(3);
+{% endhighlight %}
+
 # References
 
 [http://zxfcumtcs.github.io/2019/11/17/functional/](http://zxfcumtcs.github.io/2019/11/17/functional/)
