@@ -155,6 +155,10 @@ let timer = Timer.scheduledTimer(timeInterval: interval,
 RunLoop.main.add(timer, forMode: .common)
 ```
 
+---
+
+Timer里面有两种初始化的方法，timerWithTimeInterval这种创建的timer会立马fire，scheduledTimerWithTimeInterval这种创建的timer会等到给定时间后fire。
+
 # present
 
 A presentViewController 到B 后，A.presentedViewController就是B，B.presentingViewController就是A

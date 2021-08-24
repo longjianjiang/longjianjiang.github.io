@@ -82,6 +82,7 @@ Parsing也叫语法分析(syntax analysis)，Parsing的目的是将LA产生的�
 生成汇编代码；
 
 转换成平台相关语言；
+
 ### 补充
 
 最近笔者再看autoconf和automake的时候了解到其实在预编译之前还有其他的步骤，将其补充到这里：
