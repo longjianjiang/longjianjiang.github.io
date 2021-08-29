@@ -55,6 +55,25 @@ override var isHighlighted: Bool {
 
 一个播放中心界面，使用的是`.light`的effect，发现很亮，设计稿上就很淡，在effectView的contentView里面加一层半透明(white 0.8)的view后，就会谈很多。
 
+---
+
+effectView 做动画，模糊和透明之间改变。
+
+```swift
+// 首先去掉 UIVisualEffectView 原来的 effect。
+self.effectView.effect = nil
+
+
+// 现在动画添加一个新的 effect。
+let blurEffect = UIBlurEffect(style: .Light)
+
+UIView.animateWithDuration(1.5, delay: 0, usingSpringWithDamping: 1.0, initialSpringVelocity: 0, options: .CurveEaseOut, animations: {
+    self.effectView.effect = blurEffect
+}) { _ in }
+```
+
+[ref](https://www.jianshu.com/p/97597719f0fa)
+
 ## Cell 圆角
 
 当collectionView背景色为白色，cell背景色是白色，这个时候加了圆角当cell是看不出效果的，因为都是白色。
