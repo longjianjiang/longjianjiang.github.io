@@ -414,7 +414,7 @@ func scrollViewDidScroll(_ scrollView: UIScrollView) {
 }
 ```
 
-当需要监听scrollView移动方向和停止滚动时，快停止滚动时会触发停止减速的回调，但是之后还有继续触发一次didScrollD的回调，所以此时需要在didScroll的回调判断滚动的距离，将过小的值过滤，来达到触发滚动停止的执行。
+当需要监听scrollView移动方向和停止滚动时，快停止滚动时会触发停止减速的回调，但是之后还有继续触发一次didScroll的回调，所以此时需要在didScroll的回调判断滚动的距离，将过小的值过滤，来达到触发滚动停止的执行。
 
 ```swift
 func subscribeScroll() {
@@ -438,6 +438,22 @@ func subscribeScroll() {
 	}).disposed(by: rx.disposeBag)
 }
 ```
+
+---
+
+实现类似系统短信，左滑出现时间的效果。可以在tableview的外面放置一层scrollView，因为scrollView可以支持上下左右两个方向的滑动，此时需要保持scrollView和tableview的frame是一样的。
+
+```swift
+scrollView = UIScrollView()
+scrollView.userInteractionEnalble = false
+scrollView.alwaysBouncingHorizontal = true
+
+tableview.addGestureRecognizer(scrollView.panGestureRecognizer)
+```
+
+在didScroll的代理方法，，分别将 x、y 应用到响应的属性即可，y 轴就给 TableView，让其可以上下卷动，x 轴就给每个 cell，让其做自己的处理。
+
+[ref](https://www.jianshu.com/p/5804fa72aaed)
 
 # UITableView
 
