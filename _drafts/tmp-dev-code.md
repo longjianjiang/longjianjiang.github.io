@@ -678,3 +678,34 @@ extension UITabBarController {
 ## transform
 
 跑马灯的动画，可以通过设置transform动画来实现。固定起点和终点（负数）。
+
+## 圆形进度
+
+CAShapeLayer 搭配 UIBezierPath。
+
+首先构建UIBezierPath，构建一个贝塞尔曲线方法如下：
+
+{% highlight objc%}
+UIBezierPath *path = [UIBezierPath bezierPathWithArcCenter:CGPointMake(centerX, centerY) radius:radius startAngle:(-0.5f*M_PI) endAngle:1.5f*M_PI clockwise:YES];
+{% endhighlight %}
+
+
+```
+                      1.5π
+         +-------------+--------------+
+         |             |              |
+         |             |              |
+         |             |              |
+         |             |              |
+         |             |              |
+     1π  +-------------+--------------+ 0(2)π
+         |             |              |
+         |             |              |
+         |             |              |
+         |             |              |
+         |             |              |
+         +-------------+--------------+
+		              0.5π
+```
+
+将path作为shapeLayer的路径。进度的更新就是根据progress来更新shapeLayer的strokeEnd值，这个值是支持做做动画的，这样就有了进度的动画。
