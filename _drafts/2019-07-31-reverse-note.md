@@ -1,3 +1,10 @@
+# monkeydev
+
+安装monkeyDev过程中的错误，issue中有方案，记录一下。
+
+[xcode 12 Types.xcspec not found](https://github.com/AloneMonkey/MonkeyDev/issues/266)
+
+[curl: (7) Failed to connect to raw.githubusercontent.com port 443: Connection refused](https://github.com/AloneMonkey/MonkeyDev/issues/242)
 
 # 手机越狱
 
