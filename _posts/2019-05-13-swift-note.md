@@ -279,6 +279,14 @@ swift 的初始化分为两个阶段：
 [ref](https://docs.swift.org/swift-book/LanguageGuide/Initialization.html)
 [ref](https://swifter.tips/init-keywords/)
 
+---
+
+OC中的init和dealloc应该避免使用setter方法去赋值，应该去使用实例变量。
+
+因为setter会带来一些副作用，比如setter会触发KVO通知，也有可能setter方法被重写，在构造和析构的时候，可能会造成一些错误。
+
+[ref](https://stackoverflow.com/questions/8056188/should-i-refer-to-self-property-in-the-init-method-with-arc)
+
 # LazySequence
 
 所谓lazySequence就是延迟计算操作（filter，map）到真正需要使用的时机，而不是立马去执行操作，类似懒加载的用途；
