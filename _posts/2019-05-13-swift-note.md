@@ -285,6 +285,31 @@ OC中的init和dealloc应该避免使用setter方法去赋值，应该去使用�
 
 因为setter会带来一些副作用，比如setter会触发KVO通知，也有可能setter方法被重写，在构造和析构的时候，可能会造成一些错误。
 
+{% highlight objc%}
+@interface Student : NSObject
+
+@property (nonatomic, copy) NSString *name;
+
+@end
+
+
+@implementation Student
+
+- (void)dealloc {
+    self.name = nil;
+}
+
+- (void)setName:(NSString *)name {
+    _name = name;
+
+    NSString *tmp = [NSString stringWithString:name];
+    NSLog(@"set name is %@", tmp);
+}
+@end
+{% endhighlight %}
+
+dealloc中使用setter触发了自定义的setter，stringWithString方法接受的name为nil，这个方法不允许参数为nil，触发了异常。
+
 [ref](https://stackoverflow.com/questions/8056188/should-i-refer-to-self-property-in-the-init-method-with-arc)
 
 # LazySequence
