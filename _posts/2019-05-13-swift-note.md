@@ -395,6 +395,13 @@ extension NSAttributedString {
 
 @resultBuilder 修饰一个对象，实现一个buildBlock方法，这个方法实现append操作。
 
+总结来说就是，result builder提供给我们一种方式，将一组数据进行组合成一个合成的数据。
+
+SwiftUI 里面的VStack接收的参数其实就是一个result builder修饰的闭包，会将闭包内的各种子view进行打包放到TupleView中。
+
+[ref1](https://www.swiftbysundell.com/articles/deep-dive-into-swift-function-builders/#conditionals)
+[ref2](https://www.vadimbulavin.com/swift-function-builders-swiftui-view-builder/)
+
 # References 
 
 [https://docs.swift.org/swift-book/LanguageGuide/TheBasics.html](https://docs.swift.org/swift-book/LanguageGuide/TheBasics.html)
