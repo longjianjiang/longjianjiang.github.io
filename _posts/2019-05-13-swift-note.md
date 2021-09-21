@@ -364,6 +364,37 @@ TODO
 
 [ref](https://tech.meituan.com/2018/11/01/swift-compile-performance-optimization.html)
 
+# function builder (result builder)
+
+先以一个实际的例子来说明这个功能有什么用。
+
+拿构造富文本来说，构造富文本其实有两种思路，第一种思路是我已经知道了整段文本，然后我需要去为每一个子串去设置对应的属性，这样做就会写很多range相关的代码，不可读还容易出错。
+所以另一种构造的方案就是，我先构造好每个子串，然后进行拼接，得到整段文本。
+
+function builder 其实可以来完成这件事，其实要做到这事其实很简单，暴露一个构造方法，这个方法接受可变的富文本，然后将这些可变的进行拼接即可，下面就是一个参考实现：
+
+
+```swift
+@resultBuilder
+class NSAttributedStringBuilder {
+    static func buildBlock(_ components: NSAttributedString...) -> NSAttributedString {
+        let res = NSMutableAttributedString(string: "")
+
+        return components.reduce(into: res) { res, str in
+            res.append(str)
+        }
+    }
+}
+
+extension NSAttributedString {
+    public class func composing(@NSAttributedStringBuilder _ parts: () -> NSAttributedString) -> NSAttributedString {
+        return parts()
+    }
+}
+```
+
+@resultBuilder 修饰一个对象，实现一个buildBlock方法，这个方法实现append操作。
+
 # References 
 
 [https://docs.swift.org/swift-book/LanguageGuide/TheBasics.html](https://docs.swift.org/swift-book/LanguageGuide/TheBasics.html)
