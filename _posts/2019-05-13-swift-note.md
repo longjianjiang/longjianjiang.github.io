@@ -393,7 +393,7 @@ extension NSAttributedString {
 }
 ```
 
-@resultBuilder 修饰一个对象，实现一个buildBlock方法，这个方法实现append操作。
+resultBuilder 修饰一个对象，实现一个buildBlock方法，这个方法实现append操作。
 
 总结来说就是，result builder提供给我们一种方式，将一组数据进行组合成一个合成的数据。
 
