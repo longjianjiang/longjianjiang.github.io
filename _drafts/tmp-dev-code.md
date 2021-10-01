@@ -709,3 +709,44 @@ UIBezierPath *path = [UIBezierPath bezierPathWithArcCenter:CGPointMake(centerX, 
 ```
 
 将path作为shapeLayer的路径。进度的更新就是根据progress来更新shapeLayer的strokeEnd值，这个值是支持做做动画的，这样就有了进度的动画。
+
+## 圆角 任意角任意大小
+
+设置某两个方向的圆角，可以使用bezierPath创建一个path。如果是两个方向的圆角大小不一样，就得自己画一个path了。参考代码如下：
+
+{% highlight objc%}
+- (CGPathRef)createPathWithRect:(CGRect)rect
+                        topLeft:(CGFloat)topLeft
+                       topRight:(CGFloat)topRight
+                     bottomLeft:(CGFloat)bottomLeft
+                    bottomRight:(CGFloat)bottomRight {
+    CGFloat minX = CGRectGetMinX(rect);
+    CGFloat minY = CGRectGetMinY(rect);
+    CGFloat maxX = CGRectGetMaxX(rect);
+    CGFloat maxY = CGRectGetMaxY(rect);
+
+    const CGFloat topLeftCenterX = minX + topLeft;
+    const CGFloat topLeftCenterY = minY + topLeft;
+
+    const CGFloat topRightCenterX = maxX - topRight;
+    const CGFloat topRightCenterY = minY + topRight;
+
+    const CGFloat bottomLeftCenterX = minX +  bottomLeft;
+    const CGFloat bottomLeftCenterY = maxY - bottomLeft;
+
+    const CGFloat bottomRightCenterX = maxX -  bottomRight;
+    const CGFloat bottomRightCenterY = maxY - bottomRight;
+
+    CGMutablePathRef path = CGPathCreateMutable();
+    //顶 左
+    CGPathAddArc(path, NULL, topLeftCenterX, topLeftCenterY,topLeft, M_PI, 3 * M_PI_2, NO);
+    //顶 右
+    CGPathAddArc(path, NULL, topRightCenterX , topRightCenterY, topRight, 3 * M_PI_2, 0, NO);
+    //底 右
+    CGPathAddArc(path, NULL, bottomRightCenterX, bottomRightCenterY, bottomRight,0, M_PI_2, NO);
+    //底 左
+    CGPathAddArc(path, NULL, bottomLeftCenterX, bottomLeftCenterY, bottomLeft, M_PI_2,M_PI, NO);
+    CGPathCloseSubpath(path);
+    return path;
+}
+{% endhighlight %}
