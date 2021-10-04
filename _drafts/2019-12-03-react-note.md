@@ -52,3 +52,7 @@ const Person = ({ personId }) => {
 };
 ```
 [Hooks Ref](https://zhuanlan.zhihu.com/p/347136271)
+
+# References
+
+[更多资料](https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Client-side_JavaScript_frameworks/React_resources)
