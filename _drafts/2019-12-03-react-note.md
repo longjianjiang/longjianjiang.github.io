@@ -53,6 +53,12 @@ const Person = ({ personId }) => {
 ```
 [Hooks Ref](https://zhuanlan.zhihu.com/p/347136271)
 
+# Context
+
+一般我们是在父组件中将props传递给子组件，但是如果层级比较多，那么中间多一些组件传递只是为了给最底层的组件。此时可以使用Context，可以让value在整个组件树中都可以获取到。
+
+[Doc](https://reactjs.org/docs/context.html)
+
 # References
 
 [更多资料](https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Client-side_JavaScript_frameworks/React_resources)
