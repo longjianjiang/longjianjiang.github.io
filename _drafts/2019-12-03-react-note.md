@@ -3,6 +3,14 @@
 
 React 中最简单的组件就是函数的形式进行创建，此时的组件是无状态的，仅仅负责展示内容。当需要处理状态的时候就需要使用class的形式继承`React.Component`。
 
+使用了react-redux后，对于组件的区分有两种，一种是component，一种是container。
+
+component组件算是纯UI，不使用state，不使用redux的api。
+
+container则是容器，负责处理UI展示的逻辑，不负责UI的展示，使用redux的api。
+
+如果一个组件既有UI又要逻辑需要处理，需要进行拆分，将UI展示部分拆成component，将component作为UI放到container中，container内部处理逻辑。
+
 # Hooks
 
 前面说到，函数形式创建的组件是没有状态的，如果需要状态的话，就需要用到Hooks。
