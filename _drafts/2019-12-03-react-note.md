@@ -67,6 +67,61 @@ const Person = ({ personId }) => {
 
 [Doc](https://reactjs.org/docs/context.html)
 
+# 一些函数
+
+## compose
+
+compose接受一系列的函数，将其组合起来，返回一个新的函数，这样外部调用的时候就需要只调用一次函数，而不需要多次调用。
+
+{% highlight javascript%}
+function testCompose() {
+	const fn1 = num => {
+	  console.log("f1 be called");
+	  return num + 1;
+	}
+	const fn2 = num => {
+	  console.log("f2 be called");
+	  return num + 2;
+	};
+	const fn3 = num => {
+	  console.log("f3 be called");
+	  return num + 3;
+	};
+
+	let x = 10;
+
+	const fc1 = compose(fn1, fn2, fn3);
+	const fc2 = compose(fn3, fn2, fn1);
+
+	let res3 = fc1(x);
+	let res4 = fc2(x);
+
+	console.log("res3 = " + res3 + ", res4 = " + res4);
+}
+{% endhighlight %}
+
+默认compose函数的调用顺序是从参数列表的最后一个函数开始，然后依次进行调用。
+
+compose的实现可以使用递归实现，参考实现如下：
+
+{% highlight javascript%}
+function compose(...fns) {
+    let len = fns.length
+    let res = null
+    return function fn(...arg) {
+        res = fns[len - 1].apply(null, arg) // 每次函数运行的结果
+        if(len > 1) {
+            len --
+            return fn.call(null, res) // 将结果递归传给下一个函数
+        } else {
+            return res //返回结果
+        }
+    }
+}
+{% endhighlight %}
+
+[ref](https://zhuanlan.zhihu.com/p/345122007)
+
 # References
 
 [更多资料](https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Client-side_JavaScript_frameworks/React_resources)
