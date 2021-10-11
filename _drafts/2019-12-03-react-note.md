@@ -67,6 +67,16 @@ const Person = ({ personId }) => {
 
 [Doc](https://reactjs.org/docs/context.html)
 
+# TypeScript
+
+react 支持ts，记录下过程，以及过程中遇到的一些错误：
+
+1. npm 安装ts；
+
+2. 文件名调整；react组件改成tsx，普通js改成ts。
+
+上面两步好了以后，重新npm start。中间可能出现错误，但是会给出可能的解决方案，我按步骤操作完成后，继续npm start，此时的报错就是ts相关的语法错误。
+
 # 一些函数
 
 ## compose
