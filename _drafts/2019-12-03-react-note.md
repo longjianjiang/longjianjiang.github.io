@@ -77,6 +77,8 @@ react 支持ts，记录下过程，以及过程中遇到的一些错误：
 
 上面两步好了以后，重新npm start。中间可能出现错误，但是会给出可能的解决方案，我按步骤操作完成后，继续npm start，此时的报错就是ts相关的语法错误。
 
+改完以后觉得主要的工作还是去添加type，指定参数的类型。还有一个点是connect函数，mapStateToProps和mapDispatchToProps参数如果只有一个，那么缺失的需要传null，否则就会出错。
+
 # 一些函数
 
 ## compose
