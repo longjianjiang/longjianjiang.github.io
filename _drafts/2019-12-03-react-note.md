@@ -71,7 +71,7 @@ const Person = ({ personId }) => {
 
 react 支持ts，记录下过程，以及过程中遇到的一些错误：
 
-1. npm 安装ts；
+1. npm 安装ts； `npm install typescript --save-dev`
 
 2. 文件名调整；react组件改成tsx，普通js改成ts。
 

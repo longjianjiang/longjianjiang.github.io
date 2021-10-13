@@ -29,6 +29,14 @@
 
 [ref](https://juejin.cn/post/6847902216234369037)
 
+# mobx
+
+mobx 也是一个单向数据流的框架。
+
+## observable
+
+## Derivations
+
 # References
 
 [https://github.com/ProtoTeam/blog/blob/master/201710/3.md](https://github.com/ProtoTeam/blog/blob/master/201710/3.md)
