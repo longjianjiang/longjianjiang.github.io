@@ -79,6 +79,16 @@ react 支持ts，记录下过程，以及过程中遇到的一些错误：
 
 改完以后觉得主要的工作还是去添加type，指定参数的类型。还有一个点是connect函数，mapStateToProps和mapDispatchToProps参数如果只有一个，那么缺失的需要传null，否则就会出错。
 
+# npm
+
+npm 包依赖管理。
+
+npm install --save xx; 将模块依赖写入dependencies 节点。
+
+npm install --save-dev xx; 将模块依赖写入devDependencies 节点。
+
+[npm install](https://segmentfault.com/a/1190000021468231)
+
 # 一些函数
 
 ## compose
