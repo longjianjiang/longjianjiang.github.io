@@ -33,9 +33,13 @@
 
 mobx 也是一个单向数据流的框架。
 
-## observable
+## state 
+
+## action
 
 ## Derivations
+
+大致看了下文档，mobx面向对象的方式相比redux要简单一些，用了类似Rx中的observable的机制来进行订阅刷新，避免了redux中手动去写connect。
 
 # References
 
