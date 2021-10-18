@@ -41,6 +41,12 @@ mobx 也是一个单向数据流的框架。
 
 大致看了下文档，mobx面向对象的方式相比redux要简单一些，用了类似Rx中的observable的机制来进行订阅刷新，避免了redux中手动去写connect。
 
+# mobx-react
+
+类似react-redux，提供了一个Provicer进行包装最外层组件。
+
+observer进行包装组件，组件监听store变化，更新UI。inject则是用来注入组件想要关注当某几个store，而不必去取到整个store，类型connect函数。
+
 # References
 
 [https://github.com/ProtoTeam/blog/blob/master/201710/3.md](https://github.com/ProtoTeam/blog/blob/master/201710/3.md)
