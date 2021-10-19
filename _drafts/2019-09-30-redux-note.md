@@ -47,6 +47,8 @@ mobx 也是一个单向数据流的框架。
 
 observer进行包装组件，组件监听store变化，更新UI。inject则是用来注入组件想要关注当某几个store，而不必去取到整个store，类型connect函数。
 
+还有一种方式是，将store放到context中，各个组建使用context来取store。
+
 # References
 
 [https://github.com/ProtoTeam/blog/blob/master/201710/3.md](https://github.com/ProtoTeam/blog/blob/master/201710/3.md)
