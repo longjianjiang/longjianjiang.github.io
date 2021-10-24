@@ -208,6 +208,16 @@ flex 是 `flex-grow`, `flex-shrink`, `flex-basis`的简写，默认是`0 1 auto`
 
 单独指定item的对齐方式，覆盖`align-items`属性，默认是auto，表示使用容器的`align-items`属性。
 
+# css
+
+在项目的过程中，作为程序员，都希望代码能够复用，提高稳定性。然而现实是残酷的，其他人并不会替你思考这些问题，所以就有很多场景，明明看着一模一样，但是某几个字体就是不一样，大小就是差那么几个像素。那么要处理这种问题，一般有两种方案。
+
+1，继承，基类写基本成员，子类来写布局和属性。这样会导致很多子类，不熟悉的人会很疑惑这些东西都在哪里用的。
+
+2，增加style属性，使用style来重写布局和属性，这样可能会随着类型的增多switch-case也增加。
+
+同样，这里web也给了我们一个很好的思路。内容-样式分离，我们可以做一套类似于css的系统，使用class来设置布局样式，这样布局样式也可以复用了！
+
 # References
 
 [http://www.ruanyifeng.com/blog/2015/07/flex-grammar.html](http://www.ruanyifeng.com/blog/2015/07/flex-grammar.html)
