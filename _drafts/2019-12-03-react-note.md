@@ -1,4 +1,10 @@
 
+# Virtual Dom
+
+dom其实就是浏览器上的一个个元素。所谓虚拟dom其实就是react中的component，一个js对象，这个js对象描述了dom的信息。在挂载阶段，react将这些component进行创建渲染。
+
+相应的在更新阶段，首先react会使用diff算法来进行component之间的diff计算，得出哪些真实的dom需要做更新操作，然后去更新dom。
+
 # Component
 
 React 中最简单的组件就是函数的形式进行创建，此时的组件是无状态的，仅仅负责展示内容。当需要处理状态的时候就需要使用class的形式继承`React.Component`。
