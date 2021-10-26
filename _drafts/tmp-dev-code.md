@@ -750,3 +750,9 @@ UIBezierPath *path = [UIBezierPath bezierPathWithArcCenter:CGPointMake(centerX, 
     return path;
 }
 {% endhighlight %}
+
+# 导航栏隐藏
+
+在开发一个页面的时候，预期是导航栏隐藏，但是容器的vc设置导航栏隐藏，然后设置kvo打断点看看，是哪里又把导航栏展示出来了。
+
+结果是pageVC的childVC内部，展示了导航栏。
