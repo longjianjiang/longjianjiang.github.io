@@ -510,6 +510,10 @@ func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: Inde
 
 [ref](https://kangzubin.com/uitableview-estimatedrowheight/)
 
+## rowForHeight返回0，还展示
+
+列表里面有两个section，第一个section数据为空时，cell高度返回0。发现cell还是会展示出来，这个时候需要设置 cell.clipToBounds = YES。这样就不会展示了。
+
 # UICollectionView
 
 ## contentInset
@@ -756,3 +760,4 @@ UIBezierPath *path = [UIBezierPath bezierPathWithArcCenter:CGPointMake(centerX, 
 在开发一个页面的时候，预期是导航栏隐藏，但是容器的vc设置导航栏隐藏，然后设置kvo打断点看看，是哪里又把导航栏展示出来了。
 
 结果是pageVC的childVC内部，展示了导航栏。
+
