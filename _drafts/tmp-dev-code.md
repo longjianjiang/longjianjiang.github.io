@@ -35,6 +35,17 @@ override var intrinsicContentSize: CGSize {
 
 这个时候需要等于listView加载完毕，也就是reloadData()后进行动画。因为UI操作一定是在主线程，所以可以使用GCD将动画操作加到队列中，这样reload完成后，此时view也都加载完毕，可以正常的进行动画显示；
 
+listView reloadData默认没有提供完成的回调，可以通过下面的方式进行设置完成的回调。因为在performBatchUpdate和reloadData混合使用的时候，一定得保证reloadData执行完成后，才能performBatchUpdate，否则会触发数据源不一致的异常；
+
+{% highlight oc%}
+[CATransaction begin];
+[CATransaction setCompletionBlock:^{
+	// add some code
+}];
+[self.msgTableView reloadData];
+[CATransaction commit];
+{% endhighlight %}
+
 ## Cell 中存在animationImageView
 
 ```
