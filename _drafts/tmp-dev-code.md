@@ -772,3 +772,8 @@ UIBezierPath *path = [UIBezierPath bezierPathWithArcCenter:CGPointMake(centerX, 
 
 结果是pageVC的childVC内部，展示了导航栏。
 
+# 内存警告
+
+做一个糖葫芦列表，其中有一个cell需要做动画，同时需要保证滑动不能打断动画，所以加了一个标记位，开始只在下拉刷新的时候重置标记位。config方法里面判断标记位，进行return操作。
+
+触发内存警告的时候，cell新建了一个，此时需要config，但是标记位没有被重置，导致出现了空白。所以监听内存警告的通知，重置标记位。
