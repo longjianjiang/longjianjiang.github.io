@@ -82,6 +82,16 @@ dump.py 报 Unable to connect (connection refused) 错误，电脑frida版本比
 
 # class-dump
 
+安装步骤：
+
+```
+1. 下载地址：http://stevenygard.com/projects/class-dump/
+2. open /usr/local/bin
+3. 把dmg文件中的class-dump文件复制到/usr/local/bin
+4. 更改权限：终端输入, sudo chmod 777 /usr/local/bin/class-dump
+5. class-dump --help
+```
+
 拿到砸壳的ipa后，首先dump出二进制文件的头文件信息。
 
 class-dump这个工具使用Runtime特性，将mach-O文件中的@interface和@protocol的信息提取出来，生成对应的.h文件。
