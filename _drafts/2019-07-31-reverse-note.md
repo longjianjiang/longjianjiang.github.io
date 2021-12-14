@@ -77,6 +77,9 @@ sudo easy_install pip; // python2.7 系统自带
 
 [可以导出包，但是没有砸壳成功](https://github.com/AloneMonkey/frida-ios-dump/issues/118)
 
+dump.py 报 segmentation fault 错误，手机的frida版本需要升级到最新就正常了。
+dump.py 报 Unable to connect (connection refused) 错误，电脑frida版本比手机高会报错，需要保持手机电脑frida版本一致。
+
 # class-dump
 
 拿到砸壳的ipa后，首先dump出二进制文件的头文件信息。
