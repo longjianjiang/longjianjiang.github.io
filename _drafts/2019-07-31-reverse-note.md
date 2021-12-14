@@ -10,6 +10,27 @@
 
 用iOS App signer 重签 uncOver；
 
+## cydia 打开报错
+
+报错： The package <tweak.name> needs to be reinstalled, but I can't find an archive for it. cydia 无法正常显示内存。
+
+解决方案root下执行命令，就可以了。
+
+```
+dpkg --remove --force-remove-reinstreq <tweak.name>
+```
+
+## cydia 无法连接网络
+
+报错：posix: network is down
+
+解决方案root下执行命令，就可以了。
+
+```
+rm /Library/Preferences/com.apple.networkextension.plist
+killall -9 CommCenter
+```
+
 # 砸壳
 
 - 电脑安装frida
