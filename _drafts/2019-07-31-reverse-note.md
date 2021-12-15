@@ -108,9 +108,17 @@ class-dump这个工具使用Runtime特性，将mach-O文件中的@interface和@p
 
 ```
 ps -e | grep appname
-debugserver localhost:1234 -a pid
-lldb: process connect connect:1234 // ip is 1234
+
+// 步骤：
+iproxy 1234 22; // console1
+ssh -p 1234 root@localhost; // console2 
+debugserver 127.0.0.1:1234 -a WeChat // console2
+iproxy 12345 1234; // console3
+lldb; process connect connect://127.0.0.1:12345; // console4
 ```
+
+[ref](https://iosre.com/t/debugserver-lldb-error-failed-to-connect-port/15133/27)
+
 # lldb
 
 反反调试工具，[https://github.com/4ch12dy/xia0LLDB](https://github.com/4ch12dy/xia0LLDB)。
