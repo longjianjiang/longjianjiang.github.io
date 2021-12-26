@@ -202,3 +202,5 @@ dict中存储string对象，但实际为nil，导致crash。解决方案： obj?
 消息中detail字段根据不同消息类型可能是不一样的类型，取的时候未判断导致取property的时候出现了unrecognized selector sent to instance。
 
 解决方案：取detail时进行消息类型的判断；
+
+- 数组类型（字符串）操作，时刻注意越界；
