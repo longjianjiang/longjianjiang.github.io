@@ -779,3 +779,5 @@ UIBezierPath *path = [UIBezierPath bezierPathWithArcCenter:CGPointMake(centerX, 
 触发内存警告的时候，cell新建了一个，此时需要config，但是标记位没有被重置，导致出现了空白。所以监听内存警告的通知，重置标记位。
 
 发现UIApplicationDidReceiveMemoryWarningNotification 和 didReceiveMemoryWarning 不是同步的。
+
+所以解决思路得换一下，之前得思路是找到触发缓存清理得方式，比如内存警告，然后在这个地方去重置，不过万一没有发送内存警告通知，其实还是会有问题。所以换个角度，在cellForRow处进行处理，判断cell是否重新创建，是得话重置，这样就不用关心引发的各个情况。
