@@ -781,3 +781,18 @@ UIBezierPath *path = [UIBezierPath bezierPathWithArcCenter:CGPointMake(centerX, 
 发现UIApplicationDidReceiveMemoryWarningNotification 和 didReceiveMemoryWarning 不是同步的。
 
 所以解决思路得换一下，之前得思路是找到触发缓存清理得方式，比如内存警告，然后在这个地方去重置，不过万一没有发送内存警告通知，其实还是会有问题。所以换个角度，在cellForRow处进行处理，判断cell是否重新创建，是得话重置，这样就不用关心引发的各个情况。
+
+# image resize scale
+
+image的scale，默认是1。如果本地图片（assets里面也好，bundle里面也好）文件名中带@3x，@2x这样，scale会变成3，2。另一种情况是自己使用cgimage的方式生成指定scale。
+
+比如tabbar的图片需要网络中下载，此时就需要下载完成后指定scale，否则上传的是3倍分辨率的图，以像素的形式展示就会很大。
+
+还有一种情况是，网络中下载的一些背景图，因为容器的尺寸会变，比如高度固定但是宽度相对屏幕宽度或者气泡的尺寸根据内容变化，此时需要进行拉伸，保证不变形。
+
+{% highlight objc%}
+UIEdgeInsets insets = {0, 40, 0, 40};
+[image resizableImageWithCapInsets:insets resizingMode:UIImageResizingModeStretch];
+{% endhighlight %}
+
+这个时候下载下来的图片，需要指定scale，和本地的占位图的scale保持一致，否则默认scale是1，进行拉伸效果会不符合预期。
