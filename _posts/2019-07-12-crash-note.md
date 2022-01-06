@@ -203,4 +203,13 @@ dict中存储string对象，但实际为nil，导致crash。解决方案： obj?
 
 解决方案：取detail时进行消息类型的判断；
 
-- 数组类型（字符串）操作，时刻注意越界；
+- 数组类型（字符串）操作，时刻注意越界
+
+`range` 操作需要注意，range.location + range.length <= length;
+
+- Attempted to dereference null pointer.
+
+类中存在实例变量的时候，使用`->`去操作的时候，得加空判断，否则会出现EXC_BAD_ACCESS；
+
+- 多线程错误
+
