@@ -127,6 +127,10 @@ lldb; process connect connect://127.0.0.1:12345; // console4
 
 这一步使用`CaptainHook`提供的API，以及上一步头文件和UI的搜索，尝试Hook具体某个类的某个方法。
 
+编写越狱插件的原理大致是，写完hook代码后生成一个动态库，当app启动时，cydia会让app加载对应当动态库（绑定了bundleId），修改App内存中的代码逻辑,去执行dylib中函数代码。
+
+所以,theos的tweak并不会对App原来的可执行文件进行修改,仅仅是修改了内存中的代码逻辑。
+
 [Logos](https://iphonedevwiki.net/index.php/Logos#.25orig)
 
 # dpkg
