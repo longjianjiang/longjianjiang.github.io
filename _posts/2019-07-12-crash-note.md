@@ -219,7 +219,7 @@ EXC_BAD_ACCESS 错误一般有两种情况，一种是访问了非法地址，�
 
 如何区分，看指令寄存器，如果指令寄存器和异常地址一样，那么就是执行了非法指令，否则就是访问了非法地址。
 
-访问了非法地址，一般是地址被改动，等到正常访问的时候出错了，一般涉及到多线程，此时时序无法保证。
+访问了非法地址，一般是地址被改动，等到正常访问的时候出错了，一般涉及到多线程，此时时序无法保证。可以使用xcode提供到[sanitizer](https://developer.apple.com/documentation/xcode/diagnosing-memory-thread-and-crash-issues-early)工具进行排查。
 
 arm下，如果发生了执行非法指令异常，可以从lr寄存器中获取执行非法之前的调用地址，通过atos进行解析到调用记录。
 
