@@ -223,4 +223,6 @@ EXC_BAD_ACCESS 错误一般有两种情况，一种是访问了非法地址，�
 
 arm下，如果发生了执行非法指令异常，可以从lr寄存器中获取执行非法之前的调用地址，通过atos进行解析到调用记录。
 
-[ref](https://developer.apple.com/documentation/xcode/investigating-memory-access-crashes)
+[apple memory access crash doc](https://developer.apple.com/documentation/xcode/investigating-memory-access-crashes)
+
+[更多crash参考](https://www.jianshu.com/p/14ad9353fac1)
