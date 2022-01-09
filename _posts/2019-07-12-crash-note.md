@@ -46,6 +46,8 @@ task_set_exception_ports
 
 watch dog机制是系统为了避免app长时间无法响应，一般是主线程阻塞，超过一定时间触发watch dog，将app 杀死。[ref](https://developer.apple.com/documentation/xcode/addressing-watchdog-terminations)
 
+watch dog机制的堆栈信息有时候并不是真正耗时的原因，因为比如要求5s完成，但是前4s耗时操作完成了，然后堆栈停留在了正常工作的那一秒，这个时候就需要使用timer porfiler去查看。
+
 oom（out of memory），当app 一直申请内存，一般是递归调用导致栈溢出，触发oom，app会被杀死。
 
 # 文件格式
