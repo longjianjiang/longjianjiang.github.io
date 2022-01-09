@@ -13,6 +13,18 @@
 
 描述了工程的目录结构，build settings，build phase，所有文件。
 
+# link framework & embed framework
+
+link库，静态库会将代码链接进可执行文件。静态库则不用，运行时加载进内存，可以做到多个进程共用。
+
+embend，把这个库嵌入到最终输出的程序的bundle里面。
+
+如果link了，但是没有embed，会报Termination Description: DYLD, dependent dylib '@rpath/MyFramework.framework/MyFramework'，操作。
+
+有的时候我们是只需要 link 而不需要 embed 的，比如一个 Framework 依赖另外一个 Framework 的时候（Apple 并不提倡这种操作），比如 Framework A 依赖 Framework B，主工程依赖 Framework A，这时在 Framework A 中，只要 Link Framework B，不需要也不能( Xcode 对于 Framework 工程没有对应的操作界面) Embed Framework B，主工程中在同时 Embed Framework A 和 Framework B。
+
+具体可以看 [Embedding Frameworks In An App](https://developer.apple.com/library/archive/technotes/tn2435/_index.html) 的 Apps with Dependencies Between Frameworks 片段
+
 # shortcut
 
 ```
