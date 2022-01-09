@@ -215,3 +215,12 @@ dict中存储string对象，但实际为nil，导致crash。解决方案： obj?
 
 - 多线程错误
 
+EXC_BAD_ACCESS 错误一般有两种情况，一种是访问了非法地址，一种是执行了非法指令。对于CPU来说，同一段信息有时候看作是数据有时候看作是指令。
+
+如何区分，看指令寄存器，如果指令寄存器和异常地址一样，那么就是执行了非法指令，否则就是访问了非法地址。
+
+访问了非法地址，一般是地址被改动，等到正常访问的时候出错了，一般涉及到多线程，此时时序无法保证。
+
+arm下，如果发生了执行非法指令异常，可以从lr寄存器中获取执行非法之前的调用地址，通过atos进行解析到调用记录。
+
+[ref](https://developer.apple.com/documentation/xcode/investigating-memory-access-crashes)
