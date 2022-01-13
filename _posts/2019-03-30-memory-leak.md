@@ -72,6 +72,12 @@ void allocCustomObjectsWithCustomMallocZone() {
 
 [ref](https://www.jianshu.com/p/f82e2b378455)
 
+# 内存泄露发现过程
+
+1 初步使用leaks工具检测，定位到代码。
+
+2 如果代码是系统方法或者库代码，使用符号断点（不需要加-/+），关注泄露到分配方式，在汇编中寻找。如果是malloc，则需要关注是否有逻辑跳过了free，改具体逻辑支持free到调用。
+
 # References
 
 [ref1](https://github.com/facebook/FBRetainCycleDetector)
