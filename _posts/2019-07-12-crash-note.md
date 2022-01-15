@@ -226,3 +226,9 @@ arm下，如果发生了执行非法指令异常，可以从lr寄存器中获取
 [apple memory access crash doc](https://developer.apple.com/documentation/xcode/investigating-memory-access-crashes)
 
 [更多crash参考](https://www.jianshu.com/p/14ad9353fac1)
+
+- [xxx .cxx_destruct]
+
+类中将任务提交到一个串行队列中，提交到任务会访问到类中到实例变量（比如数组）。当对象释放的最后会进行实例变量的释放，这个时候如果数组对象release后，这个时候切换线程执行到串行队列中到任务，访问到数组，这个时候就Attempted to dereference garbage pointer。
+
+
