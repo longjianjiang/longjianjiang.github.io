@@ -75,6 +75,8 @@ NSLayoutConstraint *constraint = [myView.topAnchor constraintEqualToAnchor:other
 
 当需要更新约束做动画时，更新完需要后，需要调用父类的`layoutIfNeeded`来使布局立即更新，否则动画没有效果。
 
+因为约束通过算法计算后依然是frame，那么正常情况下约束的更新不会立即去转成frame，所以做动画的时候frame没改变，所以就没有动画效果，而layoutIfNeeded的作用在于让约束的改变立即生效，这样在动画的block中frame改变了，动画也就生效了。
+
 ## UIStackView
 
 使用stackView可以少写很多约束，还是比较方便的。stackView可以理解为一个布局的容器，他的大小是由subviews决定的，而且是拥有intrinsicContentSize的。
@@ -143,6 +145,12 @@ originalPriceLabel.snp.makeConstraints {
 ## layout变化
 
 当某个view根据兄弟view进行设置约束，此时兄弟view进行了一次removeFromSuperview然后重新添加操作后，会导致view的位置进行变化，因为之前的view已经不在了，约束也就找不到了。
+
+## 几个方法
+
+setNeedsLayout
+
+setNeedsUpdateConstraints()
 
 # flexbox
 
