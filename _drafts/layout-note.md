@@ -148,9 +148,29 @@ originalPriceLabel.snp.makeConstraints {
 
 ## 几个方法
 
-setNeedsLayout
+setNeedsLayout，会标记layout需要更新，会在下一次runloop的最后，统一提交一次loop内的所有改动。layoutIfNeeded则是判断当前如果存在需要更新的标记，则立马进行layout的更新，不等到loop结尾。
 
-setNeedsUpdateConstraints()
+setNeedsUpdateConstraints，标记约束需要更新，会在下一次runloop调用updateConstraints() / updateViewConstraints()进行更新约束。updateConstraintsIfNeeded()则是判断当前如果存在需要更新的标记，立即调用updateConstraints() / updateViewConstraints()。
+
+正常情况下，更新frame，更新约束，都会触发layout的更新，所以一般情况下，不需要调用上面的这些方法。
+
+一般流程：
+
+```
+initWithFrame
+| loop start
+setNeedsLayout() ,setNeedsUpdateConstraints()
+|
+update constraints? => updateConstraints()
+|
+update layout? => layoutSubviews()
+|
+need display? => drawRect()
+| loop end
+```
+
+[ref](https://stackoverflow.com/questions/47823639/why-calling-setneedsupdateconstraints-isnt-needed-for-constraint-changes-or-ani)
+[ref](https://stackoverflow.com/questions/20609206/setneedslayout-vs-setneedsupdateconstraints-and-layoutifneeded-vs-updateconstra)
 
 # flexbox
 
