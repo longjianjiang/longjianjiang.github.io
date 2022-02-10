@@ -231,4 +231,20 @@ arm下，如果发生了执行非法指令异常，可以从lr寄存器中获取
 
 类中将任务提交到一个串行队列中，提交到任务会访问到类中到实例变量（比如数组）。当对象释放的最后会进行实例变量的释放，这个时候如果数组对象release后，这个时候切换线程执行到串行队列中到任务，访问到数组，这个时候就Attempted to dereference garbage pointer。
 
+- performSelector
+
+afterDelay会增加receiver的引用计数，cancel则会对应减一。
+
+如果在receiver的引用计数只剩下1 （仅为delay）时，调用cancel之后会立即销毁receiver，后续再调用receiver的方法就会crash。
+
+__weak typeof(self) weakSelf = self;
+[NSObject cancelPreviousPerformRequestsWithTarget:self];
+if (!weakSelf)
+{
+//NSLog(@"self被销毁");
+    return;
+}
+
+[self doOther];
+
 
