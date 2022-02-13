@@ -42,6 +42,8 @@ section: machO中的section；
 symbols：符号；
 Dead Stripped Symbols：未被使用的符号，不包含在可执行文件中；
 
+可以通过这个文件来做一些分析，比如segment里面有不同的section，比如通过__objc_classrefs和_objc_classname对比就可以知道哪些类没用，通过__objc_selrefs和_objc_methname对比可以知道哪些方法没有使用到。
+
 [ref](https://kingcos.me/posts/2019/link_map_file_in_xcode/)
 
 # 参考
