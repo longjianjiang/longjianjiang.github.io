@@ -312,6 +312,7 @@ A：需要这样一个延时的机制，普通函数的返回值默认都是auto
 main函数其实是包了一层autorelease pool的，所以这样每次runloop的push不用新建page，只需要插入nil，然后runloop结束的时候pop，对这层pool的对象进行回收。
 
 同时手动写autorelease pool可以在超过作用域立马回收，防止在循环中产生大量对象，这样可以分次进行释放，减小内存的使用压力。
+
 ## 总结
 
 本文介绍了autorelease的实现，其实依然是一个数据结构，理解了这个数据结构就能知道其实现原理。

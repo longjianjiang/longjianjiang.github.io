@@ -27,6 +27,23 @@ Dylibs(Dynamic libraries): 动态库（暴露了可执行程序可以使用的�
 
 链接的过程就是将多个.o文件和库link在一起，具体来说过程如下，linker会扫描所有的目标文件，将所有符号表中的信息收集起来，构成一个全局的符号表，然后再根据重定位表，把所有不确定的跳转指令根据符号表里地址，进行一次修正。最后，把所有的目标文件的section分别进行合并，形成最终的可执行代码。
 
+链接过程中有一个LTO（link time optimization）阶段，简单来说就是对目标文件做一些逻辑对优化，比如根据逻辑去除一些不可能使用到对符号，比如if false类似的情况，[参考](https://llvm.org/docs/LinkTimeOptimization.html)。
+
+### link map 文件
+
+link map文件就是在链接过程中产生的若干信息所构成的文件，默认是不生成的。
+
+文件主要有以下几个部分构成:
+
+path：文件路径；
+arch: 架构；
+object files: 链接的文件，有object，有dylib，有tbd；
+section: machO中的section；
+symbols：符号；
+Dead Stripped Symbols：未被使用的符号，不包含在可执行文件中；
+
+[ref](https://kingcos.me/posts/2019/link_map_file_in_xcode/)
+
 # 参考
 
 [https://developer.apple.com/videos/play/wwdc2018/415/](https://developer.apple.com/videos/play/wwdc2018/415/)
