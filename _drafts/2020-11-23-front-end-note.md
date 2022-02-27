@@ -109,3 +109,40 @@ open func userContentController(_ userContentController: WKUserContentController
 TODO
 
 [ref](https://www.jianshu.com/p/efb4f93b10de)
+
+## H5加载优化
+
+1> 容器预热
+
+2> prefetch
+
+配置表提前请求数据；
+
+## 常见问题
+
+1> post data 丢失问题；
+
+```
+//js -> native（将请求body传给客户端）
+window.webkit.messageHandlers.YXXHRCALL.postMessage({"requestId":"****",body:{}})
+
+//native->js (客户端保存body保存成功回调)
+window.yx_realxhr_callback(requestId)
+
+//正式请求id通过url参数传递给客户端：  js->native
+yx-wkwebview-request-id=qjyuim27rn91593759831452
+```
+
+2> cookie 丢失问题；
+
+hook document.setcookie方法。
+
+```
+//js->native (docuemnt.setcookie 通知客户端同步到NSHTTPCookieStorage)
+window.webkit.messageHandlers.COOKIECALL.postMessage({"**":"****"})
+
+//native->js (客户端将NSHTTPCookieStorage同步到 js的document)
+window.original_cookie='****';
+```
+
+[ref](https://ramboqiu.github.io/posts/iOS%E7%A7%92%E5%BC%80H5%E5%AE%9E%E6%88%98%E6%80%BB%E7%BB%93/#1-web%E5%AE%B9%E5%99%A8%E7%A6%BB%E7%BA%BF%E5%8C%85%E6%96%B9%E6%A1%88)
