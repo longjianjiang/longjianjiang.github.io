@@ -119,6 +119,8 @@ lldb; process connect connect://127.0.0.1:12345; // console4
 
 [ref](https://iosre.com/t/debugserver-lldb-error-failed-to-connect-port/15133/27)
 
+lldb attch到某个进程后，发送command给debugserver，debugserver转发给app进程，执行，完成后将结果转发给lldb。
+
 # lldb
 
 反反调试工具，[https://github.com/4ch12dy/xia0LLDB](https://github.com/4ch12dy/xia0LLDB)。
