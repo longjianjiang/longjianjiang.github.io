@@ -82,3 +82,17 @@ tst x10, x10; 用于把一个寄存器的内容和另一个寄存器的内容或
 [ref](https://reverseengineering.stackexchange.com/questions/14385/what-are-page-and-pageoff-symbols-in-ida)
 [ref](https://juejin.im/post/5c9df4c4e51d4502c94c16dd)
 
+# Debug Notes
+
+## calling convention
+
+x86，函数参数前6个放在寄存器，后面的压栈。
+
+• FirstArgument:RDI
+• SecondArgument:RSI
+• ThirdArgument:RDX
+• FourthArgument:RCX
+• FifthArgument:R8
+• SixthArgument:R9
+
+rax寄存器存放函数返回值。
