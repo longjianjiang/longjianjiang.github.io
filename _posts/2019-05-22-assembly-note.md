@@ -96,3 +96,8 @@ x86，函数参数前6个放在寄存器，后面的压栈。
 • SixthArgument:R9
 
 rax寄存器存放函数返回值。
+
+• Nybble: 4 bits, a single value in hexadecimal
+• Half word: 16 bits, or 2 bytes
+• Word: 32 bits, or 4 bytes
+• Double word or Giant word: 64 bits or 8 bytes.
