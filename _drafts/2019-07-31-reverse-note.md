@@ -119,7 +119,13 @@ lldb; process connect connect://127.0.0.1:12345; // console4
 
 [ref](https://iosre.com/t/debugserver-lldb-error-failed-to-connect-port/15133/27)
 
+xcode的lldb之所以能调试app，是因为手机运行app，lldb会把调试指令发给手机的debugServer; debugServer是由Xcode第一次运行程序给安装到手机上。
+
+debugserver通过ptrace函数调试app，ptrace是系统函数，此函数提供一个进程去监听和控制另一个进程，并且可以检测被控制进程的内存和寄存器里面的数据。ptrace可以用来实现断点调试和系统调用跟踪。
+
 lldb attch到某个进程后，发送command给debugserver，debugserver转发给app进程，执行，完成后将结果转发给lldb。
+
+ptrace攻防参考[ref](https://www.jianshu.com/p/9ed2de5e7497)
 
 # lldb
 
