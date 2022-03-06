@@ -125,11 +125,66 @@ debugserver通过ptrace函数调试app，ptrace是系统函数，此函数提供
 
 lldb attch到某个进程后，发送command给debugserver，debugserver转发给app进程，执行，完成后将结果转发给lldb。
 
-ptrace攻防参考[ref](https://www.jianshu.com/p/9ed2de5e7497)
 
 # lldb
 
 反反调试工具，[https://github.com/4ch12dy/xia0LLDB](https://github.com/4ch12dy/xia0LLDB)。
+
+1> 可以通过ptrace来实现反调试保护。`ptrace(PT_DENY_ATTACH, 0, 0, 0);`。
+
+1.1> 此时可以通过fishhook来hook，达到去除防护的目的。
+
+
+```
+#import "fishhook.h"
+
+int  (*ptrace_p)(int _request, pid_t _pid, caddr_t _addr, int _data);
+
+int  hp_ptrace(int _request, pid_t _pid, caddr_t _addr, int _data){
+    if (_request != 31) {//不是拒绝附加
+        return ptrace_p(_request, _pid, _addr, _data);
+    }
+    return 0;
+}
+
+void hp_hook_ptrace() {
+    struct rebinding ptrace_rb;
+    ptrace_rb.name ="ptrace";
+    ptrace_rb.replacement = hp_ptrace;
+    ptrace_rb.replaced = (void *)&ptrace_p;
+
+    struct rebinding bds[] = {ptrace_rb};
+    rebind_symbols(bds, 1);
+}
+
++ (void)load {
+    hp_hook_ptrace();
+}
+```
+
+2> 所以为了不让别人hook ptrace函数，可以自己先hook，然后去调用一个自己定义的函数。
+
+2.2> 此时可以在ptrace下断点，因为即使防护者事先hook了但是最终还是会调用到ptrace函数。所以下完断点可以看到是哪里进行了保护，并且可以看到hook后的函数名是什么。
+
+这个时候我们可以把调用ptrace的汇编改成nop，这样防护也就失效了。
+
+3> 使用汇编调用ptrace，这样就可以不被符号断点断住。
+
+```
+//安全防护-反调试
+ asm(
+  "mov x0,#31\n"
+  "mov x1,#0\n"
+  "mov x2,#0\n"
+  "mov x3,#0\n"
+  "mov w16,#26\n" //26是ptrace
+  "svc #0x80" //0x80触发中断去找w16执行
+ );
+```
+
+3.3> 此时可以分析找到svc #0x80修改为nop就可以了，抖音的防护就是通过汇编调用的。
+
+ptrace攻防参考[ref](https://www.jianshu.com/p/9ed2de5e7497)
 
 # CaptainHook
 
