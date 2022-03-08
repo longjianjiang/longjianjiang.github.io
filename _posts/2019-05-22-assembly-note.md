@@ -105,3 +105,11 @@ rax寄存器存放函数返回值。
 • Half word: 16 bits, or 2 bytes
 • Word: 32 bits, or 4 bytes
 • Double word or Giant word: 64 bits or 8 bytes.
+
+# 实战
+
+Trampoline通常都和跳转相关。本文提到的Trampoline是一个特定的地址，该地址指向特定的功能，待功能执行完毕之后，立马跳出Trampoline回到正常执行路径。
+
+RN中的一个Trampoline实现，汇编地址[这里](https://github.com/facebook/react-native/blob/main/React/Profiler/RCTProfileTrampoline-arm64.S)，用到的函数[这里](https://github.com/facebook/react-native/blob/8bd3edec88148d0ab1f225d2119435681fbbba33/React/Profiler/RCTProfile.m)。
+
+[ref](https://www.rookie2geek.cn/react-native/2018/12/02/react-native-Trampoline%E5%AE%9E%E7%8E%B0.html#%E5%AF%84%E5%AD%98%E5%99%A8)
