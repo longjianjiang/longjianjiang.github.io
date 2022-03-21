@@ -78,6 +78,8 @@ L_.str:                                 ## @.str
 .cfi_def_cfa_register %rbp
 ```
 
+[CFA(Canonical Frame Address)](https://stackoverflow.com/questions/7534420/gas-explanation-of-cfi-def-cfa-offset)
+
 ### 栈
 
 > 函数调用是基于栈的，栈地址从高往低，新入栈的数据在低地址
