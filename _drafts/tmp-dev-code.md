@@ -432,6 +432,12 @@ imgView.snp.remakeConstraints {
 
 此时需要调整的地方一是每个itemSize返回实际的高度，二是estimatedSize的高度设置单个cell可能最大的高度。
 
+---
+
+如果collectionView需要展示header，viewForSupplementaryElementOfKind方法不能返回[UICollectionReusableView new]，会导致异常说没有使用dequeue方法创建。
+
+同时viewForSupplementaryElementOfKind的调用是在referenceSizeForHeaderInSection之后，当返回当header尺寸不为0，才会触发。
+
 # UIScrollView
 
 设置scrollView只能水平方向上滚动的一种方式，设置delegate，didScroll修改y。
