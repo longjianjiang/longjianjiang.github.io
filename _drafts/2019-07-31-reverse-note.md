@@ -242,3 +242,5 @@ dpkg -i Reveal2Loader_1.0-3_iphoneos-arm.deb
 [https://github.com/rpetrich/CaptainHook](https://github.com/rpetrich/CaptainHook)
 
 [https://pandara.xyz/2016/08/13/fake_wechat_location/](https://pandara.xyz/2016/08/13/fake_wechat_location/)
+
+[https://davidlii.cn/2019/03/28/jailbreak-ios12.html](https://davidlii.cn/2019/03/28/jailbreak-ios12.html)
