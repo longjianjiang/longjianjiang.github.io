@@ -487,7 +487,7 @@ scrollView.alwaysBouncingHorizontal = true
 tableview.addGestureRecognizer(scrollView.panGestureRecognizer)
 ```
 
-在didScroll的代理方法，，分别将 x、y 应用到响应的属性即可，y 轴就给 TableView，让其可以上下卷动，x 轴就给每个 cell，让其做自己的处理。
+在didScroll的代理方法，分别将 x、y 应用到响应的属性即可，y 轴就给 TableView，让其可以上下卷动，x 轴就给每个 cell，让其做自己的处理。
 
 [ref](https://www.jianshu.com/p/5804fa72aaed)
 
@@ -802,3 +802,11 @@ UIEdgeInsets insets = {0, 40, 0, 40};
 {% endhighlight %}
 
 这个时候下载下来的图片，需要指定scale，和本地的占位图的scale保持一致，否则默认scale是1，进行拉伸效果会不符合预期。
+
+# UITextView
+
+textview文字超过frame的时候可以滚动，今天遇到一个情况是，展示textview的时候会进行初始文字填充，此时textview不能滚动，需要输入一行内容才能触发滚动。
+
+经过view debug查看，发现textview约束存在警告`scrollable content size is ambiguous for uitextview`。
+
+解决警告是因为在textview内部添加了一个占位label，设置了左右顶部高度约束。当把占位label使用textview的父view添加，警告消失了，也可以正常滑动了。
