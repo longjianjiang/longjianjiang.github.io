@@ -531,6 +531,14 @@ func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: Inde
 
 列表里面有两个section，第一个section数据为空时，cell高度返回0。发现cell还是会展示出来，这个时候需要设置 cell.clipToBounds = YES。这样就不会展示了。
 
+## plain 和 group 区别
+
+plain的时候，设置section header默认会有吸顶效果。
+
+如果不需要吸顶效果，则需要实现section footer方法，返回高度为0.01，不能为0，当为0时系统会取默认值。还需要设置tableviewHeader为一个0.01的view。
+
+[ref](https://honkersk.github.io/2018/09/15/UITableViewStylePlain%E5%92%8CUITableViewStyleGrouped%E6%A0%B7%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB%E5%8F%8A%E6%95%88%E6%9E%9C%E5%A4%84%E7%90%86/)
+
 # UICollectionView
 
 ## contentInset
