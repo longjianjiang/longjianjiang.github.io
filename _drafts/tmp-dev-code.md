@@ -5,6 +5,12 @@
 出现问题，下断点调试，view debug查看层级，而不是反复的重试或者查看代码，光看是看不出问题的。
 ```
 
+## navigationBar
+
+有时候改动导航栏，为了不影响其他页面，需要进行disappear重置。
+
+需要注意的时候，需要在willDis的时候进行操作，didDis的时候，此时已经出栈，取self.navigationController为空。
+
 ## navigationItem
 
 ### rightBarButtonItem 隐藏
