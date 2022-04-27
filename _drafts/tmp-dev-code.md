@@ -68,6 +68,8 @@ override var isHighlighted: Bool {
 
 [ref](https://stackoverflow.com/questions/27904177/uiimageview-animation-stops-when-user-touches-screen)
 
+上述方式如果在tableview中咩有效果，解决方法可以将cell selection效果设置为none，通过添加手势事件对外抛出处理；
+
 ## 毛玻璃效果修正
 
 一个播放中心界面，使用的是`.light`的effect，发现很亮，设计稿上就很淡，在effectView的contentView里面加一层半透明(white 0.8)的view后，就会谈很多。
