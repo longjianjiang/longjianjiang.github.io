@@ -282,6 +282,10 @@ override func draw(_ rect: CGRect) {
 
 今天加载一张网络图，发现没有显示处理，然后在浏览器打开了图片链接看了下，看到底部有一条内容，开始以为是图片加载有问题，后来发现这张图顶部90%是透明，只有底部10%有一段信息，而imageView设置了fill，所以其实显示的是中间透明的部分，显示效果就是默认的背景色。
 
+---
+
+YYAnimatedImageView用来展示image和animationImages交替的时候，出现了显示动图切换到静态图未生效的情况，animationImages设置为nil后设置image就正常了。
+
 # UserDefaults
 
 UserDefaults 存储字典时，key如果不是string时，此时就不能使用UserDefaults 存储，此时存储的对象不是`Property List`。
