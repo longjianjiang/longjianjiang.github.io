@@ -830,3 +830,13 @@ textview文字超过frame的时候可以滚动，今天遇到一个情况是，�
 经过view debug查看，发现textview约束存在警告`scrollable content size is ambiguous for uitextview`。
 
 解决警告是因为在textview内部添加了一个占位label，设置了左右顶部高度约束。当把占位label使用textview的父view添加，警告消失了，也可以正常滑动了。
+
+# UIAlertController & webview打开imagePicker
+
+present出来一个导航控制器管理的页面，有一种场景是会弹出一个alert，点击确定后，将整个导航控制器进行dismiss。
+
+发现有一种情况是，一个h5页面，有按钮进行打开imagepicker进行选图片，选择完成后，此时弹出alert点击确定发现是没有反应的，导航控制器无法被dismiss。
+
+猜测可能和present出来的imagepicker有关系，alert是被present出来的，需要进行dismiss，导航控制器又是present出来的，需要进行dismiss，可能同一时间没有同时生效。
+
+尝试alertAction内部dismiss导航控制器加了一个async，发现就正常了。
