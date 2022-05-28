@@ -106,9 +106,9 @@ aa name nancy, bb name nancy.
 
 对于一个对象是选择struct还是class之前，首先是确定这个对象的语义。
 
-所谓值语义对象的特征是内容和计算，值对象从语义是不可变的。
+所谓值语义对象的特征是内容和计算，值对象从语义是不可变的。代表了是一个value。
 
-引用语义对象的特征是标识，状态，行为，引用对象从语义上是不可拷贝的。
+引用语义对象的特征是标识，状态，行为，引用对象从语义上是不可拷贝的。一个引用指向某个内容。
 
 这里从语义的不可变是不是可以理解为在进行赋值的时候，s2其实是s1的一份内容拷贝，所以当修改s2内部的成员不会影响到s1。
 应该就是另一篇文章中所说的`copy by value`。
@@ -235,3 +235,5 @@ NSString的copy就是简单的retain，当然自定义子类的时候，`copyWit
 [https://www.cnblogs.com/weidagang2046/archive/2010/07/24/value-vs-ref.html](https://www.cnblogs.com/weidagang2046/archive/2010/07/24/value-vs-ref.html)
 
 [https://developer.apple.com/library/archive/documentation/General/Conceptual/DevPedia-CocoaCore/ObjectCopying.html](https://developer.apple.com/library/archive/documentation/General/Conceptual/DevPedia-CocoaCore/ObjectCopying.html)
+
+[c# stack ref](https://docs.microsoft.com/zh-cn/archive/blogs/ericlippert/the-stack-is-an-implementation-detail-part-one)
