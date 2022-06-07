@@ -37,8 +37,8 @@ add r0, r1, r2 			=> r0 = r1 + r2
 add r0, r1				=> r0 = r0 + r1
 push {r0, r1, r2}		=> push r0, r1, r2 onto the stack;
 pop {r0, r1, r2}		=> pop three values off the stack, putting them into r0, r1, r2
-stp r0, r1, [sp, #16]	=> push r0, r1 onto the stack, then sp = sp + 16 	 
-ldp r0, r1, [sp, #16]	=> pop r0, r1 off the stack at sp+16 position, putting them into r0, r1
+stp r0, r1, [sp, #16]	=> *(sp + 16) = r0, *(sp + 16 + 8) = r1; // push r0, r1 onto the stack, then sp = sp + 16 	 
+ldp r0, r1, [sp, #16]	=> r0 = *(sp + 16), r1 = *(sp + 16 + 8); // pop r0, r1 off the stack at sp+16 position, putting them into r0, r1
 ```
 
 r(register), p(pair)
