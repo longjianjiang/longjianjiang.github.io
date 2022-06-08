@@ -175,7 +175,7 @@ OC里面的集合遍历提供的方法也是一种迭代器模式，其中一种
 装饰对象中持有原有对象，对原对象操作之前添加若干操作，来进行扩展原对象的行为。
 比如给UIImage增加图片处理的装饰器。
 
-{% highlight swift}
+```
 public final class Kingfisher<Base> {
     public let base: Base
     public init(_ base: Base) {
@@ -193,7 +193,7 @@ public extension KingfisherCompatible {
     }
 }
 extension ImageView: KingfisherCompatible { }
-{% endhighlight %}
+```
 
 上面的Kingfisher其实就是一种装饰者模式。
 
