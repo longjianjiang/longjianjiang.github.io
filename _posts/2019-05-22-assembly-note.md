@@ -35,6 +35,9 @@ ldr r0, [sp]			=> r0 = *sp
 str r0, [sp] 			=> *sp = r0
 add r0, r1, r2 			=> r0 = r1 + r2
 add r0, r1				=> r0 = r0 + r1
+sub R0，R1，R2 // R0 = R1 - R2
+sub R0，R1，#256 //R0 = R1 - 256
+sub R0，R2，R3，LSL#1 // R0 = R2 - (R3 << 1)
 push {r0, r1, r2}		=> push r0, r1, r2 onto the stack;
 pop {r0, r1, r2}		=> pop three values off the stack, putting them into r0, r1, r2
 stp r0, r1, [sp, #16]	=> *(sp + 16) = r0, *(sp + 16 + 8) = r1; // push r0, r1 onto the stack, then sp = sp + 16 	 
