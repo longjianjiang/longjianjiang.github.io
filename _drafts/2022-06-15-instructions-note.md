@@ -87,3 +87,7 @@ EA = PC + A，此时A也是一个偏移，使用补码的形式存储，可正�
 PUSH操作，先进行SP的减小，腾出空间，然后将内容存到新空间中。
 
 POP操作，先取顶部空间中的数据，然后进行SP增加，等于释放了一段区域。
+
+# References
+
+[计算机组成原理-唐朔飞](https://github.com/zhaojunHouse/studyGuide/blob/master/%E3%80%8A%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86%E3%80%8B%E5%94%90%E6%9C%94%E9%A3%9E.pdf)
