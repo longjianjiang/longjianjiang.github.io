@@ -89,6 +89,20 @@ tst x10, x10; 用于把一个寄存器的内容和另一个寄存器的内容或
 
 指令长度是32位，所以不能存放更长的地址，所以需要使用@PAGE先取基于PC的偏移的高21位，才使用@PAGEOFF取偏移的12位，这样就可以取到完整的偏移，加上PC就可以找到实际的地址；
 
+下面是一个例子：
+
+```
+_addCount:
+    ; omit function start
+    adrp    x8, _counter@PAGE
+    add     x8, x8, _counter@PAGEOFF
+    ; omit code for save new value to w1
+    str     w1, [x8]
+    ; omit function end
+```
+
+分成两部，adrp+add，取到_counter距离pc的完整偏移，x8就是_counter的地址，将w1的数值进行更新_counter。
+
 [ref](https://reverseengineering.stackexchange.com/questions/14385/what-are-page-and-pageoff-symbols-in-ida)
 [ref](https://juejin.im/post/5c9df4c4e51d4502c94c16dd)
 
