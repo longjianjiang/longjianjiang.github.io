@@ -108,6 +108,12 @@ _addCount:
 [ref](https://reverseengineering.stackexchange.com/questions/14385/what-are-page-and-pageoff-symbols-in-ida)
 [ref](https://juejin.im/post/5c9df4c4e51d4502c94c16dd)
 
+# Other
+
+- .p2align x
+
+进行2的x次方进行对齐；
+
 # Debug Notes
 
 ## calling convention
