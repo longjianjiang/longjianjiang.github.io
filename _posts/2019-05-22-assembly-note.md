@@ -45,7 +45,7 @@ ldp r0, r1, [sp, #16]	=> r0 = *(sp + 16), r1 = *(sp + 16 + 8); // pop r0, r1 off
 ```
 
 r(register), p(pair)
-
+Each register can be used as a 64-bit X register (X0..X30), or as a 32-bit W register (W0..W30)
 
 ```
 ldr x0, [x1, #8]		=> Load from address X1 + 8
@@ -57,6 +57,20 @@ ldr x0, [x1], #8		=> Post-index: Load from the unmodified address in X1 first, t
 temporaryLabel:
     b temporaryLabel # 类似 jmp指令，此时不会将下一个指令地址保存到lr；
 	bl temporaryLabel # 同样是跳转到某个位置，但是执行完后回来继续执行下一个指令；
+```
+
+```
+cbz    x19, 0x18bfd2d6c => (compare branch zero) x19地址中的值和0比较，如果等于0，跳转到PC+offset;
+```
+
+```
+orr    w4, wzr, #0x4 => w4 = wzr | 0x4; wzr(wzr 是 word zero register，类似于 /dev/zero，写入无效，读出为 0)
+```
+
+```
+csel  Wd, Wn, Wm, cond 
+# 等价于
+Wd = cond ? Wn : Wm
 ```
 
 # Register
