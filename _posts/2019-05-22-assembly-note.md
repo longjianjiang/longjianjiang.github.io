@@ -105,7 +105,6 @@ _addCount:
 
 分成两部，adrp+add，取到_counter距离pc的完整偏移，x8就是_counter的地址，将w1的数值进行更新_counter。
 
-[ref](https://reverseengineering.stackexchange.com/questions/14385/what-are-page-and-pageoff-symbols-in-ida)
 [ref](https://juejin.im/post/5c9df4c4e51d4502c94c16dd)
 
 # Debug Notes
