@@ -127,6 +127,10 @@ _addCount:
 
 进行2的x次方进行对齐；
 
+- .quad 0
+
+表示0占4个字，8个字节；
+
 # Debug Notes
 
 ## calling convention
@@ -156,3 +160,5 @@ RN中的一个Trampoline实现，汇编地址[这里](https://github.com/faceboo
 [ref](https://www.rookie2geek.cn/react-native/2018/12/02/react-native-Trampoline%E5%AE%9E%E7%8E%B0.html#%E5%AF%84%E5%AD%98%E5%99%A8)
 
 `imp_implementationWithBlock`的实现也用到了Trampoline，有个简单的实现[ref](https://github.com/landonf/plblockimp)。
+
+block实现imp，系统的实现里面用到了虚拟内存的两个函数。`vm_allocate`分配一块虚拟内容，`vm_remap`将申请好的虚拟内存进行重新映射到一块虚拟内存，此时相当于有两个虚拟内存地址指向的是同一块内存区域。
