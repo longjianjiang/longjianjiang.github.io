@@ -181,6 +181,8 @@ atos -arch <Binary Architecture> -o <Path to dSYM file>/Contents/Resources/DWARF
 
 crash 地址如何对应到符号表中的地址？
 
+有些crash可能看堆栈不是很直观，必要时需要使用汇编进行进一步排查，一个[例子](https://juejin.cn/post/6945393466218119182)。
+
 # References
 
 [ref1](http://foggry.com/blog/2015/07/27/ru-he-shou-dong-jie-xi-crashlog/)
@@ -246,5 +248,3 @@ if (!weakSelf)
 }
 
 [self doOther];
-
-
