@@ -166,7 +166,8 @@ extension CALayer {
 
 listview 的`clipToBounds`是true，会导致阴影显示不全，此时需要设置为false，才能显示正常；
 
-类型购物车底部的view的上方会加阴影，此时需要将上方的listView离bottomView有一些间距，不然加了阴影被盖住了，就看不出了。
+类似购物车底部的view的上方会加阴影，此时需要将上方的listView离bottomView有一些间距，不然加了阴影被盖住了，就看不出了。
+
 # Timer, WeakProxy
 
 OC中使用YYWeakProxy，swift可以使用如下的方案：
@@ -502,6 +503,12 @@ tableview.addGestureRecognizer(scrollView.panGestureRecognizer)
 在didScroll的代理方法，分别将 x、y 应用到响应的属性即可，y 轴就给 TableView，让其可以上下卷动，x 轴就给每个 cell，让其做自己的处理。
 
 [ref](https://www.jianshu.com/p/5804fa72aaed)
+
+---
+
+当出现改变contentOffest的y不生效的情况，或者做动画的时候发现不生效。可能是由于触发了其他地方的设置，将又恢复到了原先的值。
+
+这个时候需要在didScroll方法里，打断点，看是哪里触发了重置操作。
 
 # UITableView
 
