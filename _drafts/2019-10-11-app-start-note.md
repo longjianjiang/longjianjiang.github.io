@@ -73,6 +73,12 @@ objc`load`方法的执行；
 
 最后dyld将控制权交给main函数，对应`LC_MAIN` load command。
 
+# dyld 相关
+
+ios16启动优化。
+
+[ref](https://www.emergetools.com/blog/posts/iOS16LaunchTime?utm_source=swiftlee&utm_medium=swiftlee_weekly&utm_campaign=issue_123)
+
 # 启动优化
 
 
