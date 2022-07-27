@@ -93,6 +93,8 @@ Wd = cond ? Wn : Wm
 
 用于保存函数调用的返回地址，即存放执行BL或者BLX指令后的PC的值。
 
+x29是fp寄存器、x30是lr寄存器
+
 ## CPSR (Current Program Status Register)
 
 CPSR 是32位寄存器，有如下标记位：
