@@ -34,13 +34,39 @@ CPU如何知道访问的是哪个段，取决于当前段地址寄存器是哪�
 
 3. 特定指令默认来内存长度；
 
-## 寻址
+## 内存寻址的多种方式
 
 ## 转移指令
 
 可以修改IP寄存器，或者修改CS，IP寄存器的指令都是转移指令。
 
 转移指令有两种形式，一种是给定距离IP的偏移实现转移，一种是给出具体的CS，IP地址实现转移。
+
+常见的jmp，ret，loop都是转移指令；
+
+```
+assume cs:code
+code segment
+	start: 	mov ax, 1
+			mov cx, 3	
+			call s
+			mov bx, ax
+			mov ax, 4c00h
+			int 21h
+	s:		add ax, ax
+			loop s
+			ret
+code ends
+end start
+```
+
+call 和 ret 配合使用可以实现函数的嵌套。
+
+cpu将`call s`指令机器码读入后，IP会指向`call s`的下一条指令`mov bx, ax`。
+
+将IP地址进行push进栈，修改IP，加上偏移定位到标号s指令地址。
+
+执行完标号s后，执行ret，ret将之前push的IP的地址进行pop到IP，此时IP执行`call s`的下一条指令`move bx, ax`处，CPU继续执行。
 
 ---
 
