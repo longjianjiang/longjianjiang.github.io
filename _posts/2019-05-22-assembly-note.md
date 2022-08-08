@@ -261,3 +261,7 @@ RN中的一个Trampoline实现，汇编地址[这里](https://github.com/faceboo
 block实现imp，系统的实现里面用到了虚拟内存的两个函数。`vm_allocate`分配一块虚拟内容，`vm_remap`将申请好的虚拟内存进行重新映射到一块虚拟内存，此时相当于有两个虚拟内存地址指向的是同一块内存区域。
 
 [vm_remap](https://juejin.cn/post/6844903773031284750)
+
+# References
+
+[https://book.douban.com/subject/35038473/](https://book.douban.com/subject/35038473/)
