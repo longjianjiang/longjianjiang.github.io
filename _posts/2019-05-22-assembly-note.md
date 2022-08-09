@@ -84,6 +84,8 @@ cpu将`call s`指令机器码读入后，IP会指向`call s`的下一条指令`m
 
 c中有setjmp和longjmp，setjmp会保存当前的上下文环境，longjmp时恢复setjmp时的上下文环境。
 
+上下文环境其实就是常用的寄存器，比如sp，bp，ip还有一些通用的参数寄存器。
+
 [ref](https://zhuanlan.zhihu.com/p/82492121)
 
 ## 中断
