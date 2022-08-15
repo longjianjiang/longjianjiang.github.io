@@ -233,7 +233,7 @@ _addCount:
 
 # Debug Notes
 
-## calling convention
+## chttp://gitlab.ximalaya.com/iphone/xmlivegiftkit/merge_requests/9alling convention
 
 x86，函数参数前6个放在寄存器，后面的压栈。
 

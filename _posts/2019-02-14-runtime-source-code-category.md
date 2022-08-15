@@ -439,6 +439,29 @@ void objc_removeAssociatedObjects(id object) {
 
 `_object_remove_assocations` 实现也很简单，将所有`ObjcAssociation` 存放到一个 vector中，最后将vector中所有元素进行release。
 
+# weak 关联对象
+
+关联对象的policy是没有weak的，只有assign，如果我们需要实现一个delegate关联对象指定了assign，这个时候就会存在问题。
+
+虽然policy没有weak，但是我们可以通过增加一层来达到weak的效果，比如借助于block。
+
+{% highlight objc%}
+@implementation NSObject (Weak)
+-(NSString *) myObject {
+    id (^block)(void) = objc_getAssociatedObject (self, @selector (myObject));
+    return (block ? block () : nil);
+}
+
+-(void) setMyObject:(NSString *) myObject {
+    id __weak weakObject = myObject;
+    id (^block)(void) = ^{ return weakObject; };
+    objc_setAssociatedObject (self, @selector (myObject), block, OBJC_ASSOCIATION_COPY);
+}
+@end
+{% endhighlight %}
+
+或者新建一个wrapper类，weak持有实际存储的关联对象。
+
 # 最后
 
 本文笔者介绍了分类的结构及其加载过程，关联对象的实现，之前笔者也看过关于分类的文章，这次有了之前内容的铺垫，理解的更加深刻了。
