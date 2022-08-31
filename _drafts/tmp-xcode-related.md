@@ -7,6 +7,18 @@
 
 [ref](https://stackoverflow.com/questions/20637435/xcode-what-is-a-target-and-scheme-in-plain-language)
 
+# search paths
+
+$(PROJECT_DIR)代表的是整个项目，xcodeproj文件的上一层目录；
+
+$(SRCROOT)代表的是项目根目录下，xcodeproj文件所在目录；
+
+${PODS_ROOT}代表的是pod目录；
+
+`header search paths` 会尝试两种方式<>, "", `user header search paths` 只会使用 ""的方式。<>表示从系统目录空间搜索文件，""表示从用户目录空间搜索文件。
+
+[ref](https://www.jianshu.com/p/d41e05e6d9fa)
+
 # project.pbxproj
 
 这个文件是Xcode用来描述工程结构的，结构是类似json的kv形式。
