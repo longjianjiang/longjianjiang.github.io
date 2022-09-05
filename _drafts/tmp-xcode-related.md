@@ -21,6 +21,8 @@ ${PODS_ROOT} Build Settings 中的 User-Defined（在最下方） 中，有一�
 
 `header search paths` 会尝试两种方式<>, "", `user header search paths` 只会使用 ""的方式。<>表示从系统目录空间搜索文件，""表示从用户目录空间搜索文件。
 
+$(inherited) 表示继承，比如project里面设置了header search path，project下面有多个target，这个时候target的header search path就可以添加$(inherited)表示继承project里面的path。
+
 [ref](https://www.jianshu.com/p/d41e05e6d9fa)
 
 # project.pbxproj
