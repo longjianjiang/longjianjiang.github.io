@@ -13,7 +13,7 @@ $(PROJECT_DIR)代表的是整个项目，xcodeproj文件的上一层目录；
 
 $(SRCROOT)代表的是项目根目录下，xcodeproj文件所在目录；
 
-${PODS_ROOT}代表的是pod目录；
+${PODS_ROOT} Build Settings 中的 User-Defined（在最下方） 中，有一个定义 ${PODS_ROOT} = ${SRCROOT}/Pods。
 
 `header search paths` 会尝试两种方式<>, "", `user header search paths` 只会使用 ""的方式。<>表示从系统目录空间搜索文件，""表示从用户目录空间搜索文件。
 
