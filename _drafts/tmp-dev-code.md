@@ -131,6 +131,10 @@ btn.titleLabel?.lineBreakMode = .byClipping
 
 [ref](https://zhoujinying.github.io/2019/09/12/UIButton-%E5%9C%A8%E7%B2%97%E4%BD%93%E6%96%87%E6%9C%AC%E4%B8%8B%E7%9A%84bug/)
 
+---
+
+按钮无法点击的情况。一种可能是按钮的父视图size有问题，比如是zero，这个时候按虽然能展示，但是点击没有反应。
+
 # 阴影
 
 layer设置阴影代码如下：
