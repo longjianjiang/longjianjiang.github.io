@@ -67,6 +67,16 @@ const Person = ({ personId }) => {
 ```
 [Hooks Ref](https://zhuanlan.zhihu.com/p/347136271)
 
+# Ref
+
+有时父组件需要拿到子组件去调用子组件的方法。此时就需要在父组件中拿到子组件的引用。
+
+如果子组件是一个函数组件，需要用到`useImperativeHandle` Hook，改方法作用是对外暴露可调用的方法。
+
+[React Ref](https://reactjs.org/docs/refs-and-the-dom.html)
+
+[useImperativeHandle](https://reactjs.org/docs/hooks-reference.html#useimperativehandle)
+
 # Context
 
 一般我们是在父组件中将props传递给子组件，但是如果层级比较多，那么中间多一些组件传递只是为了给最底层的组件。此时可以使用Context，可以让value在整个组件树中都可以获取到。
