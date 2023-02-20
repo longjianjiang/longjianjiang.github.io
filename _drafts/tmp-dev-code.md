@@ -851,3 +851,25 @@ present出来一个导航控制器管理的页面，有一种场景是会弹出�
 猜测可能和present出来的imagepicker有关系，alert是被present出来的，需要进行dismiss，导航控制器又是present出来的，需要进行dismiss，可能同一时间没有同时生效。
 
 尝试alertAction内部dismiss导航控制器加了一个async，发现就正常了。
+
+# UIStackView
+
+stackview不相应手势，即使设置userIntere也不起效果。可以自定义子类，重写hitTest。
+
+{% highlight objc%}
+- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event{
+    UIView *hit = [super hitTest:point withEvent:event];
+    if (hit == self) {
+        return nil;
+    }
+    return hit;
+}
+{% endhighlight %}
+
+stackview里面设置fill后，如果需要某个元素一定展示需要设置一定展示的约束优先级为required。
+
+{% highlight objc%}
+[_followIconView setContentHuggingPriority:UILayoutPriorityRequired forAxis:UILayoutConstraintAxisHorizontal];
+[_followIconView setContentCompressionResistancePriority:UILayoutPriorityRequired forAxis:UILayoutConstraintAxisHorizontal];
+{% endhighlight %}
+
