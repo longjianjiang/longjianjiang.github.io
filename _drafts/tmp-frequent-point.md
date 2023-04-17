@@ -20,3 +20,11 @@ include所做的事情，就是将header文件里面的内容进行一次复制�
 import 则可以避免这种重复导入的问题。
 
 ## extern
+
+## throttle 和 debounce
+
+截流，限制某个操作的频率。
+
+防抖动，超过某个时间才去执行操作。
+
+[ref](https://www.jianshu.com/p/e91775195608)
