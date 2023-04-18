@@ -2,6 +2,15 @@
 
 本文记录笔者整理的一些前端的知识。
 
+## 页面生命周期
+
+DOMContentLoaded: html，dom加载完毕；
+load: 外部的资源加载完毕，比如<img>，样式；
+beforeunload: 准备退出；
+unload: 即将完全退出；
+
+[ref](https://javascript.info/onload-ondomcontentloaded)
+
 ## 跨域
 
 所谓跨域是指A域名下去请求B域名下的资源，此时会报错。比如发起ajax请求到另一个域名的接口会报错。
