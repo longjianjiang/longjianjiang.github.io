@@ -2,6 +2,38 @@
 
 本文记录笔者整理的一些前端的知识。
 
+## 跨域
+
+所谓跨域是指A域名下去请求B域名下的资源，此时会报错。比如发起ajax请求到另一个域名的接口会报错。
+
+之所以存在跨域问题，是浏览器需要遵守同源策略，所谓同源是指"协议+域名+端口"三者相同，即便两个不同的域名指向同一个ip地址，也非同源。
+
+所以有以下常见的跨域场景:
+
+```
+http://www.domain.com/a.js
+http://www.domain.com/b.js         同一域名，不同文件或路径           允许
+http://www.domain.com/lab/c.js
+
+http://www.domain.com:8000/a.js
+http://www.domain.com/b.js         同一域名，不同端口                不允许
+ 
+http://www.domain.com/a.js
+https://www.domain.com/b.js        同一域名，不同协议                不允许
+ 
+http://www.domain.com/a.js
+http://192.168.4.12/b.js           域名和域名对应相同ip              不允许
+ 
+http://www.domain.com/a.js
+http://x.domain.com/b.js           主域相同，子域不同                不允许
+http://domain.com/c.js
+ 
+http://www.domain1.com/a.js
+http://www.domain2.com/b.js        不同域名                         不允许
+```
+
+[ref](https://segmentfault.com/a/1190000011145364)
+
 ## dom
 
 所谓dom(document object model) 其实是用来操作html的api。整个html可以被看作是一个dom树，<div></div> 这些标签都可以看作是树的一个节点。
