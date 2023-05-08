@@ -204,6 +204,8 @@ ptrace攻防参考[ref](https://www.jianshu.com/p/9ed2de5e7497)
 
 安装过程是，使用iFunBox将这个两个deb文件放入到/var/mobile/Documents 目录下面，然后依次执行：
 
+越狱后需要安装Apple File Conduit 2插件，这样iFunBox就可以看到系统文件，正常只能看到基础的文件目录。
+
 ```
 dpkg -i extensionlist_1.0-1.deb
 dpkg -i Reveal2Loader_1.0-3_iphoneos-arm.deb
