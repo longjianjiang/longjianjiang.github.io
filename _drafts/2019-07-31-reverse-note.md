@@ -75,6 +75,8 @@ sudo easy_install pip; // python2.7 系统自带
 
 打开终端，如果当前用户是mobile，运行 `su root` 输入密码后切到到root用户。
 
+iOS设备一般有一个root账户和一个mobile账户，默认密码都是alpine。通过passwd及passwd mobile命令可以分别更改root用户和mobile用户的密码。
+
 [可以导出包，但是没有砸壳成功](https://github.com/AloneMonkey/frida-ios-dump/issues/118)
 
 dump.py 报 segmentation fault 错误，手机的frida版本需要升级到最新就正常了。
