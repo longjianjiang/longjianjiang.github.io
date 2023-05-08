@@ -873,3 +873,11 @@ stackview里面设置fill后，如果需要某个元素一定展示需要设置�
 [_followIconView setContentCompressionResistancePriority:UILayoutPriorityRequired forAxis:UILayoutConstraintAxisHorizontal];
 {% endhighlight %}
 
+# layer mask
+
+layer的mask是一个layer，这个效果可以理解为，原layer添加一个蒙版，此时原layer的内容只显示蒙版layer不透明的部分，其他区域都会显示不出来了。
+
+比如可以设置某个view的mask是一个圆角的shapeLayer，此时view的顶部会出现圆角了。
+
+
+[ref](https://zhuanlan.zhihu.com/p/374433462)
