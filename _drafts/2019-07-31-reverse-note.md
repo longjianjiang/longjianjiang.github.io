@@ -217,6 +217,17 @@ dpkg -i Reveal2Loader_1.0-3_iphoneos-arm.deb
 
 安装好reveal后，拖入到Patcher软件中，然后打开Reveal.app输入任意序列号即可激活。
 
+# cycript
+
+cycript 可以进行调试app。
+
+```
+ps -A | grep Aweme; // 查询需要调试的app进程id
+cycript -p 5757;
+cy# 表示成功；
+cy# @import mjcript; // 导入封装好的脚本
+```
+
 # 原理
 
 ## 砸壳
