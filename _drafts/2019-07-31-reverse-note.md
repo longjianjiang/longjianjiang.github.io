@@ -228,6 +228,8 @@ cy# 表示成功；
 cy# @import mjcript; // 导入封装好的脚本
 ```
 
+[mjcript](https://github.com/CoderMJLee/mjcript)
+
 # 原理
 
 ## 砸壳
