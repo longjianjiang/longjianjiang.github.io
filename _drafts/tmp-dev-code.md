@@ -514,6 +514,12 @@ tableview.addGestureRecognizer(scrollView.panGestureRecognizer)
 
 这个时候需要在didScroll方法里，打断点，看是哪里触发了重置操作。
 
+---
+
+在UIScrollView中嵌套collectionView， setContentOffset:animated方法的时候有时会不生效，可能是因为collectionView内部刷新导致外部scrollView滚动延迟，此时可以设置动画为NO。
+
+或者使用直接使用UIView动画设置contentOffset。
+
 # UITableView
 
 ## tableViewFooter 
