@@ -217,6 +217,8 @@ dpkg -i Reveal2Loader_1.0-3_iphoneos-arm.deb
 
 安装好reveal后，拖入到Patcher软件中，然后打开Reveal.app输入任意序列号即可激活。
 
+手机重启后，重新越狱遇到appList 不能获取安装app。尝试重新安装appList和RocketBootstrap插件即可。
+
 # cycript
 
 cycript 可以进行调试app。
