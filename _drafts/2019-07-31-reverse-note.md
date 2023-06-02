@@ -228,6 +228,8 @@ ps -A | grep Aweme; // 查询需要调试的app进程id
 cycript -p 5757;
 cy# 表示成功；
 cy# @import mjcript; // 导入封装好的脚本
+
+?exit; // 退出
 ```
 
 [mjcript](https://github.com/CoderMJLee/mjcript)
