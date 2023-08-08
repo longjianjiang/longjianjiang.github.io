@@ -51,6 +51,12 @@ sudo easy_install pip; // python2.7 系统自带
 
 添加源`https://build.frida.re`，然后安装frida。
 
+需要保证mac和手机frida版本一致，不然会报错unable to communicate with remote frida-server。
+
+手机可以在[frida](sgithub.com/frida/frida/releases?expanded=true&page=2&q=15.1.14)下载对应版本的`iphoneos-arm.deb`。
+
+目前测试下来，电脑手机，都安装15.1.14后，使用[fd](https://github.com/aadog/fd)可以砸壳。
+
 - usb 连接
 
 1. 安装usbmuxd ：`brew install usbmuxd`;
