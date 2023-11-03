@@ -55,6 +55,21 @@ command + shift + f: search;
 
 [ref](https://supereasyapps.com/blog/2014/9/15/14-xcode-time-saving-shortcuts-memorize-and-improve-your-productivity)
 
+# xcode索引无效
+
+xcode有时候会出现代码无法高亮，无法联想的问题，是因为xcode文件索引没建立。
+
+```
+1、进入终端命令行，清除IDEIndexDisable配置开关
+defaults delete com.apple.dt.XCode IDEIndexDisable
+
+2、如果第一步前未删除DerivedData里内容，现在可以删除
+
+3、重启Xcode即可
+```
+
+[ref](https://www.jianshu.com/p/a405237b110e)
+
 # References
 
 [ref](http://www.monobjc.net/xcode-project-file-format.html)
