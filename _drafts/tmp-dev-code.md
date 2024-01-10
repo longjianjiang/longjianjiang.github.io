@@ -616,6 +616,12 @@ func updateWikiListView(_ offset: CGFloat) {
 
 Use the collectionView:willDisplayCell:forItemAtIndexPath: delegate method to make any changes to the appearance of the cell to reflect its visual state such as selection.
 
+## reloadData 方法
+
+消息流在转屏后，然后回到竖屏，reloadData调用了，layoutsize方法没有被调用，不是必现，应该是reloadData时collectionView的高度小于内容的高度导致的。
+
+所以reloadData的时机需要异步一下。
+
 # UISearchController
 
 今天遇到一个问题，连续push两个UISearchContainerController，第二个搜索页面的输入框无法编辑。解决方案是在自定义的UISearchContainerController中viewWillAppear设置`definesPresentationContext`为true，viewWillDisappear设置`definesPresentationContext`为false。
