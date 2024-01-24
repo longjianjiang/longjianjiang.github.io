@@ -48,7 +48,7 @@ int main(int argc, const char * argv[]) {
 
 需要注意的是使用`join()`后，创建线程分配的资源，必须等到join方法返回的时候才能被回收，而相反使用 `detach()` 当线程入口函数执行完毕后会立即释放系统资源。
 
-如果没有没有指定 td 在销毁之前如何处理线程的结束状态，线程会在析构函数中调用 `std::terminate` 造成系统崩溃。
+如果没有指定 td 在销毁之前如何处理线程的结束状态，线程会在析构函数中调用 `std::terminate` 造成系统崩溃。
 
 也就是对于我们创建的线程，我们必须调用 `join()` 或者 `detach()`，我们可以创建一个类来处理线程的结束状态，如下所示:
 
@@ -147,6 +147,7 @@ C++17标准库为我们提供了这种读写锁 `std::shared_mutex`，额外增�
 C++14标准库中提供了 `std::shared_lock`, 和之前的`std::unique_lock`类似，只是`lock`和`unlock`操作被替换为 `lock_shared` 和 `unlock_shared`。
 
 实现一个读写锁，[ref1](https://zhangbuhuai.com/post/dispatch-semaphore.html), [ref2](https://www.cnblogs.com/myd620/p/6129112.html)。
+
 ### std::recursive_mutex
 
 上述提到的mutex，如果在一个线程中被连续的lock多次，会产生死锁，而且会出现未定义行为。如果实际情况中真的需要对同一个mutex进行多次lock操作，C++提供了 `std::recursive_mutex`, 所谓的递归锁。递归锁释放时，需要调用相同数量的unlock，才能释放mutex。
