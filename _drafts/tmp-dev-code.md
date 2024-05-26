@@ -335,6 +335,10 @@ func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive t
 
 ---
 
+手势的locationInView方法会返回手势触发的point，当手势结束的时候，再去调用手势的locationInView方法，此时返回的point就是zero了。
+
+---
+
 某个view中同时添加pan和tap手势，需要实现shouldRequireFailureOf方法，否则两个会产生冲突：
 
 ```swift
