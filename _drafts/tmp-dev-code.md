@@ -778,6 +778,24 @@ UIBezierPath *path = [UIBezierPath bezierPathWithArcCenter:CGPointMake(centerX, 
 
 将path作为shapeLayer的路径。进度的更新就是根据progress来更新shapeLayer的strokeEnd值，这个值是支持做做动画的，这样就有了进度的动画。
 
+扇形的动画，需要添加arc，默认arc是正圆的，但是如果外界view的圆角非正圆，构建arc时需要加大半径，使得扇形覆盖外界view，外界view设置maskToBounds。
+
+{% highlight objc%}
+CGSize imgSize = CGSizeMake(20, 20);
+CGFloat startAngle = -M_PI_2;
+CGFloat endAngle = startAngle + progress * 2 * M_PI;
+CGFloat radius = 12;
+
+CGPoint center = CGPointMake(imgSize.width / 2, imgSize.height / 2);
+UIBezierPath *path = [UIBezierPath bezierPath];
+[path moveToPoint:center];
+[path addArcWithCenter:center radius:radius startAngle:startAngle endAngle:endAngle clockwise:NO];
+[path closePath];
+
+self.circleLayer.path = path.CGPath;
+{% endhighlight %}
+
+
 ## 圆角 任意角任意大小
 
 设置某两个方向的圆角，可以使用bezierPath创建一个path。如果是两个方向的圆角大小不一样，就得自己画一个path了。参考代码如下：
